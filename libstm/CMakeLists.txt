@@ -75,6 +75,9 @@ foreach (arch ${rstm_archs})
   add_library(mmapwrapper${arch} SHARED ${mmapwrapsources})
   append_property(TARGET mmapwrapper${arch} COMPILE_FLAGS -m${arch})
   append_property(TARGET mmapwrapper${arch} LINK_FLAGS -m${arch})
+  if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    append_property(TARGET mmapwrapper${arch} LINK_FLAGS -undefined dynamic_lookup)
+  endif ()
 endforeach ()
 
 #  Build the RSTM library

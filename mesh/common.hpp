@@ -23,6 +23,12 @@
 #include "common/platform.hpp"
 #include "lock.hpp"  // pthread locks
 
+#ifdef __APPLE__
+inline void* memalign(size_t alignment, size_t size)
+{
+    return malloc(size);
+}
+#elif defined(sparc) && defined(sun)
 #if defined(sparc) && defined(sun)
 #   include <stdlib.h>
 #else
