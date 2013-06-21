@@ -25,6 +25,7 @@
 #cmakedefine STM_CC_GCC
 #cmakedefine STM_CC_SUN
 #cmakedefine STM_CC_LLVM
+#cmakedefine STM_CC_CLANG
 
 // Target OS
 #cmakedefine STM_OS_LINUX
