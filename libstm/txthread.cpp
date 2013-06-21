@@ -339,7 +339,7 @@ namespace stm
   /**
    *  Initialize the TM system.
    */
-  void sys_init(stm::AbortHandler conflict_abort_handler)
+  void sys_init(NORETURN stm::AbortHandler conflict_abort_handler)
   {
       static volatile uint32_t mtx = 0;
 
