@@ -29,7 +29,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "sun")
   set(STM_CC_SUN 1)
 else ()
-  message(SEND_ERROR "Unexcpected C++ compiler ${CMAKE_CXX_COMPILER}")
+  message(SEND_ERROR "Unexpected C++ compiler ${CMAKE_CXX_COMPILER}")
 endif ()
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
