@@ -88,7 +88,6 @@
 #include "list.h"
 #include "pair.h"
 #include "tm.h"
-#include "types.h"
 #include "lehigh.h"
 
 #ifdef __cplusplus
@@ -107,7 +106,7 @@ typedef struct hashtable {
 #ifdef HASHTABLE_SIZE_FIELD
     long size;
 #endif
-    ulong_t (*hash)(const void*);
+    unsigned long (*hash)(const void*);
     comparator_t* comparePairs;
 
     long resizeRatio;
@@ -143,7 +142,7 @@ TMhashtable_iter_reset (TM_ARGDECL
  * hashtable_iter_hasNext
  * =============================================================================
  */
-bool_t
+bool
 hashtable_iter_hasNext (hashtable_iter_t* itPtr, hashtable_t* hashtablePtr);
 
 
@@ -151,7 +150,7 @@ hashtable_iter_hasNext (hashtable_iter_t* itPtr, hashtable_t* hashtablePtr);
  * TMhashtable_iter_hasNext
  * =============================================================================
  */
-bool_t
+bool
 TMhashtable_iter_hasNext (TM_ARGDECL
                           hashtable_iter_t* itPtr, hashtable_t* hashtablePtr);
 
@@ -181,7 +180,7 @@ TMhashtable_iter_next (TM_ARGDECL
  */
 hashtable_t*
 hashtable_alloc (long initNumBucket,
-                 ulong_t (*hash)(const void*),
+                 unsigned long (*hash)(const void*),
                  comparator_t* comparePairs,
                  long resizeRatio,
                  long growthFactor);
@@ -196,7 +195,7 @@ hashtable_alloc (long initNumBucket,
 hashtable_t*
 TMhashtable_alloc (TM_ARGDECL
                    long initNumBucket,
-                   ulong_t (*hash)(const void*),
+                   unsigned long (*hash)(const void*),
                    comparator_t* comparePairs,
                    long resizeRatio,
                    long growthFactor);
@@ -222,7 +221,7 @@ TMhashtable_free (TM_ARGDECL  hashtable_t* hashtablePtr);
  * hashtable_isEmpty
  * =============================================================================
  */
-bool_t
+bool
 hashtable_isEmpty (hashtable_t* hashtablePtr);
 
 
@@ -230,7 +229,7 @@ hashtable_isEmpty (hashtable_t* hashtablePtr);
  * TMhashtable_isEmpty
  * =============================================================================
  */
-bool_t
+bool
 TMhashtable_isEmpty (TM_ARGDECL  hashtable_t* hashtablePtr);
 
 
@@ -256,7 +255,7 @@ TMhashtable_getSize (TM_ARGDECL  hashtable_t* hashtablePtr);
  * hashtable_containsKey
  * =============================================================================
  */
-bool_t
+bool
 hashtable_containsKey (hashtable_t* hashtablePtr, void* keyPtr);
 
 
@@ -264,7 +263,7 @@ hashtable_containsKey (hashtable_t* hashtablePtr, void* keyPtr);
  * TMhashtable_containsKey
  * =============================================================================
  */
-bool_t
+bool
 TMhashtable_containsKey (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr);
 
 
@@ -290,7 +289,7 @@ TMhashtable_find (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr);
  * hashtable_insert
  * =============================================================================
  */
-bool_t
+bool
 hashtable_insert (hashtable_t* hashtablePtr, void* keyPtr, void* dataPtr);
 
 
@@ -298,26 +297,26 @@ hashtable_insert (hashtable_t* hashtablePtr, void* keyPtr, void* dataPtr);
  * TMhashtable_insert
  * =============================================================================
  */
-bool_t
+bool
 TMhashtable_insert (TM_ARGDECL
                     hashtable_t* hashtablePtr, void* keyPtr, void* dataPtr);
 
 
 /* =============================================================================
  * hashtable_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
+bool
 hashtable_remove (hashtable_t* hashtablePtr, void* keyPtr);
 
 
 /* =============================================================================
  * TMhashtable_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
+bool
 TMhashtable_remove (TM_ARGDECL  hashtable_t* hashtablePtr, void* keyPtr);
 
 

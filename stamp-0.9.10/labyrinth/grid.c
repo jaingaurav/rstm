@@ -76,7 +76,6 @@
 #include "coordinate.h"
 #include "grid.h"
 #include "tm.h"
-#include "types.h"
 #include "vector.h"
 
 
@@ -192,17 +191,17 @@ grid_copy (grid_t* dstGridPtr, grid_t* srcGridPtr)
  * grid_isPointValid
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointValid (grid_t* gridPtr, long x, long y, long z)
 {
     if (x < 0 || x >= gridPtr->width  ||
         y < 0 || y >= gridPtr->height ||
         z < 0 || z >= gridPtr->depth)
     {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -251,11 +250,11 @@ grid_getPoint (grid_t* gridPtr, long x, long y, long z)
  * grid_isPointEmpty
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointEmpty (grid_t* gridPtr, long x, long y, long z)
 {
     long value = grid_getPoint(gridPtr, x, y, z);
-    return ((value == GRID_POINT_EMPTY) ? TRUE : FALSE);
+    return value == GRID_POINT_EMPTY;
 }
 
 
@@ -263,11 +262,11 @@ grid_isPointEmpty (grid_t* gridPtr, long x, long y, long z)
  * grid_isPointFull
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointFull (grid_t* gridPtr, long x, long y, long z)
 {
     long value = grid_getPoint(gridPtr, x, y, z);
-    return ((value == GRID_POINT_FULL) ? TRUE : FALSE);
+    return value == GRID_POINT_FULL;
 }
 
 

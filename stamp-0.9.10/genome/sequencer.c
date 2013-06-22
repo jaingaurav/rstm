@@ -92,18 +92,17 @@
 #include "thread.h"
 #include "utility.h"
 #include "vector.h"
-#include "types.h"
 
 
 struct endInfoEntry {
-    bool_t isEnd;
+    bool isEnd;
     long jumpToNext;
 };
 
 struct constructEntry {
-    bool_t isStart;
+    bool isStart;
     char* segment;
-    ulong_t endHash;
+    unsigned long endHash;
     struct constructEntry* startPtr;
     struct constructEntry* nextPtr;
     struct constructEntry* endPtr;
@@ -117,10 +116,10 @@ struct constructEntry {
  * -- uses sdbm hash function
  * =============================================================================
  */
-static ulong_t
+static unsigned long
 hashString (char* str)
 {
-    ulong_t hash = 0;
+    unsigned long hash = 0;
     long c;
 
     /* Note: Do not change this hashing scheme */
@@ -128,7 +127,7 @@ hashString (char* str)
         hash = c + (hash << 6) + (hash << 16) - hash;
     }
 
-    return (ulong_t)hash;
+    return (unsigned long)hash;
 }
 
 
@@ -137,10 +136,10 @@ hashString (char* str)
  * -- For hashtable
  * =============================================================================
  */
-static ulong_t
+static unsigned long
 hashSegment (const void* keyPtr)
 {
-    return (ulong_t)hash_sdbm((char*)keyPtr); /* can be any "good" hash function */
+    return hash_sdbm((char*)keyPtr); /* can be any "good" hash function */
 }
 
 
@@ -191,7 +190,7 @@ sequencer_alloc (long geneLength, long segmentLength, segments_t* segmentsPtr)
         (endInfoEntry_t*)SEQ_MALLOC(maxNumUniqueSegment * sizeof(endInfoEntry_t));
     for (i = 0; i < maxNumUniqueSegment; i++) {
         endInfoEntry_t* endInfoEntryPtr = &sequencerPtr->endInfoEntries[i];
-        endInfoEntryPtr->isEnd = TRUE;
+        endInfoEntryPtr->isEnd = true;
         endInfoEntryPtr->jumpToNext = 1;
     }
     sequencerPtr->startHashToConstructEntryTables =
@@ -216,7 +215,7 @@ sequencer_alloc (long geneLength, long segmentLength, segments_t* segmentsPtr)
     }
     for (i= 0; i < maxNumUniqueSegment; i++) {
         constructEntry_t* constructEntryPtr = &sequencerPtr->constructEntries[i];
-        constructEntryPtr->isStart = TRUE;
+        constructEntryPtr->isStart = true;
         constructEntryPtr->segment = NULL;
         constructEntryPtr->endHash = 0;
         constructEntryPtr->startPtr = constructEntryPtr;
@@ -370,8 +369,8 @@ sequencer_run (void* argPtr)
                 (char*)((pair_t*)list_iter_next(&it, chainPtr))->firstPtr;
             constructEntry_t* constructEntryPtr;
             long j;
-            ulong_t startHash;
-            bool_t status;
+            unsigned long startHash;
+            bool status;
 
             /* Find an empty constructEntries entry */
             TM_BEGIN();
@@ -394,15 +393,15 @@ sequencer_run (void* argPtr)
              * and compute all of them here.
              */
             /* constructEntryPtr is local now */
-            constructEntryPtr->endHash = (ulong_t)hashString(&segment[1]);
+            constructEntryPtr->endHash = hashString(&segment[1]);
 
             startHash = 0;
             for (j = 1; j < segmentLength; j++) {
-                startHash = (ulong_t)segment[j-1] +
+                startHash = (unsigned long)segment[j-1] +
                             (startHash << 6) + (startHash << 16) - startHash;
                 TM_BEGIN();
                 status = TMTABLE_INSERT(startHashToConstructEntryTables[j],
-                                        (ulong_t)startHash,
+                                        (unsigned long)startHash,
                                         (void*)constructEntryPtr );
                 TM_END();
                 assert(status);
@@ -411,11 +410,11 @@ sequencer_run (void* argPtr)
             /*
              * For looking up construct entries quickly
              */
-            startHash = (ulong_t)segment[j-1] +
+            startHash = (unsigned long)segment[j-1] +
                         (startHash << 6) + (startHash << 16) - startHash;
             TM_BEGIN();
             status = TMTABLE_INSERT(hashToConstructEntryTable,
-                                    (ulong_t)startHash,
+                                    (unsigned long)startHash,
                                     (void*)constructEntryPtr);
             TM_END();
             assert(status);
@@ -466,7 +465,7 @@ sequencer_run (void* argPtr)
             constructEntry_t* endConstructEntryPtr =
                 &constructEntries[entryIndex];
             char* endSegment = endConstructEntryPtr->segment;
-            ulong_t endHash = endConstructEntryPtr->endHash;
+            unsigned long endHash = endConstructEntryPtr->endHash;
 
             list_t* chainPtr = buckets[endHash % numBucket]; /* buckets: constant data */
             list_iter_t it;
@@ -490,13 +489,13 @@ sequencer_run (void* argPtr)
                              &endSegment[segmentLength - substringLength],
                              substringLength) == 0))
                 {
-                    TM_SHARED_WRITE_L(startConstructEntryPtr->isStart, FALSE);
+                    TM_SHARED_WRITE_L(startConstructEntryPtr->isStart, false);
 
                     constructEntry_t* startConstructEntry_endPtr;
                     constructEntry_t* endConstructEntry_startPtr;
 
                     /* Update endInfo (appended something so no longer end) */
-                    TM_LOCAL_WRITE_L(endInfoEntries[entryIndex].isEnd, FALSE);
+                    TM_LOCAL_WRITE_L(endInfoEntries[entryIndex].isEnd, false);
 
                     /* Update segment chain construct info */
                     startConstructEntry_endPtr =
@@ -551,14 +550,14 @@ sequencer_run (void* argPtr)
                 if (endInfoEntries[0].isEnd) {
                     constructEntry_t* constructEntryPtr = &constructEntries[0];
                     char* segment = constructEntryPtr->segment;
-                    constructEntryPtr->endHash = (ulong_t)hashString(&segment[index]);
+                    constructEntryPtr->endHash = hashString(&segment[index]);
                 }
                 /* Continue scanning (do not reset i) */
                 for (j = 0; i < numUniqueSegment; i+=endInfoEntries[i].jumpToNext) {
                     if (endInfoEntries[i].isEnd) {
                         constructEntry_t* constructEntryPtr = &constructEntries[i];
                         char* segment = constructEntryPtr->segment;
-                        constructEntryPtr->endHash = (ulong_t)hashString(&segment[index]);
+                        constructEntryPtr->endHash = hashString(&segment[index]);
                         endInfoEntries[j].jumpToNext = MAX(1, (i - j));
                         j = i;
                     }
@@ -877,8 +876,8 @@ createSegments (char* segments[])
     segmentsPtr->contentsPtr = vector_alloc(1);
 
     while (segments[i] != NULL) {
-        bool_t status = vector_pushBack(segmentsPtr->contentsPtr,
-                                        (void*)segments[i]);
+        bool status = vector_pushBack(segmentsPtr->contentsPtr,
+                                      (void*)segments[i]);
         assert(status);
         i++;
     }
@@ -911,7 +910,7 @@ tester (char* gene, char* segments[])
 int
 main ()
 {
-    bool_t status = memory_init(1, 4, 2);
+    bool status = memory_init(1, 4, 2);
     assert(status);
     thread_startup(1);
 

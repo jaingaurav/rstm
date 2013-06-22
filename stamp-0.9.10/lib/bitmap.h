@@ -73,7 +73,6 @@
 #define BITMAP_H 1
 
 
-#include "types.h"
 
 
 #ifdef __cplusplus
@@ -84,7 +83,7 @@ extern "C" {
 typedef struct bitmap {
     long numBit;
     long numWord;
-    ulong_t* bits;
+    unsigned long* bits;
 } bitmap_t;
 
 
@@ -125,20 +124,20 @@ Pbitmap_free (bitmap_t* bitmapPtr);
 /* =============================================================================
  * bitmap_set
  * -- Sets ith bit to 1
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
-bool_t
+bool
 bitmap_set (bitmap_t* bitmapPtr, long i);
 
 
 /* =============================================================================
  * bitmap_clear
  * -- Clears ith bit to 0
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
-bool_t
+bool
 bitmap_clear (bitmap_t* bitmapPtr, long i);
 
 
@@ -153,10 +152,10 @@ bitmap_clearAll (bitmap_t* bitmapPtr);
 
 /* =============================================================================
  * bitmap_isSet
- * -- Returns TRUE if ith bit is set, else FALSE
+ * -- Returns true if ith bit is set, else false
  * =============================================================================
  */
-bool_t
+bool
 bitmap_isSet (bitmap_t* bitmapPtr, long i);
 
 

@@ -77,7 +77,6 @@
 #include "list.h"
 #include "pair.h"
 #include "tm.h"
-#include "types.h"
 
 
 typedef pair_t         edge_t;
@@ -226,7 +225,7 @@ TMelement_heapCompare (TM_ARGDECL const void* aPtr, const void* bPtr);
  * element_isInCircumCircle
  * =============================================================================
  */
-bool_t
+bool
 element_isInCircumCircle (element_t* elementPtr, coordinate_t* coordinatePtr);
 
 
@@ -250,7 +249,7 @@ element_getEncroachedPtr (element_t* elementPtr);
  * element_isSkinny
  * =============================================================================
  */
-bool_t
+bool
 element_isSkinny (element_t* elementPtr);
 
 
@@ -259,7 +258,7 @@ element_isSkinny (element_t* elementPtr);
  * -- Does it need to be refined?
  * =============================================================================
  */
-bool_t
+bool
 element_isBad (element_t* elementPtr);
 
 
@@ -267,7 +266,7 @@ element_isBad (element_t* elementPtr);
  * element_isReferenced
  * =============================================================================
  */
-bool_t
+bool
 element_isReferenced (element_t* elementPtr);
 
 
@@ -276,7 +275,7 @@ element_isReferenced (element_t* elementPtr);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMelement_isReferenced (TM_ARGDECL  element_t* elementPtr);
 
 
@@ -285,7 +284,7 @@ TMelement_isReferenced (TM_ARGDECL  element_t* elementPtr);
  * =============================================================================
  */
 void
-element_setIsReferenced (element_t* elementPtr, bool_t status);
+element_setIsReferenced (element_t* elementPtr, bool status);
 
 
 /* =============================================================================
@@ -294,7 +293,7 @@ element_setIsReferenced (element_t* elementPtr, bool_t status);
  */
 TM_CALLABLE
 void
-TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool_t status);
+TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool status);
 
 
 /* =============================================================================
@@ -302,7 +301,7 @@ TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool_t status);
  * -- Can we deallocate?
  * =============================================================================
  */
-bool_t
+bool
 element_isGarbage (element_t* elementPtr);
 
 
@@ -312,7 +311,7 @@ element_isGarbage (element_t* elementPtr);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMelement_isGarbage (TM_ARGDECL  element_t* elementPtr);
 
 
@@ -321,7 +320,7 @@ TMelement_isGarbage (TM_ARGDECL  element_t* elementPtr);
  * =============================================================================
  */
 void
-element_setIsGarbage (element_t* elementPtr, bool_t status);
+element_setIsGarbage (element_t* elementPtr, bool status);
 
 
 /* =============================================================================
@@ -330,7 +329,7 @@ element_setIsGarbage (element_t* elementPtr, bool_t status);
  */
 TM_CALLABLE
 void
-TMelement_setIsGarbage (TM_ARGDECL  element_t* elementPtr, bool_t status);
+TMelement_setIsGarbage (TM_ARGDECL  element_t* elementPtr, bool status);
 
 
 /* =============================================================================
@@ -384,10 +383,10 @@ TMelement_getNewPoint (TM_ARGDECL element_t* elementPtr);
 /* =============================================================================
  * element_checkAngles
  *
- * Return FALSE if minimum angle constraint not met
+ * Return false if minimum angle constraint not met
  * =============================================================================
  */
-bool_t
+bool
 element_checkAngles (element_t* elementPtr);
 
 

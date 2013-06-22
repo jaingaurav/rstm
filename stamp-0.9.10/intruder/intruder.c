@@ -230,7 +230,7 @@ processPackets (void* argPtr)
              * Currently, stream_generate() does not create these errors.
              */
             assert(0);
-            bool_t status = PVECTOR_PUSHBACK(errorVectorPtr, (void*)flowId);
+            bool status = PVECTOR_PUSHBACK(errorVectorPtr, (void*)flowId);
             assert(status);
         }
 
@@ -243,7 +243,7 @@ processPackets (void* argPtr)
             int_error_t error = PDETECTOR_PROCESS(detectorPtr, data);
             P_FREE(data);
             if (error) {
-                bool_t status = PVECTOR_PUSHBACK(errorVectorPtr,
+                bool status = PVECTOR_PUSHBACK(errorVectorPtr,
              (void*)decodedFlowId);
                 assert(status);
       }
@@ -349,7 +349,7 @@ MAIN(argc, argv)
         numFound += numError;
         for (e = 0; e < numError; e++) {
             long flowId = (long)vector_at(errorVectorPtr, e);
-            bool_t status = stream_isAttack(streamPtr, flowId);
+            bool status = stream_isAttack(streamPtr, flowId);
             assert(status);
         }
     }

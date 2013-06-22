@@ -170,9 +170,9 @@ TMregion_free (TM_ARGDECL region_t* regionPtr)
 void
 TMaddToBadVector (TM_ARGDECL  vector_t* badVectorPtr, element_t* badElementPtr)
 {
-  bool_t status = PVECTOR_PUSHBACK(badVectorPtr, (void*)badElementPtr);
+  bool status = PVECTOR_PUSHBACK(badVectorPtr, (void*)badElementPtr);
   assert(status);
-  TMELEMENT_SETISREFERENCED(badElementPtr, TRUE);
+  TMELEMENT_SETISREFERENCED(badElementPtr, true);
 }
 
 
@@ -232,7 +232,7 @@ TMretriangulate (TM_ARGDECL
     assert(bElementPtr);
     TMMESH_INSERT(meshPtr, bElementPtr, edgeMapPtr);
 
-    bool_t status;
+    bool status;
     status = TMMESH_REMOVEBOUNDARY(meshPtr, element_getEdge(elementPtr, 0));
     assert(status);
     status = TMMESH_INSERTBOUNDARY(meshPtr, element_getEdge(aElementPtr, 0));
@@ -283,10 +283,10 @@ TMgrowRegion (TM_ARGDECL
               mesh_t* meshPtr,
               MAP_T* edgeMapPtr)
 {
-  bool_t isBoundary = FALSE;
+  bool isBoundary = false;
 
   if (element_getNumEdge(centerElementPtr) == 1) {
-    isBoundary = TRUE;
+    isBoundary = true;
   }
 
   list_t* beforeListPtr = regionPtr->beforeListPtr;
@@ -322,7 +322,7 @@ TMgrowRegion (TM_ARGDECL
             return neighborElementPtr;
           } else {
             /* Continue breadth-first search */
-            bool_t isSuccess;
+            bool isSuccess;
             isSuccess = PQUEUE_PUSH(expandQueuePtr,
                                     (void*)neighborElementPtr);
             assert(isSuccess);
@@ -374,7 +374,7 @@ TMregion_refine (TM_ARGDECL
                                       edgeMapPtr);
 
     if (encroachElementPtr) {
-      TMELEMENT_SETISREFERENCED(encroachElementPtr, TRUE);
+      TMELEMENT_SETISREFERENCED(encroachElementPtr, true);
       numDelta += TMregion_refine(TM_ARG
                                   regionPtr,
                                   encroachElementPtr,
@@ -432,7 +432,7 @@ TMregion_transferBad (TM_ARGDECL  region_t* regionPtr, heap_t* workHeapPtr)
     if (TMELEMENT_ISGARBAGE(badElementPtr)) {
       TMELEMENT_FREE(badElementPtr);
     } else {
-      bool_t status = TMHEAP_INSERT(workHeapPtr, (void*)badElementPtr);
+      bool status = TMHEAP_INSERT(workHeapPtr, (void*)badElementPtr);
       assert(status);
     }
   }

@@ -74,7 +74,6 @@
 
 
 #include "tm.h"
-#include "types.h"
 
 typedef struct coordinate {
     long x;
@@ -103,7 +102,7 @@ coordinate_free (coordinate_t* coordinatePtr);
  * coordinate_isEqual
  * =============================================================================
  */
-bool_t
+bool
 coordinate_isEqual (coordinate_t* aPtr, coordinate_t* bPtr);
 
 
@@ -120,7 +119,7 @@ coordinate_comparePair (const void* aPtr, const void* bPtr);
  * coordinate_areAdjacent
  * =============================================================================
  */
-bool_t
+bool
 coordinate_areAdjacent (coordinate_t* aPtr, coordinate_t* bPtr);
 
 

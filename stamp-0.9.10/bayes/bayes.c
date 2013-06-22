@@ -78,7 +78,6 @@
 #include "thread.h"
 #include "timer.h"
 #include "tm.h"
-#include "types.h"
 
 enum param_types {
     PARAM_EDGE    = (unsigned char)'e',
@@ -342,7 +341,7 @@ MAIN(argc, argv)
      * Check solution
      */
 
-    bool_t status = net_isCycle(learnerPtr->netPtr);
+    bool status = net_isCycle(learnerPtr->netPtr);
     assert(!status);
 
 #ifndef SIMULATOR

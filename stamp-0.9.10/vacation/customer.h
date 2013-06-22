@@ -77,7 +77,6 @@
 #include "list.h"
 #include "reservation.h"
 #include "tm.h"
-#include "types.h"
 
 typedef struct customer {
     long id;
@@ -125,27 +124,27 @@ customer_free (TM_ARGDECL  customer_t* customerPtr);
 
 /* =============================================================================
  * customer_addReservationInfo
- * -- Returns TRUE if success, else FALSE
+ * -- Returns true if success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 customer_addReservationInfo (TM_ARGDECL
                              customer_t* customerPtr,
                              reservation_type_t type, long id, long price);
 
-bool_t
+bool
 customer_addReservationInfo_seq (customer_t* customerPtr,
                                  reservation_type_t type, long id, long price);
 
 
 /* =============================================================================
  * customer_removeReservationInfo
- * -- Returns TRUE if success, else FALSE
+ * -- Returns true if success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 customer_removeReservationInfo (TM_ARGDECL
                                 customer_t* customerPtr,
                                 reservation_type_t type, long id);

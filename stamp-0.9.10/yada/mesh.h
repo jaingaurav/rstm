@@ -129,7 +129,7 @@ TMmesh_remove (TM_ARGDECL  mesh_t* meshPtr, element_t* elementPtr);
  * TMmesh_insertBoundary
  * =============================================================================
  */
-bool_t
+bool
 TMmesh_insertBoundary (TM_ARGDECL  mesh_t* meshPtr, edge_t* boundaryPtr);
 
 
@@ -137,7 +137,7 @@ TMmesh_insertBoundary (TM_ARGDECL  mesh_t* meshPtr, edge_t* boundaryPtr);
  * TMmesh_removeBoundary
  * =============================================================================
  */
-bool_t
+bool
 TMmesh_removeBoundary (TM_ARGDECL  mesh_t* meshPtr, edge_t* boundaryPtr);
 
 
@@ -174,7 +174,7 @@ mesh_shuffleBad (mesh_t* meshPtr, random_t* randomPtr);
  * mesh_check
  * =============================================================================
  */
-bool_t
+bool
 mesh_check (mesh_t* meshPtr, long expectedNumElement);
 
 

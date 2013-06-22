@@ -77,7 +77,6 @@
 #include "memory.h"
 #include "reservation.h"
 #include "tm.h"
-#include "types.h"
 
 
 /* =============================================================================
@@ -171,10 +170,10 @@ customer_free (TM_ARGDECL  customer_t* customerPtr)
 
 /* =============================================================================
  * customer_addReservationInfo
- * -- Returns TRUE if success, else FALSE
+ * -- Returns true if success, else false
  * =============================================================================
  */
-bool_t
+bool
 customer_addReservationInfo (TM_ARGDECL
                              customer_t* customerPtr,
                              reservation_type_t type, long id, long price)
@@ -193,10 +192,10 @@ customer_addReservationInfo (TM_ARGDECL
 
 /* =============================================================================
  * customer_removeReservationInfo
- * -- Returns TRUE if success, else FALSE
+ * -- Returns true if success, else false
  * =============================================================================
  */
-bool_t
+bool
 customer_removeReservationInfo (TM_ARGDECL
                                 customer_t* customerPtr,
                                 reservation_type_t type, long id)
@@ -215,18 +214,18 @@ customer_removeReservationInfo (TM_ARGDECL
                                          &findReservationInfo);
 
     if (reservationInfoPtr == NULL) {
-        return FALSE;
+        return false;
     }
 
-    bool_t status = TMLIST_REMOVE(reservationInfoListPtr,
+    bool status = TMLIST_REMOVE(reservationInfoListPtr,
                                   (void*)&findReservationInfo);
-    if (status == FALSE) {
+    if (!status) {
         TM_RESTART();
     }
 
     RESERVATION_INFO_FREE(reservationInfoPtr);
 
-    return TRUE;
+    return true;
 }
 
 

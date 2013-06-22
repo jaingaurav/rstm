@@ -143,7 +143,7 @@
 
 #  include "memory.h"
 #  define P_MEMORY_STARTUP(numThread)   do { \
-                                            bool_t status; \
+                                            bool status; \
                                             status = memory_init((numThread), \
                                                                  ((1<<28) / numThread), \
                                                                  2); \
@@ -282,7 +282,6 @@
 #  include <tmapi.h>
 #  include "memory.h"
 #  include "thread.h"
-#  include "types.h"
 
 #  define TM_ARG                        /* nothing */
 #  define TM_ARG_ALONE                  /* nothing */

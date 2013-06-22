@@ -195,7 +195,7 @@ net_alloc (long numNode)
                 SEQ_FREE(netPtr);
                 return NULL;
             }
-            bool_t status = vector_pushBack(nodeVectorPtr, (void*)nodePtr);
+            bool status = vector_pushBack(nodeVectorPtr, (void*)nodePtr);
             assert(status);
         }
         netPtr->nodeVectorPtr = nodeVectorPtr;
@@ -230,7 +230,7 @@ static void
 insertEdge (net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
-    bool_t status;
+    bool status;
 
     net_node_t* childNodePtr = (net_node_t*)vector_at(nodeVectorPtr, toId);
     list_t* parentIdListPtr = childNodePtr->parentIdListPtr;
@@ -252,7 +252,7 @@ static void
 TMinsertEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
-    bool_t status;
+    bool status;
 
     net_node_t* childNodePtr = (net_node_t*)vector_at(nodeVectorPtr, toId);
     list_t* parentIdListPtr = childNodePtr->parentIdListPtr;
@@ -274,7 +274,7 @@ static void
 removeEdge (net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
-    bool_t status;
+    bool status;
 
     net_node_t* childNodePtr = (net_node_t*)vector_at(nodeVectorPtr, toId);
     list_t* parentIdListPtr = childNodePtr->parentIdListPtr;
@@ -296,7 +296,7 @@ static void
 TMremoveEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
-    bool_t status;
+    bool status;
 
     net_node_t* childNodePtr = (net_node_t*)vector_at(nodeVectorPtr, toId);
     list_t* parentIdListPtr = childNodePtr->parentIdListPtr;
@@ -373,7 +373,7 @@ TMnet_applyOperation (TM_ARGDECL
  * net_hasEdge
  * =============================================================================
  */
-bool_t
+bool
 net_hasEdge (net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
@@ -385,11 +385,11 @@ net_hasEdge (net_t* netPtr, long fromId, long toId)
     while (list_iter_hasNext(&it, parentIdListPtr)) {
         long parentId = (long)list_iter_next(&it, parentIdListPtr);
         if (parentId == fromId) {
-            return TRUE;
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
@@ -397,7 +397,7 @@ net_hasEdge (net_t* netPtr, long fromId, long toId)
  * TMnet_hasEdge
  * =============================================================================
  */
-bool_t
+bool
 TMnet_hasEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
@@ -409,11 +409,11 @@ TMnet_hasEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId)
     while (TMLIST_ITER_HASNEXT(&it, parentIdListPtr)) {
         long parentId = (long)TMLIST_ITER_NEXT(&it, parentIdListPtr);
         if (parentId == fromId) {
-            return TRUE;
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
@@ -421,14 +421,14 @@ TMnet_hasEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId)
  * net_isPath
  * =============================================================================
  */
-bool_t
+bool
 net_isPath (net_t* netPtr,
             long fromId,
             long toId,
             bitmap_t* visitedBitmapPtr,
             queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(visitedBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -443,7 +443,7 @@ net_isPath (net_t* netPtr,
         long id = (long)queue_pop(workQueuePtr);
         if (id == toId) {
             queue_clear(workQueuePtr);
-            return TRUE;
+            return true;
         }
         status = bitmap_set(visitedBitmapPtr, id);
         assert(status);
@@ -460,7 +460,7 @@ net_isPath (net_t* netPtr,
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
@@ -468,7 +468,7 @@ net_isPath (net_t* netPtr,
  * TMnet_isPath
  * =============================================================================
  */
-bool_t
+bool
 TMnet_isPath (TM_ARGDECL
               net_t* netPtr,
               long fromId,
@@ -476,7 +476,7 @@ TMnet_isPath (TM_ARGDECL
               bitmap_t* visitedBitmapPtr,
               queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(visitedBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -491,7 +491,7 @@ TMnet_isPath (TM_ARGDECL
         long id = (long)queue_pop(workQueuePtr);
         if (id == toId) {
             queue_clear(workQueuePtr);
-            return TRUE;
+            return true;
         }
         status = PBITMAP_SET(visitedBitmapPtr, id);
         assert(status);
@@ -508,7 +508,7 @@ TMnet_isPath (TM_ARGDECL
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
@@ -516,7 +516,7 @@ TMnet_isPath (TM_ARGDECL
  * isCycle
  * =============================================================================
  */
-static bool_t
+static bool
 isCycle (vector_t* nodeVectorPtr, net_node_t* nodePtr)
 {
     switch (nodePtr->mark) {
@@ -530,22 +530,22 @@ isCycle (vector_t* nodeVectorPtr, net_node_t* nodePtr)
                 net_node_t* childNodePtr =
                     (net_node_t*)vector_at(nodeVectorPtr, childId);
                 if (isCycle(nodeVectorPtr, childNodePtr)) {
-                    return TRUE;
+                    return true;
                 }
             }
             break;
         }
         case NET_NODE_MARK_TEST:
-            return TRUE;
+            return true;
         case NET_NODE_MARK_DONE:
-            return FALSE;
+            return false;
             break;
         default:
             assert(0);
     }
 
     nodePtr->mark = NET_NODE_MARK_DONE;
-    return FALSE;
+    return false;
 }
 
 
@@ -553,7 +553,7 @@ isCycle (vector_t* nodeVectorPtr, net_node_t* nodePtr)
  * net_isCycle
  * =============================================================================
  */
-bool_t
+bool
 net_isCycle (net_t* netPtr)
 {
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
@@ -569,7 +569,7 @@ net_isCycle (net_t* netPtr)
         switch (nodePtr->mark) {
             case NET_NODE_MARK_INIT:
                 if (isCycle(nodeVectorPtr, nodePtr)) {
-                    return TRUE;
+                    return true;
                 }
                 break;
             case NET_NODE_MARK_DONE:
@@ -584,7 +584,7 @@ net_isCycle (net_t* netPtr)
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
@@ -622,13 +622,13 @@ net_getChildIdListPtr (net_t* netPtr, long id)
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 net_findAncestors (net_t* netPtr,
                    long id,
                    bitmap_t* ancestorBitmapPtr,
                    queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(ancestorBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -654,7 +654,7 @@ net_findAncestors (net_t* netPtr,
         long parentId = (long)queue_pop(workQueuePtr);
         if (parentId == id) {
             queue_clear(workQueuePtr);
-            return FALSE;
+            return false;
         }
         net_node_t* nodePtr = (net_node_t*)vector_at(nodeVectorPtr, parentId);
         list_t* grandParentIdListPtr = nodePtr->parentIdListPtr;
@@ -671,7 +671,7 @@ net_findAncestors (net_t* netPtr,
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -681,14 +681,14 @@ net_findAncestors (net_t* netPtr,
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 TMnet_findAncestors (TM_ARGDECL
                      net_t* netPtr,
                      long id,
                      bitmap_t* ancestorBitmapPtr,
                      queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(ancestorBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -714,7 +714,7 @@ TMnet_findAncestors (TM_ARGDECL
         long parentId = (long)PQUEUE_POP(workQueuePtr);
         if (parentId == id) {
             PQUEUE_CLEAR(workQueuePtr);
-            return FALSE;
+            return false;
         }
         net_node_t* nodePtr = (net_node_t*)vector_at(nodeVectorPtr, parentId);
         list_t* grandParentIdListPtr = nodePtr->parentIdListPtr;
@@ -731,7 +731,7 @@ TMnet_findAncestors (TM_ARGDECL
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -741,13 +741,13 @@ TMnet_findAncestors (TM_ARGDECL
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 net_findDescendants (net_t* netPtr,
                      long id,
                      bitmap_t* descendantBitmapPtr,
                      queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(descendantBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -773,7 +773,7 @@ net_findDescendants (net_t* netPtr,
         long childId = (long)queue_pop(workQueuePtr);
         if (childId == id) {
             queue_clear(workQueuePtr);
-            return FALSE;
+            return false;
         }
         net_node_t* nodePtr = (net_node_t*)vector_at(nodeVectorPtr, childId);
         list_t* grandChildIdListPtr = nodePtr->childIdListPtr;
@@ -790,7 +790,7 @@ net_findDescendants (net_t* netPtr,
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -800,14 +800,14 @@ net_findDescendants (net_t* netPtr,
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 TMnet_findDescendants (TM_ARGDECL
                        net_t* netPtr,
                        long id,
                        bitmap_t* descendantBitmapPtr,
                        queue_t* workQueuePtr)
 {
-    bool_t status;
+    bool status;
 
     vector_t* nodeVectorPtr = netPtr->nodeVectorPtr;
     assert(descendantBitmapPtr->numBit == vector_getSize(nodeVectorPtr));
@@ -833,7 +833,7 @@ TMnet_findDescendants (TM_ARGDECL
         long childId = (long)PQUEUE_POP(workQueuePtr);
         if (childId == id) {
             queue_clear(workQueuePtr);
-            return FALSE;
+            return false;
         }
         net_node_t* nodePtr = (net_node_t*)vector_at(nodeVectorPtr, childId);
         list_t* grandChildIdListPtr = nodePtr->childIdListPtr;
@@ -850,7 +850,7 @@ TMnet_findDescendants (TM_ARGDECL
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -915,7 +915,7 @@ main ()
 
     puts("Starting tests...");
 
-    bool_t status;
+    bool status;
 
     net_t* netPtr = net_alloc(numNode);
     assert(netPtr);

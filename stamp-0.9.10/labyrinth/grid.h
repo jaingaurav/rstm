@@ -73,7 +73,6 @@
 #define GRID_H 1
 
 
-#include "types.h"
 #include "vector.h"
 
 
@@ -135,7 +134,7 @@ grid_copy (grid_t* dstGridPtr, grid_t* srcGridPtr);
  * grid_isPointValid
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointValid (grid_t* gridPtr, long x, long y, long z);
 
 
@@ -168,7 +167,7 @@ grid_getPoint (grid_t* gridPtr, long x, long y, long z);
  * grid_isPointEmpty
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointEmpty (grid_t* gridPtr, long x, long y, long z);
 
 
@@ -176,7 +175,7 @@ grid_isPointEmpty (grid_t* gridPtr, long x, long y, long z);
  * grid_isPointFull
  * =============================================================================
  */
-bool_t
+bool
 grid_isPointFull (grid_t* gridPtr, long x, long y, long z);
 
 

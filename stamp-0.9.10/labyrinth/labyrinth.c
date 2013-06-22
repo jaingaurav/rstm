@@ -78,7 +78,6 @@
 #include "router.h"
 #include "thread.h"
 #include "timer.h"
-#include "types.h"
 
 enum param_types {
     PARAM_BENDCOST = (unsigned char)'b',
@@ -96,7 +95,7 @@ enum param_defaults {
     PARAM_DEFAULT_ZCOST    = 2,
 };
 
-bool_t global_doPrint = FALSE;
+bool global_doPrint = false;
 char* global_inputFile = NULL;
 long global_params[256]; /* 256 = ascii limit */
 
@@ -163,7 +162,7 @@ parseArgs (long argc, char* const argv[])
                 global_inputFile = optarg;
                 break;
             case 'p':
-                global_doPrint = TRUE;
+                global_doPrint = true;
                 break;
             case '?':
             default:
@@ -248,8 +247,8 @@ MAIN(argc, argv)
      * Check solution and clean up
      */
     assert(numPathRouted <= numPathToRoute);
-    bool_t status = maze_checkPaths(mazePtr, pathVectorListPtr, global_doPrint);
-    assert(status == TRUE);
+    bool status = maze_checkPaths(mazePtr, pathVectorListPtr, global_doPrint);
+    assert(status);
     puts("Verification passed.");
     maze_free(mazePtr);
     router_free(routerPtr);

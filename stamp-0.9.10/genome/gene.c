@@ -176,7 +176,7 @@ main ()
     gene_t* gene3Ptr;
     random_t* randomPtr;
 
-    bool_t status = memory_init(1, 4, 2);
+    bool status = memory_init(1, 4, 2);
     assert(status);
 
     puts("Starting...");

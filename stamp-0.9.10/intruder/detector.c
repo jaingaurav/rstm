@@ -160,8 +160,8 @@ Pdetector_free (detector_t* detectorPtr)
 void
 detector_addPreprocessor (detector_t* detectorPtr, preprocessor_t p)
 {
-    bool_t status = vector_pushBack(detectorPtr->preprocessorVectorPtr,
-                                    (void*)p);
+    bool status = vector_pushBack(detectorPtr->preprocessorVectorPtr,
+                                  (void*)p);
     assert(status);
 }
 

@@ -77,7 +77,6 @@
 #include "net.h"
 #include "random.h"
 #include "sort.h"
-#include "types.h"
 #include "vector.h"
 
 enum data_config {
@@ -197,7 +196,7 @@ data_generate (data_t* dataPtr, long seed, long maxNumParent, long percentParent
         long numChild = list_getSize(childIdListPtr);
         if (numChild == 0) {
 
-            bool_t status;
+            bool status;
 
             /*
              * Use breadth-first search to find net connected to this leaf
@@ -305,10 +304,10 @@ data_getRecord (data_t* dataPtr, long index)
 
 /* =============================================================================
  * data_copy
- * -- Returns FALSE on failure
+ * -- Returns false on failure
  * =============================================================================
  */
-bool_t
+bool
 data_copy (data_t* dstPtr, data_t* srcPtr)
 {
     long numDstDatum = dstPtr->numVar * dstPtr->numRecord;
@@ -317,7 +316,7 @@ data_copy (data_t* dstPtr, data_t* srcPtr)
         SEQ_FREE(dstPtr->records);
         dstPtr->records = (char*)calloc(numSrcDatum, sizeof(char));
         if (dstPtr->records == NULL) {
-            return FALSE;
+            return false;
         }
     }
 
@@ -325,7 +324,7 @@ data_copy (data_t* dstPtr, data_t* srcPtr)
     dstPtr->numRecord = srcPtr->numRecord;
     memcpy(dstPtr->records, srcPtr->records, (numSrcDatum * sizeof(char)));
 
-    return TRUE;
+    return true;
 }
 
 

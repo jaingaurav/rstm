@@ -119,7 +119,7 @@ TMnet_applyOperation (TM_ARGDECL
  * net_hasEdge
  * =============================================================================
  */
-bool_t
+bool
 net_hasEdge (net_t* netPtr, long fromId, long toId);
 
 
@@ -127,7 +127,7 @@ net_hasEdge (net_t* netPtr, long fromId, long toId);
  * TMnet_hasEdge
  * =============================================================================
  */
-bool_t
+bool
 TMnet_hasEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId);
 
 
@@ -135,7 +135,7 @@ TMnet_hasEdge (TM_ARGDECL  net_t* netPtr, long fromId, long toId);
  * net_isPath
  * =============================================================================
  */
-bool_t
+bool
 net_isPath (net_t* netPtr,
             long fromId,
             long toId,
@@ -147,7 +147,7 @@ net_isPath (net_t* netPtr,
  * TMnet_isPath
  * =============================================================================
  */
-bool_t
+bool
 TMnet_isPath (TM_ARGDECL
               net_t* netPtr,
               long fromId,
@@ -160,7 +160,7 @@ TMnet_isPath (TM_ARGDECL
  * net_isCycle
  * =============================================================================
  */
-bool_t
+bool
 net_isCycle (net_t* netPtr);
 
 
@@ -186,7 +186,7 @@ net_getChildIdListPtr (net_t* netPtr, long id);
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 net_findAncestors (net_t* netPtr,
                    long id,
                    bitmap_t* ancestorBitmapPtr,
@@ -199,7 +199,7 @@ net_findAncestors (net_t* netPtr,
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 TMnet_findAncestors (TM_ARGDECL
                      net_t* netPtr,
                      long id,
@@ -213,7 +213,7 @@ TMnet_findAncestors (TM_ARGDECL
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 net_findDescendants (net_t* netPtr,
                      long id,
                      bitmap_t* descendantBitmapPtr,
@@ -226,7 +226,7 @@ net_findDescendants (net_t* netPtr,
  * -- Returns false if id is not root node (i.e., has cycle back id)
  * =============================================================================
  */
-bool_t
+bool
 TMnet_findDescendants (TM_ARGDECL
                        net_t* netPtr,
                        long id,

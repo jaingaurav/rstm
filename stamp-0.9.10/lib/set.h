@@ -76,7 +76,6 @@
 
 #include <stdlib.h>
 #include "tm.h"
-#include "types.h"
 
 
 #if defined(SET_USE_RBTREE)

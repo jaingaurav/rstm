@@ -74,7 +74,6 @@
 
 
 #include "tm.h"
-#include "types.h"
 #include "lehigh.h"
 
 typedef struct heap heap_t;
@@ -102,20 +101,20 @@ heap_free (heap_t* heapPtr);
 
 /* =============================================================================
  * heap_insert
- * -- Returns FALSE on failure
+ * -- Returns false on failure
  * =============================================================================
  */
-bool_t
+bool
 heap_insert (heap_t* heapPtr, void* dataPtr);
 
 
 /* =============================================================================
  * TMheap_insert
- * -- Returns FALSE on failure
+ * -- Returns false on failure
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMheap_insert (TM_ARGDECL  heap_t* heapPtr, void* dataPtr);
 
 
@@ -142,7 +141,7 @@ TMheap_remove (TM_ARGDECL  heap_t* heapPtr);
  * heap_isValid
  * =============================================================================
  */
-bool_t
+bool
 heap_isValid (heap_t* heapPtr);
 
 

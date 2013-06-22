@@ -172,9 +172,9 @@ initializeWork (heap_t* workHeapPtr, mesh_t* meshPtr)
             break;
         }
         numBad++;
-        bool_t status = heap_insert(workHeapPtr, (void*)elementPtr);
+        bool status = heap_insert(workHeapPtr, (void*)elementPtr);
         assert(status);
-        element_setIsReferenced(elementPtr, TRUE);
+        element_setIsReferenced(elementPtr, true);
     }
 
     return numBad;
@@ -210,7 +210,7 @@ process (void*)
             break;
         }
 
-        bool_t isGarbage;
+        bool isGarbage;
         TM_BEGIN();
         isGarbage = TMELEMENT_ISGARBAGE(elementPtr);
         TM_END();
@@ -230,7 +230,7 @@ process (void*)
         TM_END();
 
         TM_BEGIN();
-        TMELEMENT_SETISREFERENCED(elementPtr, FALSE);
+        TMELEMENT_SETISREFERENCED(elementPtr, false);
         isGarbage = TMELEMENT_ISGARBAGE(elementPtr);
         TM_END();
         if (isGarbage) {
@@ -333,9 +333,9 @@ MAIN(argc, argv)
     fflush(stdout);
 
 #if 1
-    bool_t isSuccess = mesh_check(global_meshPtr, finalNumElement);
+    bool isSuccess = mesh_check(global_meshPtr, finalNumElement);
 #else
-    bool_t isSuccess = TRUE;
+    bool isSuccess = true;
 #endif
     printf("Final mesh is %s\n", (isSuccess ? "valid." : "INVALID!"));
     fflush(stdout);

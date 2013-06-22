@@ -76,7 +76,6 @@
 
 #include "map.h"
 #include "tm.h"
-#include "types.h"
 
 typedef struct manager {
     MAP_T* carTablePtr;
@@ -112,15 +111,15 @@ manager_free (manager_t* managerPtr);
  * manager_addCar
  * -- Add cars to a city
  * -- Adding to an existing car overwrite the price if 'price' >= 0
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_addCar (TM_ARGDECL
                 manager_t* managerPtr, long carId, long numCar, long price);
 
-bool_t
+bool
 manager_addCar_seq (manager_t* managerPtr, long carId, long numCar, long price);
 
 
@@ -130,11 +129,11 @@ manager_addCar_seq (manager_t* managerPtr, long carId, long numCar, long price);
  * -- Decreases available car count (those not allocated to a customer)
  * -- Fails if would make available car count negative
  * -- If decresed to 0, deletes entire entry
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_deleteCar (TM_ARGDECL  manager_t* managerPtr, long carId, long numCar);
 
 
@@ -142,15 +141,15 @@ manager_deleteCar (TM_ARGDECL  manager_t* managerPtr, long carId, long numCar);
  * manager_addRoom
  * -- Add rooms to a city
  * -- Adding to an existing room overwrites the price if 'price' >= 0
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_addRoom (TM_ARGDECL
                  manager_t* managerPtr, long roomId, long numRoom, long price);
 
-bool_t
+bool
 manager_addRoom_seq (manager_t* managerPtr, long roomId, long numRoom, long price);
 
 
@@ -160,11 +159,11 @@ manager_addRoom_seq (manager_t* managerPtr, long roomId, long numRoom, long pric
  * -- Decreases available room count (those not allocated to a customer)
  * -- Fails if would make available room count negative
  * -- If decresed to 0, deletes entire entry
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_deleteRoom (TM_ARGDECL  manager_t* managerPtr, long roomId, long numRoom);
 
 
@@ -172,15 +171,15 @@ manager_deleteRoom (TM_ARGDECL  manager_t* managerPtr, long roomId, long numRoom
  * manager_addFlight
  * -- Add seats to a flight
  * -- Adding to an existing flight overwrites the price if 'price' >= 0
- * -- Returns TRUE on success, FALSE on failure
+ * -- Returns true on success, false on failure
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_addFlight (TM_ARGDECL
                    manager_t* managerPtr, long flightId, long numSeat, long price);
 
-bool_t
+bool
 manager_addFlight_seq (manager_t* managerPtr, long flightId, long numSeat, long price);
 
 
@@ -188,25 +187,25 @@ manager_addFlight_seq (manager_t* managerPtr, long flightId, long numSeat, long 
  * manager_deleteFlight
  * -- Delete an entire flight
  * -- Fails if customer has reservation on this flight
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_deleteFlight (TM_ARGDECL  manager_t* managerPtr, long flightId);
 
 
 /* =============================================================================
  * manager_addCustomer
  * -- If customer already exists, returns success
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_addCustomer (TM_ARGDECL  manager_t* managerPtr, long customerId);
 
-bool_t
+bool
 manager_addCustomer_seq (manager_t* managerPtr, long customerId);
 
 
@@ -214,11 +213,11 @@ manager_addCustomer_seq (manager_t* managerPtr, long customerId);
  * manager_deleteCustomer
  * -- Delete this customer and associated reservations
  * -- If customer does not exist, returns success
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_deleteCustomer (TM_ARGDECL  manager_t* managerPtr, long customerId);
 
 
@@ -314,11 +313,11 @@ manager_queryCustomerBill (TM_ARGDECL  manager_t* managerPtr, long customerId);
 /* =============================================================================
  * manager_reserveCar
  * -- Returns failure if the car or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_reserveCar (TM_ARGDECL
                     manager_t* managerPtr, long customerId, long carId);
 
@@ -326,11 +325,11 @@ manager_reserveCar (TM_ARGDECL
 /* =============================================================================
  * manager_reserveRoom
  * -- Returns failure if the room or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_reserveRoom (TM_ARGDECL
                      manager_t* managerPtr, long customerId, long roomId);
 
@@ -338,11 +337,11 @@ manager_reserveRoom (TM_ARGDECL
 /* =============================================================================
  * manager_reserveFlight
  * -- Returns failure if the flight or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_reserveFlight (TM_ARGDECL
                        manager_t* managerPtr, long customerId, long flightId);
 
@@ -350,11 +349,11 @@ manager_reserveFlight (TM_ARGDECL
 /* =============================================================================
  * manager_cancelCar
  * -- Returns failure if the car, reservation, or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_cancelCar (TM_ARGDECL
                    manager_t* managerPtr, long customerId, long carId);
 
@@ -362,11 +361,11 @@ manager_cancelCar (TM_ARGDECL
 /* =============================================================================
  * manager_cancelRoom
  * -- Returns failure if the room, reservation, or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_cancelRoom (TM_ARGDECL
                     manager_t* managerPtr, long customerId, long roomId);
 
@@ -374,11 +373,11 @@ manager_cancelRoom (TM_ARGDECL
 /* =============================================================================
  * manager_cancelFlight
  * -- Returns failure if the flight, reservation, or customer does not exist
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 manager_cancelFlight (TM_ARGDECL
                       manager_t* managerPtr, long customerId, long flightId);
 

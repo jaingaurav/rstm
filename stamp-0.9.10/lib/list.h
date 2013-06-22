@@ -75,7 +75,6 @@
 #define LIST_H 1
 
 #include "tm.h"
-#include "types.h"
 #include "lehigh.h"
 
 #ifdef __cplusplus
@@ -118,7 +117,7 @@ TMlist_iter_reset (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr);
  * list_iter_hasNext
  * =============================================================================
  */
-bool_t
+bool
 list_iter_hasNext (list_iter_t* itPtr, list_t* listPtr);
 
 
@@ -127,7 +126,7 @@ list_iter_hasNext (list_iter_t* itPtr, list_t* listPtr);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMlist_iter_hasNext (TM_ARGDECL  list_iter_t* itPtr, list_t* listPtr);
 
 
@@ -214,20 +213,20 @@ TMlist_free (TM_ARGDECL  list_t* listPtr);
 
 /* =============================================================================
  * list_isEmpty
- * -- Return TRUE if list is empty, else FALSE
+ * -- Return true if list is empty, else false
  * =============================================================================
  */
-bool_t
+bool
 list_isEmpty (list_t* listPtr);
 
 
 /* =============================================================================
  * TMlist_isEmpty
- * -- Return TRUE if list is empty, else FALSE
+ * -- Return true if list is empty, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMlist_isEmpty (TM_ARGDECL  list_t* listPtr);
 
 
@@ -271,57 +270,57 @@ TMlist_find (TM_ARGDECL  list_t* listPtr, void* dataPtr);
 
 /* =============================================================================
  * list_insert
- * -- Return TRUE on success, else FALSE
+ * -- Return true on success, else false
  * =============================================================================
  */
-bool_t
+bool
 list_insert (list_t* listPtr, void* dataPtr);
 
 
 /* =============================================================================
  * Plist_insert
- * -- Return TRUE on success, else FALSE
+ * -- Return true on success, else false
  * =============================================================================
  */
-bool_t
+bool
 Plist_insert (list_t* listPtr, void* dataPtr);
 
 
 /* =============================================================================
  * TMlist_insert
- * -- Return TRUE on success, else FALSE
+ * -- Return true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMlist_insert (TM_ARGDECL  list_t* listPtr, void* dataPtr);
 
 
 /* =============================================================================
  * list_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
+bool
 list_remove (list_t* listPtr, void* dataPtr);
 
 
 /* =============================================================================
  * Plist_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
+bool
 Plist_remove (list_t* listPtr, void* dataPtr);
 
 
 /* =============================================================================
  * TMlist_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMlist_remove (TM_ARGDECL  list_t* listPtr, void* dataPtr);
 
 

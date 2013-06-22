@@ -348,7 +348,7 @@ createTaskList (void* argPtr)
     learner_t* learnerPtr = (learner_t*)argPtr;
     list_t* taskListPtr = learnerPtr->taskListPtr;
 
-    bool_t status;
+    bool status;
 
     adtree_t* adtreePtr = learnerPtr->adtreePtr;
     float* localBaseLogLikelihoods = learnerPtr->localBaseLogLikelihoods;
@@ -535,7 +535,7 @@ TMpopTask (TM_ARGDECL  list_t* taskListPtr)
     TMLIST_ITER_RESET(&it, taskListPtr);
     if (TMLIST_ITER_HASNEXT(&it, taskListPtr)) {
         taskPtr = (learner_task_t*)TMLIST_ITER_NEXT(&it, taskListPtr);
-        bool_t status = TMLIST_REMOVE(taskListPtr, (void*)taskPtr);
+        bool status = TMLIST_REMOVE(taskListPtr, (void*)taskPtr);
         assert(status);
     }
 
@@ -561,8 +561,8 @@ populateParentQueryVector (net_t* netPtr,
     list_iter_reset(&it, parentIdListPtr);
     while (list_iter_hasNext(&it, parentIdListPtr)) {
         long parentId = (long)list_iter_next(&it, parentIdListPtr);
-        bool_t status = vector_pushBack(parentQueryVectorPtr,
-                                        (void*)&queries[parentId]);
+        bool status = vector_pushBack(parentQueryVectorPtr,
+                                      (void*)&queries[parentId]);
         assert(status);
     }
 }
@@ -587,8 +587,8 @@ TMpopulateParentQueryVector (TM_ARGDECL
     TMLIST_ITER_RESET(&it, parentIdListPtr);
     while (TMLIST_ITER_HASNEXT(&it, parentIdListPtr)) {
         long parentId = (long)TMLIST_ITER_NEXT(&it, parentIdListPtr);
-        bool_t status = PVECTOR_PUSHBACK(parentQueryVectorPtr,
-                                         (void*)&queries[parentId]);
+        bool status = PVECTOR_PUSHBACK(parentQueryVectorPtr,
+                                       (void*)&queries[parentId]);
         assert(status);
     }
 }
@@ -608,7 +608,7 @@ populateQueryVectors (net_t* netPtr,
 {
     populateParentQueryVector(netPtr, id, queries, parentQueryVectorPtr);
 
-    bool_t status;
+    bool status;
     status = vector_copy(queryVectorPtr, parentQueryVectorPtr);
     assert(status);
     status = vector_pushBack(queryVectorPtr, (void*)&queries[id]);
@@ -632,7 +632,7 @@ TMpopulateQueryVectors (TM_ARGDECL
 {
     TMpopulateParentQueryVector(TM_ARG  netPtr, id, queries, parentQueryVectorPtr);
 
-    bool_t status;
+    bool status;
     status = PVECTOR_COPY(queryVectorPtr, parentQueryVectorPtr);
     assert(status);
     status = PVECTOR_PUSHBACK(queryVectorPtr, (void*)&queries[id]);
@@ -745,7 +745,7 @@ TMfindBestInsertTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
     vector_t*  baseParentQueryVectorPtr = argPtr->aQueryVectorPtr;
     vector_t*  baseQueryVectorPtr       = argPtr->bQueryVectorPtr;
 
-    bool_t status;
+    bool status;
     adtree_t* adtreePtr               = learnerPtr->adtreePtr;
     net_t*    netPtr                  = learnerPtr->netPtr;
     float*    localBaseLogLikelihoods = learnerPtr->localBaseLogLikelihoods;
@@ -872,7 +872,7 @@ TMfindBestRemoveTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
     float      baseLogLikelihood        = argPtr->baseLogLikelihood;
     vector_t*  origParentQueryVectorPtr = argPtr->aQueryVectorPtr;
 
-    bool_t status;
+    bool status;
     adtree_t* adtreePtr = learnerPtr->adtreePtr;
     net_t* netPtr = learnerPtr->netPtr;
     float* localBaseLogLikelihoods = learnerPtr->localBaseLogLikelihoods;
@@ -987,7 +987,7 @@ TMfindBestReverseTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
     vector_t*  toOrigParentQueryVectorPtr   = argPtr->aQueryVectorPtr;
     vector_t*  fromOrigParentQueryVectorPtr = argPtr->bQueryVectorPtr;
 
-    bool_t status;
+    bool status;
     adtree_t* adtreePtr = learnerPtr->adtreePtr;
     net_t* netPtr = learnerPtr->netPtr;
     float* localBaseLogLikelihoods = learnerPtr->localBaseLogLikelihoods;
@@ -1100,7 +1100,7 @@ TMfindBestReverseTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
      */
 
     if (bestFromId != toId) {
-        bool_t isTaskValid = TRUE;
+        bool isTaskValid = true;
         TMNET_APPLYOPERATION(netPtr, OPERATION_REMOVE, bestFromId, toId);
         if (TMNET_ISPATH(netPtr,
                          bestFromId,
@@ -1108,7 +1108,7 @@ TMfindBestReverseTask (TM_ARGDECL  findBestTaskArg_t* argPtr)
                          visitedBitmapPtr,
                          workQueuePtr))
         {
-            isTaskValid = FALSE;
+            isTaskValid = false;
         }
         TMNET_APPLYOPERATION(netPtr, OPERATION_INSERT, bestFromId, toId);
         if (!isTaskValid) {
@@ -1215,14 +1215,14 @@ learnStructure (void* argPtr)
         long fromId = taskPtr->fromId;
         long toId = taskPtr->toId;
 
-        bool_t isTaskValid;
+        bool isTaskValid;
 
         TM_BEGIN();
 
         /*
          * Check if task is still valid
          */
-        isTaskValid = TRUE;
+        isTaskValid = true;
         switch (op) {
             case OPERATION_INSERT: {
                 if (TMNET_HASEDGE(netPtr, fromId, toId) ||
@@ -1232,7 +1232,7 @@ learnStructure (void* argPtr)
                                  visitedBitmapPtr,
                                  workQueuePtr))
                 {
-                    isTaskValid = FALSE;
+                    isTaskValid = false;
                 }
                 break;
             }
@@ -1249,7 +1249,7 @@ learnStructure (void* argPtr)
                                  visitedBitmapPtr,
                                  workQueuePtr))
                 {
-                    isTaskValid = FALSE;
+                    isTaskValid = false;
                 }
                 TMNET_APPLYOPERATION(netPtr, OPERATION_INSERT, fromId, toId);
                 break;

@@ -71,18 +71,17 @@
 
 
 #include "hash.h"
-#include "types.h"
 
 
 /* =============================================================================
  * hash_dbj2
  * =============================================================================
  */
-ulong_t
+unsigned long
 hash_dbj2 (char* str)
 {
-    ulong_t hash = 5381;
-    ulong_t c;
+    unsigned long hash = 5381;
+    unsigned long c;
 
     while ((c = *str++) != '\0') {
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
@@ -96,11 +95,11 @@ hash_dbj2 (char* str)
  * hash_sdbm
  * =============================================================================
  */
-ulong_t
+unsigned long
 hash_sdbm (char* str)
 {
-    ulong_t hash = 0;
-    ulong_t c;
+    unsigned long hash = 0;
+    unsigned long c;
 
     while ((c = *str++) != '\0') {
         hash = c + (hash << 6) + (hash << 16) - hash;

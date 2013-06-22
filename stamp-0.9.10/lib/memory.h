@@ -74,7 +74,6 @@
 #define MEMORY_H 1
 
 #include <stddef.h>
-#include "types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,10 +90,10 @@ typedef struct memory memory_t;
 
 /* =============================================================================
  * memory_init
- * -- Returns FALSE on failure
+ * -- Returns false on failure
  * =============================================================================
  */
-bool_t
+bool
 memory_init (long numThread, size_t initBlockCapacity, long blockGrowthFactor);
 
 

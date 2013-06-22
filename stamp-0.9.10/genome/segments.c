@@ -162,7 +162,7 @@ segments_create (segments_t* segmentsPtr, gene_t* genePtr, random_t* randomPtr)
     /* Pick some random segments to start */
     for (i = 0; i < minNumSegment; i++) {
         long j = (long)(random_generate(randomPtr) % numStart);
-        bool_t status = bitmap_set(startBitmapPtr, j);
+        bool status = bitmap_set(startBitmapPtr, j);
         assert(status);
         memcpy(strings[i], &(geneString[j]), segmentLength * sizeof(char));
         status = vector_pushBack(segmentsContentsPtr, (void*)strings[i]);
@@ -175,7 +175,7 @@ segments_create (segments_t* segmentsPtr, gene_t* genePtr, random_t* randomPtr)
         char* string = (char*)SEQ_MALLOC((segmentLength+1) * sizeof(char));
         string[segmentLength] = '\0';
         memcpy(string, &(geneString[i]), segmentLength * sizeof(char));
-        bool_t status = vector_pushBack(segmentsContentsPtr, (void*)string);
+        bool status = vector_pushBack(segmentsContentsPtr, (void*)string);
         assert(status);
         status = bitmap_set(startBitmapPtr, i);
         assert(status);
@@ -196,7 +196,7 @@ segments_create (segments_t* segmentsPtr, gene_t* genePtr, random_t* randomPtr)
             string[segmentLength] = '\0';
             i = i - 1;
             memcpy(string, &(geneString[i]), segmentLength * sizeof(char));
-            bool_t status = vector_pushBack(segmentsContentsPtr, (void*)string);
+            bool status = vector_pushBack(segmentsContentsPtr, (void*)string);
             assert(status);
             status = bitmap_set(startBitmapPtr, i);
             assert(status);
@@ -229,11 +229,10 @@ segments_free (segments_t* segmentsPtr)
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "types.h"
 
 
 static void
-tester (long geneLength, long segmentLength, long minNumSegment, bool_t doPrint)
+tester (long geneLength, long segmentLength, long minNumSegment, bool doPrint)
 {
     gene_t* genePtr;
     segments_t* segmentsPtr;
@@ -291,15 +290,15 @@ tester (long geneLength, long segmentLength, long minNumSegment, bool_t doPrint)
 int
 main ()
 {
-    bool_t status = memory_init(1, 4, 2)
+    bool status = memory_init(1, 4, 2)
     assert(status);
 
     puts("Starting...");
 
-    tester(10, 4, 20, TRUE);
-    tester(20, 5, 1, TRUE);
-    tester(100, 10, 1000, FALSE);
-    tester(100, 10, 1, FALSE);
+    tester(10, 4, 20, true);
+    tester(20, 5, 1, true);
+    tester(100, 10, 1000, false);
+    tester(100, 10, 1, false);
 
     puts("All tests passed.");
 

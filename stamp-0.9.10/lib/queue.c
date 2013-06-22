@@ -74,7 +74,6 @@
 #include <string.h>
 #include "random.h"
 #include "tm.h"
-#include "types.h"
 #include "queue.h"
 
 
@@ -205,14 +204,14 @@ TMqueue_free (TM_ARGDECL  queue_t* queuePtr)
  * queue_isEmpty
  * =============================================================================
  */
-bool_t
+bool
 queue_isEmpty (queue_t* queuePtr)
 {
     long pop      = queuePtr->pop;
     long push     = queuePtr->push;
     long capacity = queuePtr->capacity;
 
-    return (((pop + 1) % capacity == push) ? TRUE : FALSE);
+    return (((pop + 1) % capacity == push) ? true : false);
 }
 
 
@@ -239,14 +238,14 @@ TMqueue_clear (TM_ARGDECL queue_t* queuePtr)
  * TMqueue_isEmpty
  * =============================================================================
  */
-bool_t
+bool
 TMqueue_isEmpty (TM_ARGDECL  queue_t* queuePtr)
 {
     long pop      = (long)TM_SHARED_READ_L(queuePtr->pop);
     long push     = (long)TM_SHARED_READ_L(queuePtr->push);
     long capacity = (long)TM_SHARED_READ_L(queuePtr->capacity);
 
-    return (((pop + 1) % capacity == push) ? TRUE : FALSE);
+    return (((pop + 1) % capacity == push) ? true : false);
 }
 
 
@@ -287,7 +286,7 @@ queue_shuffle (queue_t* queuePtr, random_t* randomPtr)
  * queue_push
  * =============================================================================
  */
-bool_t
+bool
 queue_push (queue_t* queuePtr, void* dataPtr)
 {
     long pop      = queuePtr->pop;
@@ -303,7 +302,7 @@ queue_push (queue_t* queuePtr, void* dataPtr)
         long newCapacity = capacity * QUEUE_GROWTH_FACTOR;
         void** newElements = (void**)SEQ_MALLOC(newCapacity * sizeof(void*));
         if (newElements == NULL) {
-            return FALSE;
+            return false;
         }
 
         long dst = 0;
@@ -334,7 +333,7 @@ queue_push (queue_t* queuePtr, void* dataPtr)
     queuePtr->elements[push] = dataPtr;
     queuePtr->push = newPush;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -342,7 +341,7 @@ queue_push (queue_t* queuePtr, void* dataPtr)
  * Pqueue_push
  * =============================================================================
  */
-bool_t
+bool
 Pqueue_push (queue_t* queuePtr, void* dataPtr)
 {
     long pop      = queuePtr->pop;
@@ -358,7 +357,7 @@ Pqueue_push (queue_t* queuePtr, void* dataPtr)
         long newCapacity = capacity * QUEUE_GROWTH_FACTOR;
         void** newElements = (void**)P_MALLOC(newCapacity * sizeof(void*));
         if (newElements == NULL) {
-            return FALSE;
+            return false;
         }
 
         long dst = 0;
@@ -390,7 +389,7 @@ Pqueue_push (queue_t* queuePtr, void* dataPtr)
     queuePtr->elements[push] = dataPtr;
     queuePtr->push = newPush;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -398,7 +397,7 @@ Pqueue_push (queue_t* queuePtr, void* dataPtr)
  * TMqueue_push
  * =============================================================================
  */
-bool_t
+bool
 TMqueue_push (TM_ARGDECL  queue_t* queuePtr, void* dataPtr)
 {
     long pop      = (long)TM_SHARED_READ_L(queuePtr->pop);
@@ -413,7 +412,7 @@ TMqueue_push (TM_ARGDECL  queue_t* queuePtr, void* dataPtr)
         long newCapacity = capacity * QUEUE_GROWTH_FACTOR;
         void** newElements = (void**)TM_MALLOC(newCapacity * sizeof(void*));
         if (newElements == NULL) {
-            return FALSE;
+            return false;
         }
 
         long dst = 0;
@@ -446,7 +445,7 @@ TMqueue_push (TM_ARGDECL  queue_t* queuePtr, void* dataPtr)
     TM_SHARED_WRITE_P(elements[push], dataPtr);
     TM_SHARED_WRITE_L(queuePtr->push, newPush);
 
-    return TRUE;
+    return true;
 }
 
 

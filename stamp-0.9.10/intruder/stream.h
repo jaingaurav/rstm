@@ -129,7 +129,7 @@ TMstream_getPacket (TM_ARGDECL stream_t* streamPtr);
  * stream_isAttack
  * =============================================================================
  */
-bool_t
+bool
 stream_isAttack (stream_t* streamPtr, long flowId);
 
 

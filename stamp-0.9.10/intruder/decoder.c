@@ -78,7 +78,6 @@
 #include "packet.h"
 #include "queue.h"
 #include "tm.h"
-#include "types.h"
 
 
 struct decoder {
@@ -137,7 +136,7 @@ decoder_free (decoder_t* decoderPtr)
 int_error_t
 decoder_process (decoder_t* decoderPtr, char* bytes, long numByte)
 {
-    bool_t status;
+    bool status;
 
     /*
      * Basic error checking
@@ -301,7 +300,7 @@ decoder_process (decoder_t* decoderPtr, char* bytes, long numByte)
 int_error_t
 TMdecoder_process (TM_ARGDECL  decoder_t* decoderPtr, char* bytes, long numByte)
 {
-    bool_t status;
+    bool status;
 
     /*
      * Basic error checking

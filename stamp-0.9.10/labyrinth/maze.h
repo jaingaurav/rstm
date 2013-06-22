@@ -78,7 +78,6 @@
 #include "list.h"
 #include "pair.h"
 #include "queue.h"
-#include "types.h"
 #include "vector.h"
 
 typedef struct maze {
@@ -119,8 +118,8 @@ maze_read (maze_t* mazePtr, char* inputFileName);
  * maze_checkPaths
  * =============================================================================
  */
-bool_t
-maze_checkPaths (maze_t* mazePtr, list_t* pathListPtr, bool_t doPrintPaths);
+bool
+maze_checkPaths (maze_t* mazePtr, list_t* pathListPtr, bool doPrintPaths);
 
 
 #endif /* MAZE_H */

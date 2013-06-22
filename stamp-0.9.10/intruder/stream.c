@@ -164,7 +164,7 @@ splitIntoPackets (char* str,
 
     long p;
     for (p = 0; p < (numPacket - 1); p++) {
-        bool_t status;
+        bool status;
         char* bytes = (char*)SEQ_MALLOC(PACKET_HEADER_LENGTH + numDataByte);
         assert(bytes);
         status = vector_pushBack(allocVectorPtr, (void*)bytes);
@@ -179,7 +179,7 @@ splitIntoPackets (char* str,
         assert(status);
     }
 
-    bool_t status;
+    bool status;
     long lastNumDataByte = numDataByte + numByte % numPacket;
     char* bytes = (char*)SEQ_MALLOC(PACKET_HEADER_LENGTH + lastNumDataByte);
     assert(bytes);
@@ -232,8 +232,7 @@ stream_generate (stream_t* streamPtr,
         if ((long)(random_generate(randomPtr) % 100) < percentAttack) {
             long s = random_generate(randomPtr) % global_numDefaultSignature;
             str = dictionary_get(dictionaryPtr, s);
-            bool_t status =
-                MAP_INSERT(attackMapPtr, (void*)f, (void*)str);
+            bool status = MAP_INSERT(attackMapPtr, (void*)f, (void*)str);
             assert(status);
             numAttack++;
         } else {
@@ -242,7 +241,7 @@ stream_generate (stream_t* streamPtr,
              */
             long length = (random_generate(randomPtr) % maxLength) + 1;
             str = (char*)SEQ_MALLOC((length + 1) * sizeof(char));
-            bool_t status = vector_pushBack(allocVectorPtr, (void*)str);
+            bool status = vector_pushBack(allocVectorPtr, (void*)str);
             assert(status);
             long l;
             for (l = 0; l < length; l++) {
@@ -254,9 +253,9 @@ stream_generate (stream_t* streamPtr,
             strcpy(str2, str);
             int_error_t error = detector_process(detectorPtr, str2); /* updates in-place */
             if (error == ERROR_SIGNATURE) {
-                bool_t status = MAP_INSERT(attackMapPtr,
-                                           (void*)f,
-                                           (void*)str);
+                bool status = MAP_INSERT(attackMapPtr,
+                                         (void*)f,
+                                         (void*)str);
                 assert(status);
                 numAttack++;
             }
@@ -301,7 +300,7 @@ TMstream_getPacket (TM_ARGDECL stream_t* streamPtr)
  * stream_isAttack
  * =============================================================================
  */
-bool_t
+bool
 stream_isAttack (stream_t* streamPtr, long flowId)
 {
     return MAP_CONTAINS(streamPtr->attackMapPtr, (void*)flowId);

@@ -75,7 +75,6 @@
 
 #include "random.h"
 #include "tm.h"
-#include "types.h"
 
 
 #ifdef __cplusplus
@@ -138,7 +137,7 @@ TMqueue_free (TM_ARGDECL  queue_t* queuePtr);
  * queue_isEmpty
  * =============================================================================
  */
-bool_t
+bool
 queue_isEmpty (queue_t* queuePtr);
 
 
@@ -147,7 +146,7 @@ queue_isEmpty (queue_t* queuePtr);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMqueue_isEmpty (TM_ARGDECL  queue_t* queuePtr);
 
 
@@ -173,7 +172,7 @@ queue_shuffle (queue_t* queuePtr, random_t* randomPtr);
  * queue_push
  * =============================================================================
  */
-bool_t
+bool
 queue_push (queue_t* queuePtr, void* dataPtr);
 
 
@@ -181,7 +180,7 @@ queue_push (queue_t* queuePtr, void* dataPtr);
  * Pqueue_push
  * =============================================================================
  */
-bool_t
+bool
 Pqueue_push (queue_t* queuePtr, void* dataPtr);
 
 
@@ -190,7 +189,7 @@ Pqueue_push (queue_t* queuePtr, void* dataPtr);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMqueue_push (TM_ARGDECL  queue_t* queuePtr, void* dataPtr);
 
 

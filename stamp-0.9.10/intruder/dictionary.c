@@ -74,7 +74,6 @@
 #include <assert.h>
 #include "dictionary.h"
 #include "tm.h"
-#include "types.h"
 #include "vector.h"
 
 
@@ -169,8 +168,8 @@ dictionary_alloc ()
         long s;
         for (s = 0; s < global_numDefaultSignature; s++) {
             const char* sig = global_defaultSignatures[s];
-            bool_t status = vector_pushBack(dictionaryPtr,
-                                            (void*)sig);
+            bool status = vector_pushBack(dictionaryPtr,
+                                          (void*)sig);
             assert(status);
         }
     }
@@ -192,8 +191,8 @@ Pdictionary_alloc ()
         long s;
         for (s = 0; s < global_numDefaultSignature; s++) {
             const char* sig = global_defaultSignatures[s];
-            bool_t status = PVECTOR_PUSHBACK(dictionaryPtr,
-                                             (void*)sig);
+            bool status = PVECTOR_PUSHBACK(dictionaryPtr,
+                                          (void*)sig);
             assert(status);
         }
     }
@@ -228,7 +227,7 @@ Pdictionary_free (dictionary_t* dictionaryPtr)
  * dictionary_add
  * =============================================================================
  */
-bool_t
+bool
 dictionary_add (dictionary_t* dictionaryPtr, char* str)
 {
     return vector_pushBack(dictionaryPtr, (void*)str);

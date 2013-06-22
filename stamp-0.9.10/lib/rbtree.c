@@ -1404,10 +1404,10 @@ TMgetNode (TM_ARGDECL_ALONE)
 
 /* =============================================================================
  * rbtree_insert
- * -- Returns TRUE on success
+ * -- Returns true on success
  * =============================================================================
  */
-bool_t
+bool
 rbtree_insert (rbtree_t* r, void* key, void* val)
 {
     node_t* node = getNode();
@@ -1415,16 +1415,16 @@ rbtree_insert (rbtree_t* r, void* key, void* val)
     if (ex != NULL) {
         releaseNode(node);
     }
-    return ((ex == NULL) ? TRUE : FALSE);
+    return ((ex == NULL) ? true : false);
 }
 
 
 /* =============================================================================
  * TMrbtree_insert
- * -- Returns TRUE on success
+ * -- Returns true on success
  * =============================================================================
  */
-bool_t
+bool
 TMrbtree_insert (TM_ARGDECL  rbtree_t* r, void* key, void* val)
 {
     node_t* node = TMgetNode(TM_ARG_ALONE);
@@ -1432,16 +1432,16 @@ TMrbtree_insert (TM_ARGDECL  rbtree_t* r, void* key, void* val)
     if (ex != NULL) {
         TMreleaseNode(TM_ARG  node);
     }
-    return ((ex == NULL) ? TRUE : FALSE);
+    return ((ex == NULL) ? true : false);
 }
 
 
 /* =============================================================================
  * rbtree_delete
- * -- Returns TRUE if key exists
+ * -- Returns true if key exists
  * =============================================================================
  */
-bool_t
+bool
 rbtree_delete (rbtree_t* r, void* key)
 {
     node_t* node = NULL;
@@ -1452,16 +1452,16 @@ rbtree_delete (rbtree_t* r, void* key)
     if (node != NULL) {
         releaseNode(node);
     }
-    return ((node != NULL) ? TRUE : FALSE);
+    return ((node != NULL) ? true : false);
 }
 
 
 /* =============================================================================
  * TMrbtree_delete
- * -- Returns TRUE if key exists
+ * -- Returns true if key exists
  * =============================================================================
  */
-bool_t
+bool
 TMrbtree_delete (TM_ARGDECL  rbtree_t* r, void* key)
 {
     node_t* node = NULL;
@@ -1472,16 +1472,16 @@ TMrbtree_delete (TM_ARGDECL  rbtree_t* r, void* key)
     if (node != NULL) {
         TMreleaseNode(TM_ARG  node);
     }
-    return ((node != NULL) ? TRUE : FALSE);
+    return ((node != NULL) ? true : false);
 }
 
 
 /* =============================================================================
  * rbtree_update
- * -- Return FALSE if had to insert node first
+ * -- Return false if had to insert node first
  * =============================================================================
  */
-bool_t
+bool
 rbtree_update (rbtree_t* r, void* key, void* val)
 {
     node_t* nn = getNode();
@@ -1489,18 +1489,18 @@ rbtree_update (rbtree_t* r, void* key, void* val)
     if (ex != NULL) {
         STF(ex, v, val);
         releaseNode(nn);
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 
 /* =============================================================================
  * TMrbtree_update
- * -- Return FALSE if had to insert node first
+ * -- Return false if had to insert node first
  * =============================================================================
  */
-bool_t
+bool
 TMrbtree_update (TM_ARGDECL  rbtree_t* r, void* key, void* val)
 {
     node_t* nn = TMgetNode(TM_ARG_ALONE);
@@ -1508,9 +1508,9 @@ TMrbtree_update (TM_ARGDECL  rbtree_t* r, void* key, void* val)
     if (ex != NULL) {
         TX_STF_P(ex, v, val);
         TMreleaseNode(TM_ARG  nn);
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 
@@ -1548,7 +1548,7 @@ TMrbtree_get (TM_ARGDECL  rbtree_t* r, void* key) {
  * rbtree_contains
  * =============================================================================
  */
-long
+bool
 rbtree_contains (rbtree_t* r, void* key)
 {
     node_t* n = LOOKUP(r, key);
@@ -1560,7 +1560,7 @@ rbtree_contains (rbtree_t* r, void* key)
  * TMrbtree_contains
  * =============================================================================
  */
-long
+bool
 TMrbtree_contains (TM_ARGDECL  rbtree_t* r, void* key)
 {
     node_t* n = TX_LOOKUP(r, key);

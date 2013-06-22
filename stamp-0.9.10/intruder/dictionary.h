@@ -74,7 +74,6 @@
 
 
 #include "vector.h"
-#include "types.h"
 
 
 typedef vector_t dictionary_t;
@@ -120,7 +119,7 @@ Pdictionary_free (dictionary_t* dictionaryPtr);
  * dictionary_add
  * =============================================================================
  */
-bool_t
+bool
 dictionary_add (dictionary_t* dictionaryPtr, char* str);
 
 

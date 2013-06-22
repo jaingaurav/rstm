@@ -74,7 +74,6 @@
 #define HASH_H 1
 
 
-#include "types.h"
 
 
 #ifdef __cplusplus
@@ -86,7 +85,7 @@ extern "C" {
  * hash_dbj2
  * =============================================================================
  */
-ulong_t
+unsigned long
 hash_dbj2 (char* str);
 
 
@@ -94,7 +93,7 @@ hash_dbj2 (char* str);
  * hash_sdbm
  * =============================================================================
  */
-ulong_t
+unsigned long
 hash_sdbm (char* str);
 
 

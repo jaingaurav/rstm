@@ -75,7 +75,6 @@
 
 
 #include "tm.h"
-#include "types.h"
 
 typedef enum reservation_type {
     RESERVATION_CAR,
@@ -148,54 +147,54 @@ reservation_alloc_seq (long id, long price, long numTotal);
 /* =============================================================================
  * reservation_addToTotal
  * -- Adds if 'num' > 0, removes if 'num' < 0;
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 reservation_addToTotal (TM_ARGDECL  reservation_t* reservationPtr, long num);
 
-bool_t
+bool
 reservation_addToTotal_seq (reservation_t* reservationPtr, long num);
 
 
 /* =============================================================================
  * reservation_make
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 reservation_make (TM_ARGDECL  reservation_t* reservationPtr);
 
-bool_t
+bool
 reservation_make_seq (reservation_t* reservationPtr);
 
 
 /* =============================================================================
  * reservation_cancel
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 reservation_cancel (TM_ARGDECL  reservation_t* reservationPtr);
 
-bool_t
+bool
 reservation_cancel_seq (reservation_t* reservationPtr);
 
 
 /* =============================================================================
  * reservation_updatePrice
  * -- Failure if 'price' < 0
- * -- Returns TRUE on success, else FALSE
+ * -- Returns true on success, else false
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 reservation_updatePrice (TM_ARGDECL  reservation_t* reservationPtr, long newPrice);
 
-bool_t
+bool
 reservation_updatePrice_seq (reservation_t* reservationPtr, long newPrice);
 
 
@@ -212,7 +211,7 @@ reservation_compare (reservation_t* aPtr, reservation_t* bPtr);
  * reservation_hash
  * =============================================================================
  */
-ulong_t
+unsigned long
 reservation_hash (reservation_t* reservationPtr);
 
 

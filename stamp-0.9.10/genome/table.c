@@ -74,7 +74,6 @@
 #include <stdlib.h>
 #include "list.h"
 #include "table.h"
-#include "types.h"
 
 
 /* =============================================================================
@@ -113,55 +112,55 @@ table_alloc (long numBucket, comparator_t* compare)
 
 /* =============================================================================
  * table_insert
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
-table_insert (table_t* tablePtr, ulong_t hash, void* dataPtr)
+bool
+table_insert (table_t* tablePtr, unsigned long hash, void* dataPtr)
 {
     long i = hash % tablePtr->numBucket;
 
     if (!list_insert(tablePtr->buckets[i], dataPtr)) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 
 /* =============================================================================
  * TMtable_insert
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
-TMtable_insert (TM_ARGDECL  table_t* tablePtr, ulong_t hash, void* dataPtr)
+bool
+TMtable_insert (TM_ARGDECL  table_t* tablePtr, unsigned long hash, void* dataPtr)
 {
     long i = hash % tablePtr->numBucket;
 
     if (!TMLIST_INSERT(tablePtr->buckets[i], dataPtr)) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 
 /* =============================================================================
  * table_remove
- * -- Returns TRUE if successful, else FALSE
+ * -- Returns true if successful, else false
  * =============================================================================
  */
-bool_t
-table_remove (table_t* tablePtr, ulong_t hash, void* dataPtr)
+bool
+table_remove (table_t* tablePtr, unsigned long hash, void* dataPtr)
 {
     long i = hash % tablePtr->numBucket;
 
     if (!list_remove(tablePtr->buckets[i], dataPtr)) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -219,7 +218,7 @@ main ()
     long hash[] = {3, 1, 4, 1, 5, 9, 2, 6, 8, 7, -1};
     long i;
 
-    bool_t status = memory_init(1, 4, 2);
+    bool status = memory_init(1, 4, 2);
     assert(status);
 
     puts("Starting...");
@@ -227,18 +226,18 @@ main ()
     tablePtr = table_alloc(8, NULL);
 
     for (i = 0; hash[i] >= 0; i++ ) {
-        bool_t status = table_insert(tablePtr,
-                                     (ulong_t)hash[i],
-                                     (void*)&hash[i])
+        bool status = table_insert(tablePtr,
+                                   (unsigned long)hash[i],
+                                   &hash[i])
         assert(status);
         printTable(tablePtr);
         puts("");
     }
 
     for (i = 0; hash[i] >= 0; i++ ) {
-        bool_t status = table_remove(tablePtr,
-                                     (ulong_t)hash[i],
-                                     (void*)&hash[i])
+        bool status = table_remove(tablePtr,
+                                   (unsigned long)hash[i],
+                                   &hash[i])
         assert(status);
         printTable(tablePtr);
         puts("");

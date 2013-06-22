@@ -78,7 +78,6 @@
 #include "element.h"
 #include "pair.h"
 #include "tm.h"
-#include "types.h"
 
 
 struct element {
@@ -92,10 +91,10 @@ struct element {
     coordinate_t midpoints[3]; /* midpoint of each edge */
     double radii[3];           /* half of edge length */
     edge_t* encroachedEdgePtr; /* opposite obtuse angle */
-    bool_t isSkinny;
+    bool isSkinny;
     list_t* neighborListPtr;
-    bool_t isGarbage;
-    bool_t isReferenced;
+    bool isGarbage;
+    bool isReferenced;
 };
 
 
@@ -139,7 +138,7 @@ minimizeCoordinates (element_t* elementPtr)
 
 /* =============================================================================
  * checkAngles
- * -- Sets isSkinny to TRUE if the angle constraint is not met
+ * -- Sets isSkinny to true if the angle constraint is not met
  * =============================================================================
  */
 static void
@@ -150,8 +149,8 @@ checkAngles (element_t* elementPtr)
     double minAngle = 180.0;
 
     assert(numCoordinate == 2 || numCoordinate == 3);
-    elementPtr->isReferenced = FALSE;
-    elementPtr->isSkinny = FALSE;
+    elementPtr->isReferenced = false;
+    elementPtr->isSkinny = false;
     elementPtr->encroachedEdgePtr = NULL;
 
     if (numCoordinate == 3) {
@@ -167,7 +166,7 @@ checkAngles (element_t* elementPtr)
                 elementPtr->encroachedEdgePtr = &elementPtr->edges[(i + 1) % 3];
             }
             if (angle < angleConstraint) {
-                elementPtr->isSkinny = TRUE;
+                elementPtr->isSkinny = true;
             }
             if (angle < minAngle) {
                 minAngle = angle;
@@ -437,8 +436,8 @@ element_alloc (coordinate_t* coordinates, long numCoordinate)
         initEdges(elementPtr, coordinates, numCoordinate);
         elementPtr->neighborListPtr = Plist_alloc(&element_listcompare);
         assert(elementPtr->neighborListPtr);
-        elementPtr->isGarbage = FALSE;
-        elementPtr->isReferenced = FALSE;
+        elementPtr->isGarbage = false;
+        elementPtr->isReferenced = false;
     }
 
     return elementPtr;
@@ -469,8 +468,8 @@ Pelement_alloc (coordinate_t* coordinates, long numCoordinate)
         initEdges(elementPtr, coordinates, numCoordinate);
         elementPtr->neighborListPtr = PLIST_ALLOC(&element_listcompare);
         assert(elementPtr->neighborListPtr);
-        elementPtr->isGarbage = FALSE;
-        elementPtr->isReferenced = FALSE;
+        elementPtr->isGarbage = false;
+        elementPtr->isReferenced = false;
     }
 
     return elementPtr;
@@ -501,8 +500,8 @@ TMelement_alloc (TM_ARGDECL coordinate_t* coordinates, long numCoordinate)
         initEdges(elementPtr, coordinates, numCoordinate);
         elementPtr->neighborListPtr = TMLIST_ALLOC(&element_listcompare);
         assert(elementPtr->neighborListPtr);
-        elementPtr->isGarbage = FALSE;
-        elementPtr->isReferenced = FALSE;
+        elementPtr->isGarbage = false;
+        elementPtr->isReferenced = false;
     }
 
     return elementPtr;
@@ -696,13 +695,13 @@ TMelement_heapCompare (TM_ARGDECL const void* aPtr, const void* bPtr)
  * element_isInCircumCircle
  * =============================================================================
  */
-bool_t
+bool
 element_isInCircumCircle (element_t* elementPtr, coordinate_t* coordinatePtr)
 {
     double distance = coordinate_distance(coordinatePtr,
                                           &elementPtr->circumCenter);
 
-    return ((distance <= elementPtr->circumRadius) ? TRUE : FALSE);
+    return ((distance <= elementPtr->circumRadius) ? true : false);
 }
 
 
@@ -710,10 +709,10 @@ element_isInCircumCircle (element_t* elementPtr, coordinate_t* coordinatePtr)
  * isEncroached
  * =============================================================================
  */
-static bool_t
+static bool
 isEncroached (element_t* elementPtr)
 {
-    return ((elementPtr->encroachedEdgePtr != NULL) ? TRUE : FALSE);
+    return ((elementPtr->encroachedEdgePtr != NULL) ? true : false);
 }
 
 
@@ -743,10 +742,10 @@ element_getEncroachedPtr (element_t* elementPtr)
  * element_isSkinny
  * =============================================================================
  */
-bool_t
+bool
 element_isSkinny (element_t* elementPtr)
 {
-    return ((elementPtr->isSkinny) ? TRUE : FALSE);
+    return ((elementPtr->isSkinny) ? true : false);
 }
 
 
@@ -755,11 +754,11 @@ element_isSkinny (element_t* elementPtr)
  * -- Does it need to be refined?
  * =============================================================================
  */
-bool_t
+bool
 element_isBad (element_t* elementPtr)
 {
     return ((isEncroached(elementPtr) || element_isSkinny(elementPtr)) ?
-            TRUE : FALSE);
+            true : false);
 }
 
 
@@ -768,7 +767,7 @@ element_isBad (element_t* elementPtr)
  * -- Held by another data structure?
  * =============================================================================
  */
-bool_t
+bool
 element_isReferenced (element_t* elementPtr)
 {
     return elementPtr->isReferenced;
@@ -780,10 +779,10 @@ element_isReferenced (element_t* elementPtr)
  * -- Held by another data structure?
  * =============================================================================
  */
-bool_t
+bool
 TMelement_isReferenced (TM_ARGDECL  element_t* elementPtr)
 {
-    return (bool_t)TM_SHARED_READ_L(elementPtr->isReferenced);
+    return (bool)TM_SHARED_READ_L(elementPtr->isReferenced);
 }
 
 
@@ -792,7 +791,7 @@ TMelement_isReferenced (TM_ARGDECL  element_t* elementPtr)
  * =============================================================================
  */
 void
-element_setIsReferenced (element_t* elementPtr, bool_t status)
+element_setIsReferenced (element_t* elementPtr, bool status)
 {
     elementPtr->isReferenced = status;
 }
@@ -803,7 +802,7 @@ element_setIsReferenced (element_t* elementPtr, bool_t status)
  * =============================================================================
  */
 void
-TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool_t status)
+TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool status)
 {
     TM_SHARED_WRITE_L(elementPtr->isReferenced, status);
 }
@@ -814,7 +813,7 @@ TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool_t status)
  * -- Can we deallocate?
  * =============================================================================
  */
-bool_t
+bool
 element_isGarbage (element_t* elementPtr)
 {
     return elementPtr->isGarbage;
@@ -826,10 +825,10 @@ element_isGarbage (element_t* elementPtr)
  * -- Can we deallocate?
  * =============================================================================
  */
-bool_t
+bool
 TMelement_isGarbage (TM_ARGDECL  element_t* elementPtr)
 {
-    return (bool_t)TM_SHARED_READ_L(elementPtr->isGarbage);
+    return (bool)TM_SHARED_READ_L(elementPtr->isGarbage);
 }
 
 
@@ -838,7 +837,7 @@ TMelement_isGarbage (TM_ARGDECL  element_t* elementPtr)
  * =============================================================================
  */
 void
-element_setIsGarbage (element_t* elementPtr, bool_t status)
+element_setIsGarbage (element_t* elementPtr, bool status)
 {
     elementPtr->isGarbage = status;
 }
@@ -849,7 +848,7 @@ element_setIsGarbage (element_t* elementPtr, bool_t status)
  * =============================================================================
  */
 void
-TMelement_setIsGarbage (TM_ARGDECL  element_t* elementPtr, bool_t status)
+TMelement_setIsGarbage (TM_ARGDECL  element_t* elementPtr, bool status)
 {
     TM_SHARED_WRITE_L(elementPtr->isGarbage, status);
 }
@@ -998,10 +997,10 @@ TMelement_getNewPoint (TM_ARGDECL element_t* elementPtr)
 /* =============================================================================
  * element_checkAngles
  *
- * Return FALSE if minimum angle constraint not met
+ * Return false if minimum angle constraint not met
  * =============================================================================
  */
-bool_t
+bool
 element_checkAngles (element_t* elementPtr)
 {
     long numCoordinate = elementPtr->numCoordinate;
@@ -1015,12 +1014,12 @@ element_checkAngles (element_t* elementPtr)
                                             &coordinates[(i + 1) % 3],
                                             &coordinates[(i + 2) % 3]);
             if (angle < angleConstraint) {
-                return FALSE;
+                return false;
             }
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 

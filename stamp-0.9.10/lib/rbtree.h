@@ -85,7 +85,6 @@
 
 
 #include "tm.h"
-#include "types.h"
 #include "lehigh.h"
 
 #ifdef __cplusplus
@@ -138,20 +137,20 @@ TMrbtree_free (TM_ARGDECL  rbtree_t* r);
 
 /* =============================================================================
  * rbtree_insert
- * -- Returns TRUE on success
+ * -- Returns true on success
  * =============================================================================
  */
-bool_t
+bool
 rbtree_insert (rbtree_t* r, void* key, void* val);
 
 
 /* =============================================================================
  * TMrbtree_insert
- * -- Returns TRUE on success
+ * -- Returns true on success
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMrbtree_insert (TM_ARGDECL  rbtree_t* r, void* key, void* val);
 
 
@@ -159,7 +158,7 @@ TMrbtree_insert (TM_ARGDECL  rbtree_t* r, void* key, void* val);
  * rbtree_delete
  * =============================================================================
  */
-bool_t
+bool
 rbtree_delete (rbtree_t* r, void* key);
 
 
@@ -168,26 +167,26 @@ rbtree_delete (rbtree_t* r, void* key);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMrbtree_delete (TM_ARGDECL  rbtree_t* r, void* key);
 
 
 /* =============================================================================
  * rbtree_update
- * -- Return FALSE if had to insert node first
+ * -- Return false if had to insert node first
  * =============================================================================
  */
-bool_t
+bool
 rbtree_update (rbtree_t* r, void* key, void* val);
 
 
 /* =============================================================================
  * TMrbtree_update
- * -- Return FALSE if had to insert node first
+ * -- Return false if had to insert node first
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMrbtree_update (TM_ARGDECL  rbtree_t* r, void* key, void* val);
 
 
@@ -212,7 +211,7 @@ TMrbtree_get (TM_ARGDECL  rbtree_t* r, void* key);
  * rbtree_contains
  * =============================================================================
  */
-bool_t
+bool
 rbtree_contains (rbtree_t* r, void* key);
 
 
@@ -221,7 +220,7 @@ rbtree_contains (rbtree_t* r, void* key);
  * =============================================================================
  */
 TM_CALLABLE
-bool_t
+bool
 TMrbtree_contains (TM_ARGDECL  rbtree_t* r, void* key);
 
 

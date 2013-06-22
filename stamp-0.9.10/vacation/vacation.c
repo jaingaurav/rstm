@@ -85,7 +85,6 @@
 #include "thread.h"
 #include "timer.h"
 #include "tm.h"
-#include "types.h"
 #include "utility.h"
 
 enum param_types {
@@ -195,7 +194,7 @@ parseArgs (long argc, char* const argv[])
  * -- Wrapper function
  * =============================================================================
  */
-static bool_t
+static bool
 addCustomer (manager_t* managerPtr, long id, long num, long price)
 {
     return manager_addCustomer_seq(managerPtr, id);
@@ -214,7 +213,7 @@ initializeManager ()
     long numRelation;
     random_t* randomPtr;
     long* ids;
-    bool_t (*manager_add[])( manager_t*, long, long, long) = {
+    bool (*manager_add[])( manager_t*, long, long, long) = {
         &manager_addCar_seq,
         &manager_addFlight_seq,
         &manager_addRoom_seq,
@@ -250,7 +249,7 @@ initializeManager ()
         }
         /* Populate table */
         for (i = 0; i < numRelation; i++) {
-            bool_t status;
+            bool status;
             long id = ids[i];
             long num = ((random_generate(randomPtr) % 5) + 1) * 100;
             long price = ((random_generate(randomPtr) % 5) * 10) + 50;
@@ -344,7 +343,7 @@ checkTables (manager_t* managerPtr)
         managerPtr->roomTablePtr,
     };
     long numTable = sizeof(tables) / sizeof(tables[0]);
-    bool_t (*manager_add[])(manager_t*, long, long, long) = {
+    bool (*manager_add[])(manager_t*, long, long, long) = {
         &manager_addCar_seq,
         &manager_addFlight_seq,
         &manager_addRoom_seq
