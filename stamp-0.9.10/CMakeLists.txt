@@ -11,6 +11,10 @@ include (CustomAddExecutable)
 include (AddTargetDefinitions)
 include (AppendProperty)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+endif ()
+
 # This macro adds a stamp executable that uses stamp's STM interface and links
 # to libstm.a through the STM_API_STAMP interface.
 macro (add_stamp_executable exec name arch)
