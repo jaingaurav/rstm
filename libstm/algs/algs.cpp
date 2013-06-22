@@ -80,9 +80,11 @@ namespace stm
   /*** Use the stms array to map a string name to an algorithm ID */
   int stm_name_map(const char* phasename)
   {
-      for (int i = 0; i < ALG_MAX; ++i)
-          if (0 == strcmp(phasename, stms[i].name))
+      for (int i = 0; i < ALG_MAX; ++i) {
+          if (0 == strcmp(phasename, stms[i].name)) {
               return i;
+          }
+      }
       return -1;
   }
 

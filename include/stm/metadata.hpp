@@ -219,8 +219,9 @@ namespace stm
       /*** simple constructor */
       toxic_histogram_t() : max(0), hg_commits(0), hg_aborts(0)
       {
-          for (int i = 0; i < 18; ++i)
+          for (int i = 0; i < 18; ++i) {
               buckets[i] = 0;
+          }
       }
   };
 

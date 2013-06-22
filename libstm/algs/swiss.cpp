@@ -129,8 +129,9 @@ namespace
           if ((rver1 != rver2) || (rver1 == UINT_MAX)) {
               // bad read: we'll go back to top, but first make sure we didn't
               // get aborted
-              if (tx->alive == ABORTED)
+              if (tx->alive == ABORTED) {
                   tx->tmabort(tx);
+              }
               continue;
           }
           // the read was good: log the orec
@@ -159,8 +160,9 @@ namespace
       orec_t* o = get_orec(addr);
 
       // if I'm already the lock holder, we're done!
-      if (o->v.all == tx->my_lock.all)
+      if (o->v.all == tx->my_lock.all) {
           return;
+      }
 
       while (true) {
           // look at write lock
@@ -168,19 +170,22 @@ namespace
           ivt.all = o->v.all;
           // if locked, CM will either tell us to self-abort, or to continue
           if (ivt.fields.lock) {
-              if (cm_should_abort(tx, ivt.fields.id))
+              if (cm_should_abort(tx, ivt.fields.id)) {
                   tx->tmabort(tx);
+              }
               // check liveness before continuing
-              if (tx->alive == ABORTED)
+              if (tx->alive == ABORTED) {
                   tx->tmabort(tx);
+              }
               continue;
           }
 
           // if I can't lock it, start over
           if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
               // check liveness before continuing
-              if (tx->alive == ABORTED)
+              if (tx->alive == ABORTED) {
                   tx->tmabort(tx);
+              }
               continue;
           }
 
@@ -226,8 +231,9 @@ namespace
 
       // increment the global timestamp, and maybe validate
       tx->end_time = 1 + faiptr(&timestamp.val);
-      if (tx->end_time > (tx->start_time + 1))
+      if (tx->end_time > (tx->start_time + 1)) {
           validate_commit(tx);
+      }
 
       // run the redo log
       tx->writes.writeback();
@@ -283,8 +289,9 @@ namespace
   void Swiss::validate_inflight(TxThread* tx)
   {
       foreach (OrecList, i, tx->r_orecs) {
-          if ((*i)->p > tx->start_time)
+          if ((*i)->p > tx->start_time) {
               tx->tmabort(tx);
+          }
       }
   }
 
@@ -309,26 +316,30 @@ namespace
   // cotention managers
   void Swiss::cm_start(TxThread* tx)
   {
-      if (!tx->consec_aborts)
+      if (!tx->consec_aborts) {
           tx->cm_ts = UINT_MAX;
+      }
   }
 
   void Swiss::cm_on_write(TxThread* tx)
   {
-      if ((tx->cm_ts == UINT_MAX) && (tx->writes.size() == SWISS_PHASE2))
+      if ((tx->cm_ts == UINT_MAX) && (tx->writes.size() == SWISS_PHASE2)) {
           tx->cm_ts = 1 + faiptr(&greedy_ts.val);
+      }
   }
 
   bool Swiss::cm_should_abort(TxThread* tx, uintptr_t owner_id)
   {
       // if caller has MAX priority, it should self-abort
-      if (tx->cm_ts == UINT_MAX)
+      if (tx->cm_ts == UINT_MAX) {
           return true;
+      }
 
       // self-abort if owner's priority lower than mine
       TxThread* owner = threads[owner_id - 1];
-      if (owner->cm_ts < tx->cm_ts)
+      if (owner->cm_ts < tx->cm_ts) {
           return true;
+      }
 
       // request owner to remote abort
       owner->alive = ABORTED;

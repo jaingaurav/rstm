@@ -25,8 +25,9 @@ _ITM_transaction::registerOnCommit(_ITM_userCommitFunction f,
                                   _ITM_transactionId_t tid, void* arg)
 {
     Node* scope = inner();
-    while (scope->getId() > tid)
+    while (scope->getId() > tid) {
         scope = inner();
+    }
 
     assert(scope->getId() == tid && "asked for a scope that doesn't exist");
     scope->registerOnCommit(f, arg);

@@ -68,13 +68,15 @@ namespace {
   ByteLazy::commit_ro(TxThread* tx)
   {
       // were there remote aborts?
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       CFENCE;
 
       // release read locks
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // clean up
       tx->r_bytelocks.reset();
@@ -102,8 +104,9 @@ namespace {
 
           // abort if cannot acquire and haven't locked yet
           if (bl->owner == 0) {
-              if (!bcas32(&bl->owner, (uintptr_t)0, tx->my_lock.all))
+              if (!bcas32(&bl->owner, (uintptr_t)0, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // log lock
               tx->w_bytelocks.insert(bl);
@@ -112,10 +115,10 @@ namespace {
               // (read 4 bytelocks at a time)
               volatile uint32_t* p1 = (volatile uint32_t*)&accumulator[0];
               volatile uint32_t* p2 = (volatile uint32_t*)&bl->reader[0];
-              for (int j = 0; j < 15; ++j)
+              for (int j = 0; j < 15; ++j) {
                   p1[j] |= p2[j];
-          }
-          else if (bl->owner != tx->my_lock.all) {
+              }
+          } else if (bl->owner != tx->my_lock.all) {
               tx->tmabort(tx);
           }
       }
@@ -124,14 +127,17 @@ namespace {
       accumulator[tx->id-1] = 0;
 
       // kill the readers
-      for (unsigned char c = 0; c < 60; ++c)
-          if (accumulator[c] == 1)
+      for (unsigned char c = 0; c < 60; ++c) {
+          if (accumulator[c] == 1) {
               cas32(&threads[c]->alive, 1u, 0u);
+          }
+      }
 
       // were there remote aborts?
       CFENCE;
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       CFENCE;
 
       // we committed... replay redo log
@@ -139,10 +145,12 @@ namespace {
       CFENCE;
 
       // release read locks, write locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // remember that this was a commit
       tx->r_bytelocks.reset();
@@ -168,15 +176,17 @@ namespace {
       }
 
       // if there's a writer, it can't be me since I'm in-flight
-      if (bl->owner != 0)
+      if (bl->owner != 0) {
           tx->tmabort(tx);
+      }
 
       // order the read before checking for remote aborts
       void* val = *addr;
       CFENCE;
 
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
 
       return val;
   }
@@ -209,16 +219,18 @@ namespace {
       }
 
       // if there's a writer, it can't be me since I'm in-flight
-      if (bl->owner != 0)
+      if (bl->owner != 0) {
           tx->tmabort(tx);
+      }
 
       // order the read before checking for remote aborts
       void* val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       CFENCE;
 
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
 
       return val;
   }
@@ -243,8 +255,9 @@ namespace {
           tx->r_bytelocks.insert(bl);
       }
 
-      if (bl->owner)
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
 
       OnFirstWrite(tx, read_rw, write_rw, commit_rw);
   }
@@ -266,8 +279,9 @@ namespace {
           tx->r_bytelocks.insert(bl);
       }
 
-      if (bl->owner)
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
   }
 
   /**
@@ -284,10 +298,12 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // clear all lists
       tx->r_bytelocks.reset();

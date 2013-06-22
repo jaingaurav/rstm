@@ -48,13 +48,15 @@ namespace
       int count = 0;
       // read from file... skip first line, as it should be a header
       std::ifstream myf(qstr);
-      if (!myf.eof())
+      if (!myf.eof()) {
           myf.getline(tmp, 1024);
+      }
       while (!myf.eof()) {
           // get the benchmark and ignore it.  If it is NULL, exit the loop
           myf.getline(bm, 1024, ',');
-          if (!bm[0])
+          if (!bm[0]) {
               break;
+          }
           count++;
           // alg name
           myf.getline(alg, 1024, ',');
@@ -87,8 +89,9 @@ namespace
           myf.getline(tmp, 1024);
           q.pct_ro = strtol(tmp,0,10);
           // if the qtable for this thread count doesn't exist, make a new one
-          if (qtbl[q.thr] == NULL)
+          if (qtbl[q.thr] == NULL) {
               qtbl[q.thr] = new MiniVector<qtable_t>(64);
+          }
           // put it in the qtable
           qtbl[q.thr]->insert(q);
       }
@@ -113,9 +116,11 @@ namespace stm
   /*** Use the policies array to map a string name to a policy ID */
   int pol_name_map(const char* phasename)
   {
-      for (int i = 0; i < POL_MAX; ++i)
-          if (0 == strcmp(phasename, pols[i].name))
+      for (int i = 0; i < POL_MAX; ++i) {
+          if (0 == strcmp(phasename, pols[i].name)) {
               return i;
+          }
+      }
       return -1;
   }
 
@@ -153,8 +158,9 @@ namespace stm
 
       // load in the qtable here
       char* qstr = getenv("STM_QTABLE");
-      if (qstr != NULL)
+      if (qstr != NULL) {
           load_qtable(qstr);
+      }
   }
 
 } // namespace stm

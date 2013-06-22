@@ -83,12 +83,14 @@ namespace {
       tx->allocator.onTxBegin();
 
       // only get a new start time if we didn't just abort
-      if (tx->order == -1)
+      if (tx->order == -1) {
           tx->order = 1 + faiptr(&timestamp.val);
+      }
 
       tx->ts_cache = last_complete.val;
-      if (tx->ts_cache == ((uintptr_t)tx->order - 1))
+      if (tx->ts_cache == ((uintptr_t)tx->order - 1)) {
           GoTurbo(tx, read_turbo, write_turbo, commit_turbo);
+      }
       return false;
   }
 
@@ -107,15 +109,17 @@ namespace {
       while (last_complete.val != ((uintptr_t)tx->order - 1)) {
           // in this wait loop, we need to check if an adaptivity action is
           // underway :(
-          if (TxThread::tmbegin != begin)
+          if (TxThread::tmbegin != begin) {
               tx->tmabort(tx);
+          }
       }
       foreach (OrecList, i, tx->r_orecs) {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // mark self as complete
       last_complete.val = tx->order;
@@ -141,15 +145,17 @@ namespace {
   {
       // wait our turn, validate, writeback
       while (last_complete.val != ((uintptr_t)tx->order - 1)) {
-          if (TxThread::tmbegin != begin)
+          if (TxThread::tmbegin != begin) {
               tx->tmabort(tx);
+          }
       }
       foreach (OrecList, i, tx->r_orecs) {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // mark every location in the write set, and perform write-back
       // NB: we cannot abort anymore
@@ -214,13 +220,15 @@ namespace {
       orec_t* o = get_orec(addr);
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
-      if (ivt > tx->ts_cache)
+      if (ivt > tx->ts_cache) {
           tx->tmabort(tx);
+      }
       // log orec
       tx->r_orecs.insert(o);
       // validate if necessary
-      if (last_complete.val > tx->ts_cache)
+      if (last_complete.val > tx->ts_cache) {
           validate(tx, last_complete.val);
+      }
       return tmp;
   }
 
@@ -242,13 +250,15 @@ namespace {
       orec_t* o = get_orec(addr);
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
-      if (ivt > tx->ts_cache)
+      if (ivt > tx->ts_cache) {
           tx->tmabort(tx);
+      }
       // log orec
       tx->r_orecs.insert(o);
       // validate if necessary
-      if (last_complete.val > tx->ts_cache)
+      if (last_complete.val > tx->ts_cache) {
           validate(tx, last_complete.val);
+      }
 
       REDO_RAW_CLEANUP(tmp, found, log, mask)
       return tmp;
@@ -312,8 +322,9 @@ namespace {
   {
       PreRollback(tx);
       // we cannot be in fast mode
-      if (CheckTurboMode(tx, read_turbo))
+      if (CheckTurboMode(tx, read_turbo)) {
           UNRECOVERABLE("Attempting to abort a turbo-mode transaction!");
+      }
 
       // Perform writes to the exception object if there were any... taking the
       // branch overhead without concern because we're not worried about
@@ -351,8 +362,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // now update the finish_cache to remember that at this time, we were
       // still valid
@@ -391,8 +403,9 @@ namespace {
   {
       timestamp.val = MAXIMUM(timestamp.val, timestamp_max.val);
       last_complete.val = timestamp.val;
-      for (uint32_t i = 0; i < threadcount.val; ++i)
+      for (uint32_t i = 0; i < threadcount.val; ++i) {
           threads[i]->order = -1;
+      }
   }
 }
 

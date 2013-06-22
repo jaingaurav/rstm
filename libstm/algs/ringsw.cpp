@@ -97,21 +97,26 @@ namespace {
           // get the latest ring entry, return if we've seen it already
           if (commit_time != tx->start_time) {
               // wait for the latest entry to be initialized
-              while (last_init.val < commit_time)
+              while (last_init.val < commit_time) {
                   spin64();
+              }
 
               // intersect against all new entries
-              for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--)
-                  if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf))
+              for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--) {
+                  if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
                       tx->tmabort(tx);
+                  }
+              }
 
               // wait for newest entry to be wb-complete before continuing
-              while (last_complete.val < commit_time)
+              while (last_complete.val < commit_time) {
                   spin64();
+              }
 
               // detect ring rollover: start.ts must not have changed
-              if (timestamp.val > (tx->start_time + RING_ELEMENTS))
+              if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
                   tx->tmabort(tx);
+              }
 
               // ensure this tx doesn't look at this entry again
               tx->start_time = commit_time;
@@ -147,8 +152,9 @@ namespace {
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already
       uintptr_t my_index = last_init.val;
-      if (__builtin_expect(my_index != tx->start_time, false))
+      if (__builtin_expect(my_index != tx->start_time, false)) {
           check_inflight(tx, my_index);
+      }
       return val;
   }
 
@@ -231,17 +237,21 @@ namespace {
   RingSW::check_inflight(TxThread* tx, uintptr_t my_index)
   {
       // intersect against all new entries
-      for (uintptr_t i = my_index; i >= tx->start_time + 1; i--)
-          if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf))
+      for (uintptr_t i = my_index; i >= tx->start_time + 1; i--) {
+          if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
               tx->tmabort(tx);
+          }
+      }
 
       // wait for newest entry to be writeback-complete before returning
-      while (last_complete.val < my_index)
+      while (last_complete.val < my_index) {
           spin64();
+      }
 
       // detect ring rollover: start.ts must not have changed
-      if (timestamp.val > (tx->start_time + RING_ELEMENTS))
+      if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
           tx->tmabort(tx);
+      }
 
       // ensure this tx doesn't look at this entry again
       tx->start_time = my_index;

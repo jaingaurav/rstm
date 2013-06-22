@@ -63,10 +63,11 @@ namespace {
       tatas_release(&timestamp.val);
       int x = tx->undo_log.size();
       tx->undo_log.reset();
-      if (x)
+      if (x) {
           OnCGLCommit(tx);
-      else
+      } else {
           OnReadOnlyCGLCommit(tx);
+      }
   }
 
   /**

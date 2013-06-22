@@ -61,8 +61,9 @@ namespace stm {
        */
       bool isValidFiltered(void** stack_low, void** stack_high) const {
           // can't be invalid on a transaction-local stack location.
-          if (addr >= stack_low && addr < stack_high)
+          if (addr >= stack_low && addr < stack_high) {
               return true;
+          }
           return isValid();
       }
 
@@ -121,8 +122,9 @@ namespace stm {
        */
       bool isValidFiltered(void** stack_low, void** stack_high) const {
           // can't be invalid on a transaction-local stack location.
-          if (addr >= stack_low && addr < stack_high)
+          if (addr >= stack_low && addr < stack_high) {
               return true;
+          }
           return isValid();
       }
 

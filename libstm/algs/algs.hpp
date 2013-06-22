@@ -395,11 +395,13 @@ namespace stm
       uint32_t bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);
       uintptr_t oldval = bits[bucket];
-      if (oldval & mask)
+      if (oldval & mask) {
           return;
+      }
       while (true) {
-          if (bcasptr(&bits[bucket], oldval, (oldval | mask)))
+          if (bcasptr(&bits[bucket], oldval, (oldval | mask))) {
               return;
+          }
           oldval = bits[bucket];
       }
   }
@@ -420,15 +422,17 @@ namespace stm
       uintptr_t mask = 1lu<<(slot % BITS);
       uintptr_t unmask = ~mask;
       uintptr_t oldval = bits[bucket];
-      if (!(oldval & mask))
+      if (!(oldval & mask)) {
           return;
+      }
       // NB:  this GCC-specific code
 #if defined(STM_CPU_X86) && defined(STM_CC_GCC)
       __sync_fetch_and_and(&bits[bucket], unmask);
 #else
       while (true) {
-          if (bcasptr(&bits[bucket], oldval, (oldval & unmask)))
+          if (bcasptr(&bits[bucket], oldval, (oldval & unmask))) {
               return;
+          }
           oldval = bits[bucket];
       }
 #endif
@@ -440,8 +444,9 @@ namespace stm
       uint32_t bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);
       uintptr_t oldval = bits[bucket];
-      if (oldval & mask)
+      if (oldval & mask) {
           return false;
+      }
       // NB: We don't have suncc fetch_and_or, so there is an ifdef here that
       //     falls back to a costly CAS-based atomic or
 #if defined(STM_CPU_X86) && defined(STM_CC_GCC) /* little endian */
@@ -449,8 +454,9 @@ namespace stm
       return true;
 #else
       while (true) {
-          if (bcasptr(&bits[bucket], oldval, oldval | mask))
+          if (bcasptr(&bits[bucket], oldval, oldval | mask)) {
               return true;
+          }
           oldval = bits[bucket];
       }
 #endif
@@ -461,8 +467,9 @@ namespace stm
   {
       // NB: We could probably use SSE here, but since we've only got ~256
       //    bits, the savings would be minimal
-      for (unsigned i = 0; i < BUCKETS; ++i)
+      for (unsigned i = 0; i < BUCKETS; ++i) {
           bits[i] |= rhs.bits[i];
+      }
   }
 
   /*** on commit, update the appropriate bucket */
@@ -470,12 +477,12 @@ namespace stm
   {
       if (aborts < 17) {
           buckets[aborts]++;
-      }
-      // overflow bucket: must also update the max value
-      else {
+      } else {
+          // overflow bucket: must also update the max value
           buckets[17]++;
-          if (aborts > max)
+          if (aborts > max) {
               max = aborts;
+          }
       }
   }
 
@@ -483,8 +490,9 @@ namespace stm
   inline void toxic_histogram_t::dump()
   {
       printf("abort_histogram: ");
-      for (int i = 0; i < 18; ++i)
+      for (int i = 0; i < 18; ++i) {
           printf("%d, ", buckets[i]);
+      }
       printf("max = %d, hgc = %d, hga = %d\n", max, hg_commits, hg_aborts);
   }
 

@@ -93,8 +93,9 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     /// performance.
     void commit() {
         for (CommitList::iterator i = do_on_commit_.begin(),
-                                  e = do_on_commit_.end(); i != e; ++i)
+                                  e = do_on_commit_.end(); i != e; ++i) {
             i->eval();
+        }
         do_on_rollback_.reset();
         undo_on_rollback_.reset();
         // don't reset thrown, it's reset by Scope::enter.
@@ -229,8 +230,9 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     struct SHIM_LOG_HELPER {
         static void log(Scope* const scope, const T* addr) {
             void** address = reinterpret_cast<void**>(const_cast<T*>(addr));
-            for (size_t i = 0; i < W; ++i)
+            for (size_t i = 0; i < W; ++i) {
                 scope->log(address + i, *(address + i), sizeof(void*));
+            }
         }
     };
 

@@ -63,8 +63,9 @@ namespace {
   NOrecPrio::begin(TxThread* tx)
   {
       // Sample the sequence lock until it is even (unheld)
-      while ((tx->start_time = timestamp.val) & 1)
+      while ((tx->start_time = timestamp.val) & 1) {
           spin64();
+      }
 
       // notify the allocator
       tx->allocator.onTxBegin();
@@ -114,16 +115,20 @@ namespace {
       //     using the STM otherwise.
       while (true) {
           bool good = true;
-          for (uintptr_t i = 0; i < threadcount.val; ++i)
+          for (uintptr_t i = 0; i < threadcount.val; ++i) {
               good = good && (threads[i]->prio <= tx->prio);
-          if (good)
+          }
+          if (good) {
               break;
+          }
       }
 
       // get the lock and validate (use RingSTM obstruction-free technique)
-      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               tx->tmabort(tx);
+          }
+      }
 
       // redo writes
       tx->writes.writeback();
@@ -154,8 +159,9 @@ namespace {
       CFENCE;
 
       while (tx->start_time != timestamp.val) {
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               tx->tmabort(tx);
+          }
           tmp = *addr;
           CFENCE;
       }
@@ -263,24 +269,28 @@ namespace {
       while (true) {
           // read the lock until it is even
           uintptr_t s = timestamp.val;
-          if ((s & 1) == 1)
+          if ((s & 1) == 1) {
               continue;
+          }
 
           // check the read set
           CFENCE;
           // don't branch in the loop---consider it backoff if we fail
           // validation early
           bool valid = true;
-          foreach (ValueList, i, tx->vlist)
+          foreach (ValueList, i, tx->vlist) {
               valid &= STM_LOG_VALUE_IS_VALID(i, tx);
+          }
 
-          if (!valid)
+          if (!valid) {
               return VALIDATION_FAILED;
+          }
 
           // restart if timestamp changed during read set iteration
           CFENCE;
-          if (timestamp.val == s)
+          if (timestamp.val == s) {
               return s;
+          }
       }
   }
 
@@ -292,8 +302,9 @@ namespace {
   void
   NOrecPrio::onSwitchTo()
   {
-      if (timestamp.val & 1)
+      if (timestamp.val & 1) {
           ++timestamp.val;
+      }
   }
 }
 

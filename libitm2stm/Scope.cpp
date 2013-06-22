@@ -104,13 +104,15 @@ std::pair<void**, size_t>&
 Scope::rollback() {
     // 1) Undo all of the logged words.
     for (UndoList::iterator i = undo_on_rollback_.end() - 1,
-                            e = undo_on_rollback_.begin(); i >= e; --i)
+                            e = undo_on_rollback_.begin(); i >= e; --i) {
         i->undo(thrown_);
+    }
 
     // 2) Perform the user's registered onAbort callbacks, in FIFO order
     for (RollbackList::iterator i = do_on_rollback_.begin(),
-                                e = do_on_rollback_.end(); i != e; ++i)
+                                e = do_on_rollback_.end(); i != e; ++i) {
         i->eval();
+    }
 
     // 3) Clear the commit callbacks.
     do_on_commit_.reset();

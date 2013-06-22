@@ -23,8 +23,9 @@ inline void tx_fence()
         if ((v_old % 2) == 1) {
             uint32_t v_new = v_old;
             // wait until counter changes
-            while (v_new == v_old)
+            while (v_new == v_old) {
                 v_new = stm::trans_nums[i].val;
+            }
         }
     }
 }
@@ -32,8 +33,9 @@ inline void tx_fence()
 int munmap(void * addr, size_t len)
 {
     // look for the original lib function
-    if (_munmap == NULL)
+    if (_munmap == NULL) {
         _munmap = (int (*)(void *, size_t))dlsym(RTLD_NEXT, "munmap");
+    }
 
     // wait for quietscence
     tx_fence();

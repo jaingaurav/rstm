@@ -106,8 +106,9 @@ namespace
           tx->prio = 0;
 
           // clear metadata, reset list
-          foreach (RRecList, i, tx->myRRecs)
+          foreach (RRecList, i, tx->myRRecs) {
               (*i)->unsetbit(tx->id-1);
+          }
           tx->myRRecs.reset();
       }
       tx->r_orecs.reset();
@@ -145,11 +146,11 @@ namespace
               // save old version to o->p, log lock
               o->p = ivt.all;
               tx->locks.insert(o);
-          }
-          // else if we don't hold the lock abort
-          else if (ivt.all != tx->my_lock.all) {
-              if (!ivt.fields.lock)
+          } else if (ivt.all != tx->my_lock.all) {
+              // else if we don't hold the lock abort
+              if (!ivt.fields.lock) {
                   tx->tmabort(tx);
+              }
               // priority test... if I have priority, and the last unlocked
               // version of the orec was the one I read, and the current
               // owner has less priority than me, wait
@@ -180,8 +181,9 @@ namespace
               unsigned bucket = slot / rrec_t::BITS;
               unsigned mask = 1lu<<(slot % rrec_t::BITS);
               if (accumulator.bits[bucket] & mask) {
-                  if (threads[slot]->prio > tx->prio)
+                  if (threads[slot]->prio > tx->prio) {
                       tx->tmabort(tx);
+                  }
               }
           }
       }
@@ -190,8 +192,9 @@ namespace
       unsigned end_time = 1 + faiptr(&timestamp.val);
 
       // skip validation if nobody else committed
-      if (end_time != (tx->start_time + 1))
+      if (end_time != (tx->start_time + 1)) {
           validate_committime(tx);
+      }
 
       // run the redo log
       tx->writes.writeback();
@@ -208,14 +211,16 @@ namespace
           tx->prio = 0;
 
           // clear metadata, reset list
-          foreach (RRecList, j, tx->myRRecs)
+          foreach (RRecList, j, tx->myRRecs) {
               (*j)->unsetbit(tx->id-1);
+          }
           tx->myRRecs.reset();
       }
 
       // release locks
-      foreach (OrecList, j, tx->locks)
+      foreach (OrecList, j, tx->locks) {
           (*j)->v.all = end_time;
+      }
 
       // remember that this was a commit
       tx->r_orecs.reset();
@@ -450,16 +455,18 @@ namespace
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
 
       // If I had priority, release it
       if (tx->prio > 0) {
           // give up my priority, unset all my read bits
           faaptr(&prioTxCount.val, -1);
           tx->prio = 0;
-          foreach (RRecList, i, tx->myRRecs)
+          foreach (RRecList, i, tx->myRRecs) {
               (*i)->unsetbit(tx->id-1);
+          }
           tx->myRRecs.reset();
       }
 
@@ -501,8 +508,9 @@ namespace
           ivt.all = (*i)->v.all;
           // only a problem if locked or newer than start time
           if (ivt.all > tx->start_time) {
-              if (!ivt.fields.lock)
+              if (!ivt.fields.lock) {
                   tx->tmabort(tx);
+              }
               // priority test... if I have priority, and the last unlocked
               // orec was the one I read, and the current owner has less
               // priority than me, wait
@@ -543,8 +551,7 @@ namespace
                   // unlocked orec was the one I read, and the current
                   // owner has less priority than me, wait
                   if (((*i)->p <= tx->start_time) &&
-                      (threads[ivt.fields.id-1]->prio < tx->prio))
-                  {
+                      (threads[ivt.fields.id-1]->prio < tx->prio)) {
                       spin64();
                       continue;
                   }
@@ -552,15 +559,15 @@ namespace
               }
               ++i;
           }
-      }
-      else {
+      } else {
           foreach (OrecList, i, tx->r_orecs) {
               // read this orec
               id_version_t ivt;
               ivt.all = (*i)->v.all;
               // if unlocked and newer than start time, abort
-              if ((ivt.all > tx->start_time) && (ivt.all != tx->my_lock.all))
+              if ((ivt.all > tx->start_time) && (ivt.all != tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
           }
       }
   }

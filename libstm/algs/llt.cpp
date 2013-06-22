@@ -96,14 +96,14 @@ namespace {
           // lock all orecs, unless already locked
           if (ivt <= tx->start_time) {
               // abort if cannot acquire
-              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
               // save old version to o->p, remember that we hold the lock
               o->p = ivt;
               tx->locks.insert(o);
-          }
           // else if we don't hold the lock abort
-          else if (ivt != tx->my_lock.all) {
+          } else if (ivt != tx->my_lock.all) {
               tx->tmabort(tx);
           }
       }
@@ -112,16 +112,18 @@ namespace {
       uintptr_t end_time = 1 + faiptr(&timestamp.val);
 
       // skip validation if nobody else committed
-      if (end_time != (tx->start_time + 1))
+      if (end_time != (tx->start_time + 1)) {
           validate(tx);
+      }
 
       // run the redo log
       tx->writes.writeback();
 
       // release locks
       CFENCE;
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = end_time;
+      }
 
       // clean-up
       tx->r_orecs.reset();
@@ -227,8 +229,9 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
 
       // undo memory operations, reset lists
       tx->r_orecs.reset();
@@ -256,8 +259,9 @@ namespace {
       foreach (OrecList, i, tx->r_orecs) {
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
   }
 

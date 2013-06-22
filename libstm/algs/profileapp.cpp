@@ -120,8 +120,7 @@ namespace {
           // update max values: only ro_reads and runtime change in RO transactions
           UPDATE_MAX(profiles[0].read_ro, app_profiles->read_ro);
           UPDATE_MAX(runtime,           app_profiles->txn_time);
-      }
-      else {
+      } else {
           // update totals: again, only ro_reads and runtime
           app_profiles->read_ro += profiles[0].read_ro;
           app_profiles->txn_time += runtime;
@@ -161,8 +160,7 @@ namespace {
           UPDATE_MAX(profiles[0].write_nonwaw,   app_profiles->write_nonwaw);
           UPDATE_MAX(profiles[0].write_waw,      app_profiles->write_waw);
           UPDATE_MAX(runtime,                    app_profiles->txn_time);
-      }
-      else {
+      } else {
           // update totals
           app_profiles->read_ro        += profiles[0].read_ro;
           app_profiles->read_rw_nonraw += profiles[0].read_rw_nonraw;
@@ -277,8 +275,9 @@ namespace {
   void
   ProfileApp<COUNTMODE>::onSwitchTo()
   {
-      if (app_profiles != NULL)
+      if (app_profiles != NULL) {
           return;
+      }
 
       // allocate and configure the counters
       app_profiles = new dynprof_t();
@@ -296,8 +295,8 @@ namespace {
     MACRO(ProfileAppAll, __AVERAGE)
 
 #define INIT_PROFILEAPP(ID, MODE)                \
-    template <>                                 \
-    void initTM<ID>() {                         \
+    template <>                                  \
+    void initTM<ID>() {                          \
         ProfileApp<MODE>::Initialize(ID, #ID);   \
     }
 

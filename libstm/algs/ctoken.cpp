@@ -90,8 +90,9 @@ namespace {
       // wait until it is our turn to commit, then validate, acquire, and do
       // writeback
       while (last_complete.val != (uintptr_t)(tx->order - 1)) {
-          if (TxThread::tmbegin != begin)
+          if (TxThread::tmbegin != begin) {
               tx->tmabort(tx);
+          }
       }
 
       // since we have the token, we can validate before getting locks
@@ -143,15 +144,17 @@ namespace {
       //
       // NB: this is a pretty serious tradeoff... it admits false aborts for
       //     the sake of preventing a 'check if locked' test
-      if (ivt > tx->ts_cache)
+      if (ivt > tx->ts_cache) {
           tx->tmabort(tx);
+      }
 
       // log orec
       tx->r_orecs.insert(o);
 
       // validate
-      if (last_complete.val > tx->ts_cache)
+      if (last_complete.val > tx->ts_cache) {
           validate(tx, last_complete.val);
+      }
       return tmp;
   }
 
@@ -240,8 +243,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // now update the finish_cache to remember that at this time, we were
       // still valid
@@ -264,8 +268,9 @@ namespace {
   {
       timestamp.val = MAXIMUM(timestamp.val, timestamp_max.val);
       last_complete.val = timestamp.val;
-      for (uint32_t i = 0; i < threadcount.val; ++i)
+      for (uint32_t i = 0; i < threadcount.val; ++i) {
           threads[i]->order = -1;
+      }
   }
 }
 

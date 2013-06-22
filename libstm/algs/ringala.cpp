@@ -95,23 +95,28 @@ namespace {
               // NB: in RingSW, we wait for this entry to be complete...
               //     here we skip it, which will require us to repeat the
               //     loop... This decision should be revisited at some point
-              if (last_init.val < commit_time)
+              if (last_init.val < commit_time) {
                   commit_time--;
+              }
               // NB: we don't need to union these entries into CF and then
               // intersect CF with RF.  Instead, we can just intersect with
               // RF directly.  This is safe, because RF is guaranteed not to
               // change from here on out.
-              for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--)
-                  if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf))
+              for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--) {
+                  if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
                       tx->tmabort(tx);
+                  }
+              }
 
               // wait for newest entry to be wb-complete before continuing
-              while (last_complete.val < commit_time)
+              while (last_complete.val < commit_time) {
                   spin64();
+              }
 
               // detect ring rollover: start.ts must not have changed
-              if (timestamp.val > (tx->start_time + RING_ELEMENTS))
+              if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
                   tx->tmabort(tx);
+              }
 
               // ensure this tx doesn't look at this entry again
               tx->start_time = commit_time;
@@ -146,16 +151,18 @@ namespace {
   RingALA::read_ro(STM_READ_SIG(tx,addr,))
   {
       // abort if this read would violate ALA
-      if (tx->cf->lookup(addr))
+      if (tx->cf->lookup(addr)) {
           tx->tmabort(tx);
+      }
 
       // read the value from memory, log the address, and validate
       void* val = *addr;
       CFENCE;
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already
-      if (__builtin_expect(last_init.val != tx->start_time, false))
+      if (__builtin_expect(last_init.val != tx->start_time, false)) {
           update_cf(tx);
+      }
       return val;
   }
 
@@ -171,16 +178,18 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // abort if this read would violate ALA
-      if (tx->cf->lookup(addr))
+      if (tx->cf->lookup(addr)) {
           tx->tmabort(tx);
+      }
 
       // read the value from memory, log the address, and validate
       void* val = *addr;
       CFENCE;
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already
-      if (__builtin_expect(last_init.val != tx->start_time, false))
+      if (__builtin_expect(last_init.val != tx->start_time, false)) {
           update_cf(tx);
+      }
 
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
@@ -251,21 +260,25 @@ namespace {
       uintptr_t my_index = last_init.val;
 
       // add all new entries to cf
-      for (uintptr_t i = my_index; i >= tx->start_time + 1; i--)
+      for (uintptr_t i = my_index; i >= tx->start_time + 1; i--) {
           tx->cf->unionwith(ring_wf[i % RING_ELEMENTS]);
+      }
 
       CFENCE;
       // detect ring rollover: start.ts must not have changed
-      if (timestamp.val > (tx->start_time + RING_ELEMENTS))
+      if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
           tx->tmabort(tx);
+      }
 
       // now intersect my rf with my cf
-      if (tx->rf->intersect(tx->cf))
+      if (tx->rf->intersect(tx->cf)) {
           tx->tmabort(tx);
+      }
 
       // wait for newest entry to be writeback-complete before returning
-      while (last_complete.val < my_index)
+      while (last_complete.val < my_index) {
           spin64();
+      }
 
       // ensure this tx doesn't look at this entry again
       tx->start_time = my_index;

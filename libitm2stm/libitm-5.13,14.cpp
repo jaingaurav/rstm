@@ -57,8 +57,9 @@ memcpy(void* to, const void* from, size_t len, R reader, W writer) {
         add_bytes(to, wrote); // and the to cursor
 
         // copy the unwritten bytes into the beginning of the buffer
-        for (size_t i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i) {
             buffer[i] = buffer[wrote + i];
+        }
     }
 
     // force the writer to write out the rest of the buffer (it could have
@@ -88,22 +89,22 @@ memmove(void* to, const void* from, size_t len, R reader, W writer)
     //
     // if the target is less than the source address, then we always read the
     // source bytes before we overwrite them and we can use our basic memcpy
-    if (target < source)
+    if (target < source) {
         memcpy(to, from, len, reader, writer);
-
-    // source, source + len, target, target + len
-    //
-    // if the target doesn't overlap the source then we won't ever write on top
-    // of the source and we're ok
-    else if (source + len <= target)
+    } else if (source + len <= target) {
+        // source, source + len, target, target + len
+        //
+        // if the target doesn't overlap the source then we won't ever write on top
+        // of the source and we're ok
         memcpy(to, from, len, reader, writer);
+    } else {
 
-    // source, target, source + len, target + len
-    //
-    // here we have to writer from source + len to target + len backwards, but
-    // our memcpy can't yet handle that.
-    else
+        // source, target, source + len, target + len
+        //
+        // here we have to writer from source + len to target + len backwards, but
+        // our memcpy can't yet handle that.
         assert(false && "memmove not yet implemented for overlapping regions.");
+    }
 }
 
 

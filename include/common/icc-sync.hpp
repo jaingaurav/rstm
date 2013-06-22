@@ -162,8 +162,9 @@ namespace stm
             // wrote a new value---ABA is irrelevant. Can't use val cas
             // because I need to know if my memory write happened.
             T mem = *address;
-            while (!bcas(address, mem, value))
+            while (!bcas(address, mem, value)) {
                 mem = *address;
+            }
             return mem;
         }
 
@@ -402,8 +403,9 @@ namespace stm
     {
         T mem = *address;
         // NB: mem + value must be a T
-        while (!SYNC<T>::bcas(address, mem, mem + value))
+        while (!SYNC<T>::bcas(address, mem, mem + value)) {
             mem = *address;
+        }
         return mem;
     }
   } // namespace stm::iccsync

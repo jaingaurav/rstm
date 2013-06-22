@@ -17,9 +17,11 @@ namespace
   inline bool
   is_strictly_older(uint32_t* newer, uint32_t* older, uint32_t old_len)
   {
-      for (uint32_t i = 0; i < old_len; ++i)
-          if ((newer[i] <= older[i]) && (newer[i] & 1))
+      for (uint32_t i = 0; i < old_len; ++i) {
+          if ((newer[i] <= older[i]) && (newer[i] & 1)) {
               return false;
+          }
+      }
       return true;
   }
 }
@@ -32,8 +34,9 @@ void WBMMPolicy::handle_full_prelimbo()
 {
     // get the current timestamp from the epoch
     prelimbo->length = threadcount.val;
-    for (uint32_t i = 0, e = prelimbo->length; i < e; ++i)
+    for (uint32_t i = 0, e = prelimbo->length; i < e; ++i) {
         prelimbo->ts[i] = trans_nums[i].val;
+    }
 
     // push prelimbo onto the front of the limbo list:
     prelimbo->older = limbo;
@@ -47,8 +50,9 @@ void WBMMPolicy::handle_full_prelimbo()
     limbo_t* current = limbo->older;
     limbo_t* prev = limbo;
     while (current != NULL) {
-        if (is_strictly_older(limbo->ts, current->ts, current->length))
+        if (is_strictly_older(limbo->ts, current->ts, current->length)) {
             break;
+        }
         prev = current;
         current = current->older;
     }
@@ -61,8 +65,9 @@ void WBMMPolicy::handle_full_prelimbo()
         // free all blocks in each node's pool and free the node
         while (current != NULL) {
             // free blocks in current's pool
-            for (unsigned long i = 0; i < current->POOL_SIZE; i++)
+            for (unsigned long i = 0; i < current->POOL_SIZE; i++) {
                 free(current->pool[i]);
+            }
 
             // free the node and move on
             limbo_t* old = current;

@@ -27,8 +27,9 @@ namespace stm
   inline void afterread_TML(TxThread* tx)
   {
       CFENCE;
-      if (__builtin_expect(timestamp.val != tx->start_time, false))
+      if (__builtin_expect(timestamp.val != tx->start_time, false)) {
           tx->tmabort(tx);
+      }
   }
 
   /**
@@ -36,8 +37,9 @@ namespace stm
    */
   inline void beforewrite_TML(TxThread* tx) {
       // acquire the lock, abort on failure
-      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
+      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
           tx->tmabort(tx);
+      }
       ++tx->start_time;
       tx->tmlHasLock = true;
   }

@@ -70,8 +70,9 @@ namespace stm
   TM_INLINE
   inline void begin(TxThread* tx, scope_t* s, uint32_t /*abort_flags*/)
   {
-      if (++tx->nesting_depth > 1)
+      if (++tx->nesting_depth > 1) {
           return;
+      }
 
       // we must ensure that the write of the transaction's scope occurs
       // *before* the read of the begin function pointer.  On modern x86, a
@@ -88,8 +89,9 @@ namespace stm
       // transactional time.  This code suffices, because it gets the time
       // between transactions.  If we need the time for a single transaction,
       // we can run ProfileTM
-      if (tx->end_txn_time)
+      if (tx->end_txn_time) {
           tx->total_nontxn_time += (tick() - tx->end_txn_time);
+      }
 
       // now call the per-algorithm begin function
       TxThread::tmbegin(tx);
@@ -104,8 +106,9 @@ namespace stm
   inline void commit(TxThread* tx)
   {
       // don't commit anything if we're nested... just exit this scope
-      if (--tx->nesting_depth)
+      if (--tx->nesting_depth) {
           return;
+      }
 
       // dispatch to the appropriate end function
       tx->tmcommit(tx);

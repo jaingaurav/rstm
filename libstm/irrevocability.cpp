@@ -133,11 +133,13 @@ namespace stm
       //
       // NB: stm::is_irrevoc relies on how this works, so if it changes then
       //     please update that code as well.
-      if (TxThread::tmirrevoc == stms[CGL].irrevoc)
+      if (TxThread::tmirrevoc == stms[CGL].irrevoc) {
           return;
+      }
 
-      if ((curr_policy.ALG_ID == MCS) || (curr_policy.ALG_ID == Ticket))
+      if ((curr_policy.ALG_ID == MCS) || (curr_policy.ALG_ID == Ticket)) {
           return;
+      }
 
       if (curr_policy.ALG_ID == Serial) {
           serial_irrevoc_override(tx);
@@ -145,8 +147,9 @@ namespace stm
       }
 
       if (curr_policy.ALG_ID == TML) {
-          if (!tx->tmlHasLock)
+          if (!tx->tmlHasLock) {
               beforewrite_TML(tx);
+          }
           return;
       }
 
@@ -162,13 +165,16 @@ namespace stm
       //  follows this CAS.  Since we can't distinguish the three cases,
       //  we'll just abort all the time.  The impact should be minimal.
       if (!bcasptr(&TxThread::tmbegin, stms[curr_policy.ALG_ID].begin,
-                   &begin_blocker))
+                   &begin_blocker)) {
           tx->tmabort(tx);
+      }
 
       // wait for everyone to be out of a transaction (scope == NULL)
-      for (unsigned i = 0; i < threadcount.val; ++i)
-          while ((i != (tx->id-1)) && (threads[i]->scope))
+      for (unsigned i = 0; i < threadcount.val; ++i) {
+          while ((i != (tx->id-1)) && (threads[i]->scope)) {
               spin64();
+          }
+      }
 
       // try to become irrevocable inflight
       tx->irrevocable = TxThread::tmirrevoc(tx);
@@ -198,14 +204,18 @@ namespace stm
    */
   bool is_irrevoc(const TxThread& tx)
   {
-      if (tx.irrevocable || TxThread::tmirrevoc == stms[CGL].irrevoc)
+      if (tx.irrevocable || TxThread::tmirrevoc == stms[CGL].irrevoc) {
           return true;
-      if ((curr_policy.ALG_ID == MCS) || (curr_policy.ALG_ID  == Ticket))
+      }
+      if ((curr_policy.ALG_ID == MCS) || (curr_policy.ALG_ID  == Ticket)) {
           return true;
-      if ((curr_policy.ALG_ID == TML) && (tx.tmlHasLock))
+      }
+      if ((curr_policy.ALG_ID == TML) && (tx.tmlHasLock)) {
           return true;
-      if (curr_policy.ALG_ID == Serial)
+      }
+      if (curr_policy.ALG_ID == Serial) {
           return true;
+      }
       return false;
   }
 
@@ -231,8 +241,9 @@ namespace stm
           scope_t* b = tx->scope;
           tx->scope = 0;
           // next, wait for the begin_blocker to be uninstalled
-          while (TxThread::tmbegin == begin_blocker)
+          while (TxThread::tmbegin == begin_blocker) {
               spin64();
+          }
           CFENCE;
           // now re-install the scope
 #ifdef STM_CPU_SPARC
@@ -245,8 +256,9 @@ namespace stm
           // if begin_blocker is no longer installed, we can call the pointer
           // to start a transaction, and then return.  Otherwise, we missed our
           // window, so we need to go back to the top of the loop.
-          if (beginner != begin_blocker)
+          if (beginner != begin_blocker) {
               return beginner(tx);
+          }
       }
   }
 }

@@ -78,8 +78,9 @@ namespace {
   BitEagerRedo::commit_ro(TxThread* tx)
   {
       // read-only... release read locks
-      foreach (BitLockList, i, tx->r_bitlocks)
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       tx->r_bitlocks.reset();
       OnReadOnlyCommit(tx);
@@ -96,10 +97,12 @@ namespace {
       CFENCE;
 
       // release write locks, then read locks
-      foreach (BitLockList, i, tx->w_bitlocks)
+      foreach (BitLockList, i, tx->w_bitlocks) {
           (*i)->owner = 0;
-      foreach (BitLockList, i, tx->r_bitlocks)
+      }
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       // clean-up
       tx->r_bitlocks.reset();
@@ -120,8 +123,9 @@ namespace {
       bitlock_t* lock = get_bitlock(addr);
 
       // do I have a read lock?
-      if (lock->readers.getbit(tx->id-1))
+      if (lock->readers.getbit(tx->id-1)) {
           return *addr;
+      }
 
       // log this location
       tx->r_bitlocks.insert(lock);
@@ -132,14 +136,16 @@ namespace {
           lock->readers.setbit(tx->id-1);
 
           // if nobody has the write lock, we're done
-          if (__builtin_expect(lock->owner == 0, true))
+          if (__builtin_expect(lock->owner == 0, true)) {
               return *addr;
+          }
 
           // drop read lock, wait (with timeout) for lock release
           lock->readers.unsetbit(tx->id-1);
           while (lock->owner != 0) {
-              if (++tries > READ_TIMEOUT)
+              if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
+              }
           }
       }
   }
@@ -168,8 +174,9 @@ namespace {
       }
 
       // do I have a read lock?
-      if (lock->readers.getbit(tx->id-1))
+      if (lock->readers.getbit(tx->id-1)) {
           return *addr;
+      }
 
       // log this location
       tx->r_bitlocks.insert(lock);
@@ -180,14 +187,16 @@ namespace {
           lock->readers.setbit(tx->id-1);
 
           // if nobody has the write lock, we're done
-          if (__builtin_expect(lock->owner == 0, true))
+          if (__builtin_expect(lock->owner == 0, true)) {
               return *addr;
+          }
 
           // drop read lock, wait (with timeout) for lock release
           lock->readers.unsetbit(tx->id-1);
           while (lock->owner != 0) {
-              if (++tries > READ_TIMEOUT)
+              if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
+              }
           }
       }
   }
@@ -204,9 +213,11 @@ namespace {
       bitlock_t* lock = get_bitlock(addr);
 
       // get the write lock, with timeout
-      while (!bcasptr(&(lock->owner), 0u, tx->id))
-          if (++tries > ACQUIRE_TIMEOUT)
+      while (!bcasptr(&(lock->owner), 0u, tx->id)) {
+          if (++tries > ACQUIRE_TIMEOUT) {
               tx->tmabort(tx);
+          }
+      }
 
       // log the lock, drop any read locks I have
       tx->w_bitlocks.insert(lock);
@@ -216,9 +227,11 @@ namespace {
       // (read one bucket at a time)
       for (unsigned b = 0; b < rrec_t::BUCKETS; ++b) {
           tries = 0;
-          while (lock->readers.bits[b])
-              if (++tries > DRAIN_TIMEOUT)
+          while (lock->readers.bits[b]) {
+              if (++tries > DRAIN_TIMEOUT) {
                   tx->tmabort(tx);
+              }
+          }
       }
 
       // record in redo log
@@ -245,9 +258,11 @@ namespace {
       }
 
       // get the write lock, with timeout
-      while (!bcasptr(&(lock->owner), 0u, tx->id))
-          if (++tries > ACQUIRE_TIMEOUT)
+      while (!bcasptr(&(lock->owner), 0u, tx->id)) {
+          if (++tries > ACQUIRE_TIMEOUT) {
               tx->tmabort(tx);
+          }
+      }
 
       // log the lock, drop any read locks I have
       tx->w_bitlocks.insert(lock);
@@ -257,9 +272,11 @@ namespace {
       // (read one bucket at a time)
       for (unsigned b = 0; b < rrec_t::BUCKETS; ++b) {
           tries = 0;
-          while (lock->readers.bits[b])
-              if (++tries > DRAIN_TIMEOUT)
+          while (lock->readers.bits[b]) {
+              if (++tries > DRAIN_TIMEOUT) {
                   tx->tmabort(tx);
+              }
+          }
       }
 
       // record in redo log
@@ -280,10 +297,12 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release write locks, then read locks
-      foreach (BitLockList, i, tx->w_bitlocks)
+      foreach (BitLockList, i, tx->w_bitlocks) {
           (*i)->owner = 0;
-      foreach (BitLockList, i, tx->r_bitlocks)
+      }
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       // reset lists
       tx->r_bitlocks.reset();

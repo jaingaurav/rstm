@@ -35,17 +35,20 @@
 /***  Issue 64 nops to provide a little busy waiting */
 inline void spin64()
 {
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < 64; i++) {
         nop();
+    }
 }
 
 /***  exponential backoff for TATAS locks */
 inline void backoff(int *b)
 {
-    for (int i = *b; i; i--)
+    for (int i = *b; i; i--) {
         nop();
-    if (*b < MAX_TATAS_BACKOFF)
+    }
+    if (*b < MAX_TATAS_BACKOFF) {
         *b <<= 1;
+    }
 }
 
 /***  TATAS lock: test-and-test-and-set with exponential backoff */
@@ -66,8 +69,9 @@ inline int tatas_acquire_slowpath(tatas_lock_t* lock)
  */
 inline int tatas_acquire(tatas_lock_t* lock)
 {
-    if (!tas(lock))
+    if (!tas(lock)) {
         return 0;
+    }
     return tatas_acquire_slowpath(lock);
 }
 
@@ -97,8 +101,9 @@ inline int ticket_acquire(ticket_lock_t* lock)
 {
     int ret = 0;
     uintptr_t my_ticket = faiptr(&lock->next_ticket);
-    while (lock->now_serving != my_ticket)
+    while (lock->now_serving != my_ticket) {
         ret++;
+    }
     return ret;
 }
 
@@ -141,8 +146,9 @@ inline void mcs_release(mcs_qnode_t** lock, mcs_qnode_t* mine)
     // if my node is the only one, then if I can zero the lock, do so and I'm
     // done
     if (mine->next == 0) {
-        if (bcasptr(lock, mine, static_cast<mcs_qnode_t*>(NULL)))
+        if (bcasptr(lock, mine, static_cast<mcs_qnode_t*>(NULL))) {
             return;
+        }
         // uh-oh, someone arrived while I was zeroing... wait for arriver to
         // initialize, fall out to other case
         while (mine->next == 0) { } // spin

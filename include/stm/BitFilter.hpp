@@ -107,11 +107,13 @@ namespace stm
       void unionwith(const BitFilter<BITS>& rhs)
       {
 #ifdef STM_USE_SSE
-          for (uint32_t i = 0; i < VEC_BLOCKS; ++i)
+          for (uint32_t i = 0; i < VEC_BLOCKS; ++i) {
               vec_filter[i] = _mm_or_si128(vec_filter[i], rhs.vec_filter[i]);
+          }
 #else
-          for (uint32_t i = 0; i < WORD_BLOCKS; ++i)
+          for (uint32_t i = 0; i < WORD_BLOCKS; ++i) {
               word_filter[i] |= rhs.word_filter[i];
+          }
 #endif
       }
 
@@ -122,11 +124,13 @@ namespace stm
 #ifdef STM_USE_SSE
           // This loop gets automatically unrolled for BITS = 1024 by gcc-4.3.3
           const __m128i zero = _mm_setzero_si128();
-          for (uint32_t i = 0; i < VEC_BLOCKS; ++i)
+          for (uint32_t i = 0; i < VEC_BLOCKS; ++i) {
               vec_filter[i] = zero;
+          }
 #else
-          for (uint32_t i = 0; i < WORD_BLOCKS; ++i)
+          for (uint32_t i = 0; i < WORD_BLOCKS; ++i) {
               word_filter[i] = 0;
+          }
 #endif
       }
 
@@ -135,11 +139,13 @@ namespace stm
       void fastcopy(const volatile BitFilter<BITS>* rhs) volatile
       {
 #ifdef STM_USE_SSE
-          for (uint32_t i = 0; i < VEC_BLOCKS; ++i)
+          for (uint32_t i = 0; i < VEC_BLOCKS; ++i) {
               vec_filter[i] = const_cast<BitFilter<BITS>*>(rhs)->vec_filter[i];
+          }
 #else
-          for (uint32_t i = 0; i < WORD_BLOCKS; ++i)
+          for (uint32_t i = 0; i < WORD_BLOCKS; ++i) {
               word_filter[i] = rhs->word_filter[i];
+          }
 #endif
       }
 
@@ -165,9 +171,11 @@ namespace stm
 
           return tmp.i[0]|tmp.i[1];
 #else
-          for (uint32_t i = 0; i < WORD_BLOCKS; ++i)
-              if (word_filter[i] & rhs->word_filter[i])
+          for (uint32_t i = 0; i < WORD_BLOCKS; ++i) {
+              if (word_filter[i] & rhs->word_filter[i]) {
                   return true;
+              }
+          }
           return false;
 #endif
       }

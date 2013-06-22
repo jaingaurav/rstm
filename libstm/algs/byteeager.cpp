@@ -77,8 +77,9 @@ namespace {
   ByteEager::commit_ro(TxThread* tx)
   {
       // read-only... release read locks
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       tx->r_bytelocks.reset();
       OnReadOnlyCommit(tx);
@@ -91,10 +92,12 @@ namespace {
   ByteEager::commit_rw(TxThread* tx)
   {
       // release write locks, then read locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // clean-up
       tx->r_bytelocks.reset();
@@ -113,8 +116,9 @@ namespace {
       bytelock_t* lock = get_bytelock(addr);
 
       // do I have a read lock?
-      if (lock->reader[tx->id-1] == 1)
+      if (lock->reader[tx->id-1] == 1) {
           return *addr;
+      }
 
       // log this location
       tx->r_bytelocks.insert(lock);
@@ -125,14 +129,16 @@ namespace {
           lock->set_read_byte(tx->id-1);
 
           // if nobody has the write lock, we're done
-          if (__builtin_expect(lock->owner == 0, true))
+          if (__builtin_expect(lock->owner == 0, true)) {
               return *addr;
+          }
 
           // drop read lock, wait (with timeout) for lock release
           lock->reader[tx->id-1] = 0;
           while (lock->owner != 0) {
-              if (++tries > READ_TIMEOUT)
+              if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
+              }
           }
       }
   }
@@ -147,12 +153,14 @@ namespace {
       bytelock_t* lock = get_bytelock(addr);
 
       // do I have the write lock?
-      if (lock->owner == tx->id)
+      if (lock->owner == tx->id) {
           return *addr;
+      }
 
       // do I have a read lock?
-      if (lock->reader[tx->id-1] == 1)
+      if (lock->reader[tx->id-1] == 1) {
           return *addr;
+      }
 
       // log this location
       tx->r_bytelocks.insert(lock);
@@ -162,14 +170,17 @@ namespace {
           // mark my reader byte
           lock->set_read_byte(tx->id-1);
           // if nobody has the write lock, we're done
-          if (__builtin_expect(lock->owner == 0, true))
+          if (__builtin_expect(lock->owner == 0, true)) {
               return *addr;
+          }
 
           // drop read lock, wait (with timeout) for lock release
           lock->reader[tx->id-1] = 0;
-          while (lock->owner != 0)
-              if (++tries > READ_TIMEOUT)
+          while (lock->owner != 0) {
+              if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
+              }
+          }
       }
   }
 
@@ -183,9 +194,11 @@ namespace {
       bytelock_t* lock = get_bytelock(addr);
 
       // get the write lock, with timeout
-      while (!bcas32(&(lock->owner), 0u, tx->id))
-          if (++tries > ACQUIRE_TIMEOUT)
+      while (!bcas32(&(lock->owner), 0u, tx->id)) {
+          if (++tries > ACQUIRE_TIMEOUT) {
               tx->tmabort(tx);
+          }
+      }
 
       // log the lock, drop any read locks I have
       tx->w_bytelocks.insert(lock);
@@ -196,9 +209,11 @@ namespace {
       volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
       for (int i = 0; i < 15; ++i) {
           tries = 0;
-          while (lock_alias[i] != 0)
-              if (++tries > DRAIN_TIMEOUT)
+          while (lock_alias[i] != 0) {
+              if (++tries > DRAIN_TIMEOUT) {
                   tx->tmabort(tx);
+              }
+          }
       }
 
       // add to undo log, do in-place write
@@ -225,9 +240,11 @@ namespace {
       }
 
       // get the write lock, with timeout
-      while (!bcas32(&(lock->owner), 0u, tx->id))
-          if (++tries > ACQUIRE_TIMEOUT)
+      while (!bcas32(&(lock->owner), 0u, tx->id)) {
+          if (++tries > ACQUIRE_TIMEOUT) {
               tx->tmabort(tx);
+          }
+      }
 
       // log the lock, drop any read locks I have
       tx->w_bytelocks.insert(lock);
@@ -238,9 +255,11 @@ namespace {
       volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
       for (int i = 0; i < 15; ++i) {
           tries = 0;
-          while (lock_alias[i] != 0)
-              if (++tries > DRAIN_TIMEOUT)
+          while (lock_alias[i] != 0) {
+              if (++tries > DRAIN_TIMEOUT) {
                   tx->tmabort(tx);
+              }
+          }
       }
 
       // add to undo log, do in-place write
@@ -261,10 +280,12 @@ namespace {
       STM_UNDO(tx->undo_log, except, len);
 
       // release write locks, then read locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // reset lists
       tx->r_bytelocks.reset();

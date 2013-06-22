@@ -81,13 +81,15 @@ namespace {
   BitLazy::commit_ro(TxThread* tx)
   {
       // were there remote aborts?
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       CFENCE;
 
       // release read locks
-      foreach (BitLockList, i, tx->r_bitlocks)
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       tx->r_bitlocks.reset();
       OnReadOnlyCommit(tx);
@@ -113,14 +115,14 @@ namespace {
           bitlock_t* bl = get_bitlock(i->addr);
           // abort if cannot acquire and haven't locked yet
           if (bl->owner == 0) {
-              if (!bcasptr(&bl->owner, (uintptr_t)0, tx->my_lock.all))
+              if (!bcasptr(&bl->owner, (uintptr_t)0, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
               // log lock
               tx->w_bitlocks.insert(bl);
               // get readers
               accumulator |= bl->readers;
-          }
-          else if (bl->owner != tx->my_lock.all) {
+          } else if (bl->owner != tx->my_lock.all) {
               tx->tmabort(tx);
           }
       }
@@ -148,8 +150,9 @@ namespace {
 
       // were there remote aborts?
       CFENCE;
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       CFENCE;
 
       // we committed... replay redo log
@@ -157,10 +160,12 @@ namespace {
       CFENCE;
 
       // release read locks, write locks
-      foreach (BitLockList, i, tx->w_bitlocks)
+      foreach (BitLockList, i, tx->w_bitlocks) {
           (*i)->owner = 0;
-      foreach (BitLockList, i, tx->r_bitlocks)
+      }
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       // remember that this was a commit
       tx->r_bitlocks.reset();
@@ -180,16 +185,19 @@ namespace {
   {
       // first test if we've got a read bit
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1))
+      if (bl->readers.setif(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
+      }
       // if there's a writer, it can't be me since I'm in-flight
-      if (bl->owner)
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
       // order the read before checking for remote aborts
       void* val = *addr;
       CFENCE;
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       return val;
   }
 
@@ -209,20 +217,22 @@ namespace {
 
       // first test if we've got a read bit
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1))
+      if (bl->readers.setif(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
-      // if so, we may be a writer (all writes are also reads!)
-      else {
+      } else {
+          // if so, we may be a writer (all writes are also reads!)
           found = tx->writes.find(log);
           REDO_RAW_CHECK(found, log, mask);
       }
-      if (bl->owner)
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
       void* val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       CFENCE;
-      if (!tx->alive)
+      if (!tx->alive) {
           tx->tmabort(tx);
+      }
       return val;
   }
 
@@ -239,10 +249,12 @@ namespace {
 
       // if we don't have a read bit, get one
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1))
+      if (bl->readers.setif(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
-      if (bl->owner)
+      }
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
       OnFirstWrite(tx, read_rw, write_rw, commit_rw);
   }
 
@@ -257,10 +269,12 @@ namespace {
 
       // if we don't have a read bit, get one
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1))
+      if (bl->readers.setif(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
-      if (bl->owner)
+      }
+      if (bl->owner) {
           tx->tmabort(tx);
+      }
   }
 
   /**
@@ -277,10 +291,12 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks
-      foreach (BitLockList, i, tx->w_bitlocks)
+      foreach (BitLockList, i, tx->w_bitlocks) {
           (*i)->owner = 0;
-      foreach (BitLockList, i, tx->r_bitlocks)
+      }
+      foreach (BitLockList, i, tx->r_bitlocks) {
           (*i)->readers.unsetbit(tx->id-1);
+      }
 
       tx->r_bitlocks.reset();
       tx->writes.reset();

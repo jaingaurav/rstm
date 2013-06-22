@@ -47,12 +47,14 @@ namespace stm
   void install_algorithm(int new_alg, TxThread* tx)
   {
       // diagnostic message
-      if (tx)
+      if (tx) {
           printf("[%u] switching from %s to %s\n", tx->id,
                  stms[curr_policy.ALG_ID].name, stms[new_alg].name);
-      if (!stms[new_alg].privatization_safe)
+      }
+      if (!stms[new_alg].privatization_safe) {
           printf("Warning: Algorithm %s is not privatization-safe!\n",
                  stms[new_alg].name);
+      }
 
       // we need to make sure the metadata remains healthy
       //

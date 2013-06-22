@@ -23,8 +23,9 @@ _ITM_LB(_ITM_transaction* td, const void* addr, size_t bytes) {
     Scope* scope = td->inner();
 
     // read and log as many words as we can
-    for (size_t i = 0, e = bytes / sizeof(void*); i < e; ++i)
+    for (size_t i = 0, e = bytes / sizeof(void*); i < e; ++i) {
         scope->log(address + i, address[i], sizeof(void*));
+    }
 
     // read all of the remaining bytes and log them
     if (size_t e = bytes % sizeof(void*)) {
@@ -36,8 +37,9 @@ _ITM_LB(_ITM_transaction* td, const void* addr, size_t bytes) {
             void* word;
         } buffer = {{0}};
 
-        for (size_t i = 0; i < e; ++i)
+        for (size_t i = 0; i < e; ++i) {
             buffer.bytes[i] = address8[i];
+        }
 
         scope->log(reinterpret_cast<void**>(const_cast<uint8_t*>(address8)),
                    buffer.word, e);

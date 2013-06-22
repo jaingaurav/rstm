@@ -139,14 +139,16 @@ namespace {
           foreach (OrecList, i, tx->r_orecs) {
               // abort unless orec older than start or owned by me
               uintptr_t ivt = (*i)->v.all;
-              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
           }
       }
 
       // release locks
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = end_time;
+      }
 
       // notify CM
       CM::onCommit(tx);
@@ -179,8 +181,9 @@ namespace {
           void* tmp = *addr;
 
           // best case: I locked it already
-          if (ivt.all == tx->my_lock.all)
+          if (ivt.all == tx->my_lock.all) {
               return tmp;
+          }
 
           // re-read orec AFTER reading value
           CFENCE;
@@ -193,8 +196,9 @@ namespace {
           }
 
           // abort if locked
-          if (__builtin_expect(ivt.fields.lock, 0))
+          if (__builtin_expect(ivt.fields.lock, 0)) {
               tx->tmabort(tx);
+          }
 
           // scale timestamp if ivt is too new, then try again
           uintptr_t newts = timestamp.val;
@@ -220,8 +224,9 @@ namespace {
 
           // common case: uncontended location... try to lock it, abort on fail
           if (ivt.all <= tx->start_time) {
-              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // save old value, log lock, do the write, and return
               o->p = ivt.all;
@@ -241,8 +246,9 @@ namespace {
           }
 
           // fail if lock held by someone else
-          if (ivt.fields.lock)
+          if (ivt.fields.lock) {
               tx->tmabort(tx);
+          }
 
           // unlocked but too new... scale forward and try again
           uintptr_t newts = timestamp.val;
@@ -278,8 +284,9 @@ namespace {
       // increment the timestamp to preserve the invariant that the timestamp
       // val is >= all orecs' values when unlocked
       uintptr_t ts = timestamp.val;
-      if (max > ts)
+      if (max > ts) {
           casptr(&timestamp.val, ts, (ts+1)); // assumes no transient failures
+      }
 
       // reset all lists
       tx->r_orecs.reset();
@@ -316,14 +323,16 @@ namespace {
               // read this orec
               uintptr_t ivt = (*i)->v.all;
               // if unlocked and newer than start time, abort
-              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
                   return false;
+              }
           }
       }
 
       // release locks
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = end_time;
+      }
 
       // clean up
       tx->r_orecs.reset();
@@ -347,8 +356,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
   }
 

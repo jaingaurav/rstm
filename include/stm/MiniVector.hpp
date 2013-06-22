@@ -67,8 +67,9 @@ namespace stm
           // If the list is full, double the list size, allocate a new array
           // of elements, bitcopy the old array into the new array, and free
           // the old array. No destructors are called.
-          if (m_size != m_cap)
+          if (m_size != m_cap) {
               return;
+          }
           expand();
       }
 

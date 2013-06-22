@@ -74,8 +74,9 @@ namespace {
   ByEAR::commit_ro(TxThread* tx)
   {
       // read-only... release read locks
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       tx->r_bytelocks.reset();
       OnReadOnlyCommit(tx);
@@ -88,18 +89,21 @@ namespace {
   ByEAR::commit_rw(TxThread* tx)
   {
       // atomically mark self committed
-      if (!bcas32(&tx->alive, TX_ACTIVE, TX_COMMITTED))
+      if (!bcas32(&tx->alive, TX_ACTIVE, TX_COMMITTED)) {
           tx->tmabort(tx);
+      }
 
       // we committed... replay redo log
       tx->writes.writeback();
       CFENCE;
 
       // release write locks, then read locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // clean-up
       tx->r_bytelocks.reset();
@@ -131,8 +135,9 @@ namespace {
               tx->tmabort(tx);
             case TX_ACTIVE:
               // abort the owner(it's active)
-              if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED))
+              if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->tmabort(tx);
+              }
               break;
             case TX_ABORTED:
               // if the owner is unwinding, go through and read
@@ -146,8 +151,9 @@ namespace {
       CFENCE;
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
       return result;
   }
 
@@ -187,8 +193,9 @@ namespace {
               tx->tmabort(tx);
             case TX_ACTIVE:
               // abort the owner(it's active)
-              if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED))
+              if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->tmabort(tx);
+              }
               break;
             case TX_ABORTED:
               // if the owner is unwinding, go through and read
@@ -202,8 +209,9 @@ namespace {
       CFENCE;
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
 
       return result;
   }
@@ -219,14 +227,16 @@ namespace {
       // abort current owner, wait for release, then acquire
       while (true) {
           // abort the owner if there is one
-          if (uint32_t owner = lock->owner)
+          if (uint32_t owner = lock->owner) {
               cas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED);
-          // try to get ownership
-          else if (bcas32(&(lock->owner), 0u, tx->id))
+          } else if (bcas32(&(lock->owner), 0u, tx->id)) {
+              // try to get ownership
               break;
+          }
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
       }
 
       // log the lock, drop any read locks I have
@@ -239,10 +249,13 @@ namespace {
       //       risk setting the state of a committing transaction to aborted,
       //       which can give readers inconsistent results when they trying to
       //       read while the committer is writing back.
-      for (int i = 0; i < 60; ++i)
-          if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE)
-              if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED))
+      for (int i = 0; i < 60; ++i) {
+          if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
+              if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->tmabort(tx);
+              }
+          }
+      }
 
       // add to redo log
       tx->writes.insert(WriteSetEntry(STM_WRITE_SET_ENTRY(addr, val, mask)));
@@ -267,14 +280,16 @@ namespace {
       // abort current owner, wait for release, then acquire
       while (true) {
           // abort the owner if there is one
-          if (uint32_t owner = lock->owner)
+          if (uint32_t owner = lock->owner) {
               cas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED);
           // try to get ownership
-          else if (bcas32(&(lock->owner), 0u, tx->id))
+          } else if (bcas32(&(lock->owner), 0u, tx->id)) {
               break;
+          }
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
       }
 
       // log the lock, drop any read locks I have
@@ -282,10 +297,13 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // abort active readers
-      for (int i = 0; i < 60; ++i)
-          if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE)
-              if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED))
+      for (int i = 0; i < 60; ++i) {
+          if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
+              if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->tmabort(tx);
+              }
+          }
+      }
 
       // add to redo log
       tx->writes.insert(WriteSetEntry(STM_WRITE_SET_ENTRY(addr, val, mask)));
@@ -305,10 +323,12 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release write locks, then read locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // reset lists
       tx->r_bytelocks.reset();

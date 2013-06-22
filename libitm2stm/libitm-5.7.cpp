@@ -72,8 +72,7 @@ _ITM_transaction::enter(Node* const scope, const uint32_t flags) {
 
         // Now call the per-algorithm begin function.
         irrevocable = TxThread::tmbegin(&thread_handle_);
-    }
-    else {
+    } else {
         irrevocable = libraryIsInevitable();
     }
 
@@ -81,8 +80,9 @@ _ITM_transaction::enter(Node* const scope, const uint32_t flags) {
     // library has become inevitable, and there's an uninstrumented code path
     // available, we'll choose that. Otherwise run the normally instrumented
     // code.
-    if (irrevocable && (flags & pr_uninstrumentedCode))
+    if (irrevocable && (flags & pr_uninstrumentedCode)) {
         return a_runUninstrumentedCode;
+    }
 
     return a_runInstrumentedCode;
 }

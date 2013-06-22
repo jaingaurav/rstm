@@ -55,8 +55,9 @@ namespace {
   TMLLazy::begin(TxThread* tx)
   {
       // Sample the sequence lock until it is even (unheld)
-      while ((tx->start_time = timestamp.val)&1)
+      while ((tx->start_time = timestamp.val)&1) {
           spin64();
+      }
 
       // notify the allocator
       tx->allocator.onTxBegin();
@@ -80,8 +81,9 @@ namespace {
   TMLLazy::commit_rw(TxThread* tx)
   {
       // we have writes... if we can't get the lock, abort
-      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
+      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
           tx->tmabort(tx);
+      }
 
       // we're committed... run the redo log
       tx->writes.writeback();
@@ -105,8 +107,9 @@ namespace {
       // if the lock has changed, we must fail
       //
       // NB: this form of /if/ appears to be faster
-      if (__builtin_expect(timestamp.val == tx->start_time, true))
+      if (__builtin_expect(timestamp.val == tx->start_time, true)) {
           return tmp;
+      }
       tx->tmabort(tx);
       // unreachable
       return NULL;
@@ -174,8 +177,9 @@ namespace {
   {
       // we are running in isolation by the time this code is run.  Make sure
       // we are valid.
-      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
+      if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
           return false;
+      }
 
       // push all writes back to memory and clear writeset
       tx->writes.writeback();
@@ -195,8 +199,9 @@ namespace {
   void
   TMLLazy::onSwitchTo()
   {
-      if (timestamp.val & 1)
+      if (timestamp.val & 1) {
           ++timestamp.val;
+      }
   }
 }
 

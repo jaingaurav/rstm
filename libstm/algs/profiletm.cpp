@@ -59,7 +59,9 @@ namespace
       // if my order can fit in a range from 0 .. profile_txns - 1, wait my
       // turn
       if (my_order < profile_txns) {
-          while (last_complete.val < my_order) spin64();
+          while (last_complete.val < my_order) {
+              spin64();
+          }
           // OK, I have the ticket.  Go for it!
           // update allocator
           tx->allocator.onTxBegin();
@@ -79,8 +81,9 @@ namespace
           tx->scope = 0;
           // next, wait for a good begin pointer
           while ((TxThread::tmbegin == begin) ||
-                 (TxThread::tmbegin == stm::begin_blocker))
+                 (TxThread::tmbegin == stm::begin_blocker)) {
               spin64();
+          }
           CFENCE;
           // now reinstall the scope
 #ifdef STM_CPU_SPARC
@@ -94,8 +97,9 @@ namespace
           // isn't installed either, we can call the pointer to start a
           // transaction, and then return.  Otherwise, we missed our window,
           // so we need to go back to the top of the loop
-          if ((beginner != stm::begin_blocker) && (beginner != begin))
+          if ((beginner != stm::begin_blocker) && (beginner != begin)) {
               return beginner(tx);
+          }
       }
   }
 
@@ -119,8 +123,9 @@ namespace
 
       // now adapt based on the fact that we just successfully collected a
       // profile
-      if (++last_complete.val == profile_txns)
+      if (++last_complete.val == profile_txns) {
           profile_oncomplete(tx);
+      }
   }
 
   /**
@@ -150,8 +155,9 @@ namespace
 
       // now adapt based on the fact that we just successfully collected a
       // profile
-      if (++last_complete.val == profile_txns)
+      if (++last_complete.val == profile_txns) {
           profile_oncomplete(tx);
+      }
   }
 
   /**

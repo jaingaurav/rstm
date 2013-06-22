@@ -55,13 +55,16 @@ namespace
   {
       // prevent new txns from starting
       if (!bcasptr(&TxThread::tmbegin, stms[curr_policy.ALG_ID].begin,
-                   &begin_blocker))
+                   &begin_blocker)) {
           return;
+      }
 
       // wait for everyone to be out of a transaction (scope == NULL)
-      for (unsigned i = 0; i < threadcount.val; ++i)
-          while ((i != (tx->id-1)) && (threads[i]->scope))
+      for (unsigned i = 0; i < threadcount.val; ++i) {
+          while ((i != (tx->id-1)) && (threads[i]->scope)) {
               spin64();
+          }
+      }
 
       // remember the prior algorithm
       curr_policy.PREPROFILE_ALG = curr_policy.ALG_ID;
@@ -83,13 +86,16 @@ namespace
 
       // prevent new txns from starting
       if (!bcasptr(&TxThread::tmbegin, stms[curr_policy.ALG_ID].begin,
-                   &begin_blocker))
+                   &begin_blocker)) {
           return;
+      }
 
       // wait for everyone to be out of a transaction (scope == NULL)
-      for (unsigned i = 0; i < threadcount.val; ++i)
-          while ((i != (tx->id-1)) && (threads[i]->scope))
+      for (unsigned i = 0; i < threadcount.val; ++i) {
+          while ((i != (tx->id-1)) && (threads[i]->scope)) {
               spin64();
+          }
+      }
 
       // adjust thresholds
       adjust_thresholds(new_algorithm, curr_policy.ALG_ID);
@@ -125,8 +131,7 @@ namespace stm
       //     /already/ begin_blocker on account of a call to set_policy or
       //     TxThread()
       while (!bcasptr(&TxThread::tmbegin, stms[curr_policy.ALG_ID].begin,
-                      &begin_blocker))
-      {
+                      &begin_blocker)) {
           spin64();
       }
 

@@ -29,8 +29,9 @@ read_subword(TxThread& tx, void** base, uint8_t* to, size_t i, size_t j) {
 
     // copy the bytes on-by-one, note the offset into the align union
     const size_t length = (j - i);
-    for (size_t k = 0; k < length; ++k)
+    for (size_t k = 0; k < length; ++k) {
         to[k] = align.bytes[i + k];
+    }
 
     // return the number of bytes we read
     return length;
@@ -50,8 +51,9 @@ write_subword(TxThread& tx, void** base, const uint8_t* from, size_t i,
     } buffer = {0};
 
     const size_t length = j - i;
-    for (size_t k = 0; k < length; ++k)
+    for (size_t k = 0; k < length; ++k) {
         buffer.bytes[i + k] = from[k];
+    }
 
     // perform the write
     tx.tmwrite(&tx, base, buffer.word, make_mask(i, j));
@@ -120,8 +122,9 @@ itm2stm::block_read(TxThread& tx, void* target, const void* source,
     // aligned, but that's ok because the write to "target" is nontransactional
     void** to = reinterpret_cast<void**>(target);
 
-    for (size_t i = 0; i < words; ++i, read += sizeof(void*))
+    for (size_t i = 0; i < words; ++i, read += sizeof(void*)) {
         to[i] = tx.tmread(&tx, base + i, mask);
+    }
 
     // return the number of bytes we've read
     return read;
@@ -186,8 +189,9 @@ itm2stm::block_write(TxThread& tx, void* target, const void* source,
     // nontransactional
     void* const * const from = reinterpret_cast<void* const *>(source);
 
-    for (size_t i = 0; i < words; ++i, written += sizeof(void*))
+    for (size_t i = 0; i < words; ++i, written += sizeof(void*)) {
         tx.tmwrite(&tx, base + i, from[i], mask);
+    }
 
     // return the number of bytes we've written
     return written;
@@ -226,8 +230,9 @@ itm2stm::block_set(TxThread& tx, void* target, uint8_t c, size_t length) {
     const size_t words = length / sizeof(void*);
     const uintptr_t mask = make_mask(0, sizeof(void*));
 
-    for (size_t i = 0; i < words; ++i, length -= sizeof(void*))
+    for (size_t i = 0; i < words; ++i, length -= sizeof(void*)) {
         tx.tmwrite(&tx, base + i, from.word, mask);
+    }
 
     // deal with any postfix bytes
     if (length)

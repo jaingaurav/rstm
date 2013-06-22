@@ -69,8 +69,9 @@ namespace {
   TLI::commit_ro(TxThread* tx)
   {
       // if the transaction is invalid, abort
-      if (__builtin_expect(tx->alive == 2, false))
+      if (__builtin_expect(tx->alive == 2, false)) {
           tx->tmabort(tx);
+      }
 
       // ok, all is good
       tx->alive = 0;
@@ -85,8 +86,9 @@ namespace {
   TLI::commit_rw(TxThread* tx)
   {
       // if the transaction is invalid, abort
-      if (__builtin_expect(tx->alive == 2, false))
+      if (__builtin_expect(tx->alive == 2, false)) {
           tx->tmabort(tx);
+      }
 
       // grab the lock to stop the world
       uintptr_t tmp = timestamp.val;
@@ -102,9 +104,11 @@ namespace {
       }
 
       // kill conflicting transactions
-      for (uint32_t i = 0; i < threadcount.val; i++)
-          if ((threads[i]->alive == 1) && (tx->wf->intersect(threads[i]->rf)))
+      for (uint32_t i = 0; i < threadcount.val; i++) {
+          if ((threads[i]->alive == 1) && (tx->wf->intersect(threads[i]->rf))) {
               threads[i]->alive = 2;
+          }
+      }
 
       // do writeback
       tx->writes.writeback();
@@ -143,11 +147,13 @@ namespace {
           bool ts_ok = !(x1&1) && (timestamp.val == x1);
           CFENCE;
           // if read valid, and we're not killed, return the value
-          if ((tx->alive == 1) && ts_ok)
+          if ((tx->alive == 1) && ts_ok) {
               return val;
+          }
           // abort if we're killed
-          if (tx->alive == 2)
+          if (tx->alive == 2) {
               tx->tmabort(tx);
+          }
       }
   }
 
@@ -226,8 +232,9 @@ namespace {
    */
   void TLI::onSwitchTo()
   {
-      if (timestamp.val & 1)
+      if (timestamp.val & 1) {
           ++timestamp.val;
+      }
   }
 }
 

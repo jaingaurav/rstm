@@ -100,17 +100,19 @@ _ITM_transaction::abort(_ITM_abortReason why) {
     //         If the reason is something else, we remember this reason in
     //          prev_abort_reason_. This sets prev_abort_ = true as a side
     //          effect (see the union declaration an Transaction.h).
-    if (why & exceptionBlockAbort)
+    if (why & exceptionBlockAbort) {
         why = (prev_abort_) ? prev_abort_reason_ : TMConflict;
-    else
+    } else {
         prev_abort_reason_ = why;
+    }
 
     // CASE 1: cancel the scope if this is a simple user abort, or if the
     //         current transaction is an exception block transaction---a
     //         condition that I don't truly understand but which is easy enough
     //         to implement.
-    if (inner()->isExceptionBlock() || why & userAbort)
+    if (inner()->isExceptionBlock() || why & userAbort) {
         cancel(); // noreturn
+    }
 
     assert(why & (userRetry | TMConflict) && "Should be one of these cases.");
 

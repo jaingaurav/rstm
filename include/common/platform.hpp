@@ -214,7 +214,9 @@ inline uint64_t internal_cas64(volatile uint64_t* ptr, uint64_t old,
         __typeof((v)) tmp;                      \
         while (1) {                             \
             tmp = *(p);                         \
-            if (bcasptr((p), tmp, (v))) break;  \
+            if (bcasptr((p), tmp, (v))) {       \
+                break;                          \
+            }                                   \
         }                                       \
         tmp;                                    \
     })
@@ -451,8 +453,9 @@ inline void yield_cpu() {
 inline uint64_t getElapsedTime()
 {
     static mach_timebase_info_data_t sTimebaseInfo;
-    if (sTimebaseInfo.denom == 0)
+    if (sTimebaseInfo.denom == 0) {
         (void)mach_timebase_info(&sTimebaseInfo);
+    }
     return mach_absolute_time() * sTimebaseInfo.numer / sTimebaseInfo.denom;
 }
 

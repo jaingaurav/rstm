@@ -122,14 +122,14 @@ namespace {
           // lock all orecs, unless already locked
           if (ivt <= tx->start_time) {
               // abort if cannot acquire
-              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
               // save old version to o->p, remember that we hold the lock
               o->p = ivt;
               tx->locks.insert(o);
-          }
-          // else if we don't hold the lock abort
-          else if (ivt != tx->my_lock.all) {
+          } else if (ivt != tx->my_lock.all) {
+              // else if we don't hold the lock abort
               tx->tmabort(tx);
           }
       }
@@ -138,8 +138,9 @@ namespace {
       foreach (OrecList, i, tx->r_orecs) {
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
 
       // run the redo log
@@ -147,8 +148,9 @@ namespace {
 
       // increment the global timestamp, release locks
       uintptr_t end_time = 1 + faiptr(&timestamp.val);
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = end_time;
+      }
 
       // notify CM
       CM::onCommit(tx);
@@ -265,8 +267,9 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
 
       // notify CM
       CM::onAbort(tx);
@@ -303,10 +306,12 @@ namespace {
    */
   void
   validate(TxThread* tx) {
-      foreach (OrecList, i, tx->r_orecs)
+      foreach (OrecList, i, tx->r_orecs) {
           // abort if orec locked, or if unlocked but timestamp too new
-          if ((*i)->v.all > tx->start_time)
+          if ((*i)->v.all > tx->start_time) {
               tx->tmabort(tx);
+          }
+      }
   }
 
   /**

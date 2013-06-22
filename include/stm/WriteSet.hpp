@@ -90,8 +90,9 @@ namespace stm
       {
           assert((uint8_t*)upper - (uint8_t*)lower >= (int)sizeof(void*));
           assert((uintptr_t)upper % sizeof(void*) == 0);
-          if (addr >= lower && (addr + 1) <= upper)
+          if (addr >= lower && (addr + 1) <= upper) {
               writeback();
+          }
       }
   };
 
@@ -194,13 +195,16 @@ namespace stm
           }
 
           // mask could be empty if we filtered out all of the bytes
-          if (mask == 0x0)
+          if (mask == 0x0) {
               return;
+          }
 
           // write each byte if its mask is set
-          for (unsigned i = 0; i < sizeof(val); ++i)
-              if (byte_mask[i] == 0xff)
+          for (unsigned i = 0; i < sizeof(val); ++i) {
+              if (byte_mask[i] == 0xff) {
                   byte_addr[i] = byte_val[i];
+              }
+          }
       }
 
       /**
@@ -211,8 +215,9 @@ namespace stm
       void rollback(void** lower, void** upper)
       {
           // two simple cases first, no intersection or complete intersection.
-          if (addr + 1 < lower || addr >= upper)
+          if (addr + 1 < lower || addr >= upper) {
               return;
+          }
 
           if (addr >= lower && addr + 1 <= upper) {
               writeback();
@@ -373,8 +378,9 @@ namespace stm
        */
       TM_INLINE void writeback()
       {
-          for (iterator i = begin(), e = end(); i != e; ++i)
+          for (iterator i = begin(), e = end(); i != e; ++i) {
               i->writeback();
+          }
       }
 
       /**
@@ -412,14 +418,16 @@ namespace stm
           lsize += 1;
 
           // resize the list if needed
-          if (__builtin_expect(lsize == capacity, false))
+          if (__builtin_expect(lsize == capacity, false)) {
               resize();
+          }
 
           // if we reach our load-factor
           // NB: load factor could be better handled rather than the magic
           //     constant 3 (used in constructor too).
-          if (__builtin_expect((lsize * 3) >= ilength, false))
+          if (__builtin_expect((lsize * 3) >= ilength, false)) {
               rebuild();
+          }
       }
 
       /*** size() lets us know if the transaction is read-only */
@@ -434,8 +442,9 @@ namespace stm
           version += 1;
 
           // check overflow
-          if (version != 0)
+          if (version != 0) {
               return;
+          }
           reset_internal();
       }
 

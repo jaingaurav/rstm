@@ -74,8 +74,9 @@ struct INST<T, N, false> {
         // reset the mask, and load the middle words---for N=1 I expect this
         // loop to be eliminated
         mask = make_mask(0, sizeof(void*));
-        for (size_t i = 1; i < N; ++i)
+        for (size_t i = 1; i < N; ++i) {
             cast.from[i] = tx.tmread(&tx, base + i, mask);
+        }
 
         // compute the final mask
         mask = make_mask(0, offset);
@@ -106,8 +107,9 @@ struct INST<T, N, false> {
         // reset the mask, and store the middle words---for N=1 I expect this
         // loop to be eliminated
         mask = make_mask(0, sizeof(void*));
-        for (size_t i = 1; i < N; ++i)
+        for (size_t i = 1; i < N; ++i) {
             tx.tmwrite(&tx, base + i, cast.to[i], mask);
+        }
 
         // compute the final mask, and store the last word
         mask = make_mask(0, offset);
@@ -117,19 +119,21 @@ struct INST<T, N, false> {
     inline static T Read(TxThread& tx, const T* addr) {
         // check the alignment, and use the aligned option if it is safe
         const uintptr_t offset = offset_of(addr);
-        if (offset == 0)
+        if (offset == 0) {
             return INST<T, N, true>::Read(tx, addr);
-        else
+        } else {
             return INST<T, N, false>::ReadUnaligned(tx, addr, offset);
+        }
     }
 
     inline static void Write(TxThread& tx, T* addr, const T value) {
         // check the alignment and use the aligned options if it is safe
         const uintptr_t offset = offset_of(addr);
-        if (offset == 0)
+        if (offset == 0) {
             INST<T, N, true>::Write(tx, addr, value);
-        else
+        } else {
             INST<T, N, false>::WriteUnaligned(tx, addr, value, offset);
+        }
     }
 };
 
@@ -153,8 +157,9 @@ struct INST<T, N, true> {
 
         // load the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
-        for (size_t i = 0; i < N; ++i)
+        for (size_t i = 0; i < N; ++i) {
             cast.from[i] = tx.tmread(&tx, address + i, mask);
+        }
 
         return cast.to;
     }
@@ -176,8 +181,9 @@ struct INST<T, N, true> {
 
         // store the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
-        for (size_t i = 0; i < N; ++i)
+        for (size_t i = 0; i < N; ++i) {
             tx.tmwrite(&tx, address + i, cast.to[i], mask);
+        }
     }
 };
 
@@ -192,10 +198,11 @@ struct INST<T, 0u, false> {
         // passing N=1---an overflowing subword is indistinguishable from an
         // unaligned word.
         const uintptr_t offset = offset_of(addr);
-        if (offset + sizeof(T) <= sizeof(void*))
+        if (offset + sizeof(T) <= sizeof(void*)) {
             return INST<T, 0u, true>::Read(tx, addr);
-        else
+        } else {
             return INST<T, 1u, false>::ReadUnaligned(tx, addr, offset);
+        }
     }
 
     inline static void Write(TxThread& tx, T* addr, const T value) {
@@ -203,10 +210,11 @@ struct INST<T, 0u, false> {
         // otherwise use the generic N-unaligned one, but for N to be 1---an
         // overflowing subword is indestinguishable from an unaligned word.
         const uintptr_t offset = offset_of(addr);
-        if (offset + sizeof(T) <= sizeof(void*))
+        if (offset + sizeof(T) <= sizeof(void*)) {
             INST<T, 0u, true>::Write(tx, addr, value);
-        else
+        } else {
             INST<T, 1u, false>::WriteUnaligned(tx, addr, value, offset);
+        }
     }
 };
 
@@ -319,26 +327,29 @@ inline bool is_stack_write(const _ITM_transaction* const tx, const T* address) {
                                                                 \
     void                                                        \
     _ITM_W##EXT(_ITM_transaction* td, TYPE* address, const TYPE value) { \
-        if (is_stack_write(td, address))                                \
-            *address = value;                                           \
-        else                                                            \
-            INST<TYPE>::Write(td->handle(), address, value);            \
-    }                                                                   \
-                                                                        \
-    void                                                                \
+        if (is_stack_write(td, address)) {                               \
+            *address = value;                                            \
+        } else {                                                         \
+            INST<TYPE>::Write(td->handle(), address, value);             \
+        }                                                                \
+    }                                                                    \
+                                                                         \
+    void                                                                 \
     _ITM_WaR##EXT(_ITM_transaction* td, TYPE* address, const TYPE value) { \
-        if (is_stack_write(td, address))                                \
-            *address = value;                                           \
-        else                                                            \
-            INST<TYPE>::Write(td->handle(), address, value);            \
-    }                                                                   \
-                                                                        \
-    void                                                                \
+        if (is_stack_write(td, address)) {                                 \
+            *address = value;                                              \
+        } else {                                                           \
+            INST<TYPE>::Write(td->handle(), address, value);               \
+        }                                                                  \
+    }                                                                      \
+                                                                           \
+    void                                                                   \
     _ITM_WaW##EXT(_ITM_transaction* td, TYPE* address, const TYPE value) { \
-        if (is_stack_write(td, address))                                \
-            *address = value;                                           \
-        else                                                            \
-            INST<TYPE>::Write(td->handle(), address, value);            \
+        if (is_stack_write(td, address)) {                                 \
+            *address = value;                                              \
+        } else {                                                           \
+            INST<TYPE>::Write(td->handle(), address, value);               \
+        }                                                                  \
     }
 
 /// Now, for each type instantiate the barriers.

@@ -72,8 +72,9 @@ namespace {
       // switch to turbo mode?
       //
       // NB: this only applies to transactions that aborted after doing a write
-      if (tx->ts_cache == ((uintptr_t)tx->order - 1))
+      if (tx->ts_cache == ((uintptr_t)tx->order - 1)) {
           GoTurbo(tx, read_turbo, write_turbo, commit_turbo);
+      }
 
       return false;
   }
@@ -99,16 +100,18 @@ namespace {
   {
       // we need to transition to fast here, but not till our turn
       while (last_complete.val != ((uintptr_t)tx->order - 1)) {
-          if (TxThread::tmbegin != begin)
+          if (TxThread::tmbegin != begin) {
               tx->tmabort(tx);
+          }
       }
       // validate
       foreach (OrecList, i, tx->r_orecs) {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // writeback
       if (tx->writes.size() != 0) {
@@ -164,8 +167,9 @@ namespace {
       orec_t* o = get_orec(addr);
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
-      if (ivt > tx->ts_cache)
+      if (ivt > tx->ts_cache) {
           tx->tmabort(tx);
+      }
 
       // log orec
       tx->r_orecs.insert(o);
@@ -177,8 +181,9 @@ namespace {
               // read this orec
               uintptr_t ivt_inner = (*i)->v.all;
               // if it has a timestamp of ts_cache or greater, abort
-              if (ivt_inner > tx->ts_cache)
+              if (ivt_inner > tx->ts_cache) {
                   tx->tmabort(tx);
+              }
           }
           // now update the ts_cache to remember that at this time, we were
           // still valid
@@ -206,15 +211,17 @@ namespace {
       orec_t* o = get_orec(addr);
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
-      if (ivt > tx->ts_cache)
+      if (ivt > tx->ts_cache) {
           tx->tmabort(tx);
+      }
 
       // log orec
       tx->r_orecs.insert(o);
 
       // validate, and if we have writes, then maybe switch to fast mode
-      if (last_complete.val > tx->ts_cache)
+      if (last_complete.val > tx->ts_cache) {
           validate(tx, last_complete.val);
+      }
       return tmp;
   }
 
@@ -283,8 +290,9 @@ namespace {
   {
       PreRollback(tx);
       // we cannot be in turbo mode
-      if (CheckTurboMode(tx, read_turbo))
+      if (CheckTurboMode(tx, read_turbo)) {
           UNRECOVERABLE("Attempting to abort a turbo-mode transaction!");
+      }
 
       // Perform writes to the exception object if there were any... taking the
       // branch overhead without concern because we're not worried about
@@ -318,8 +326,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
-          if (ivt > tx->ts_cache)
+          if (ivt > tx->ts_cache) {
               tx->tmabort(tx);
+          }
       }
       // now update the finish_cache to remember that at this time, we were
       // still valid
@@ -356,8 +365,9 @@ namespace {
   {
       timestamp.val = MAXIMUM(timestamp.val, timestamp_max.val);
       last_complete.val = timestamp.val;
-      for (uint32_t i = 0; i < threadcount.val; ++i)
+      for (uint32_t i = 0; i < threadcount.val; ++i) {
           threads[i]->order = -1;
+      }
   }
 }
 

@@ -102,10 +102,13 @@ namespace stm
        */
       static void onBegin(TxThread* tx)
       {
-          if (!tx->strong_HG)
-              while (fcm_timestamp.val)
-                  if (TxThread::tmbegin == begin_blocker)
+          if (!tx->strong_HG) {
+              while (fcm_timestamp.val) {
+                  if (TxThread::tmbegin == begin_blocker) {
                       tx->tmabort(tx);
+                  }
+              }
+          }
       }
 
       /**
@@ -164,10 +167,13 @@ namespace stm
        */
       static void onBegin(TxThread* tx)
       {
-          if (!tx->strong_HG)
-              while (fcm_timestamp.val)
-                  if (TxThread::tmbegin == begin_blocker)
+          if (!tx->strong_HG) {
+              while (fcm_timestamp.val) {
+                  if (TxThread::tmbegin == begin_blocker) {
                       tx->tmabort(tx);
+                  }
+              }
+          }
       }
 
       /**
@@ -182,9 +188,11 @@ namespace stm
           }
 
           // acquire a timestamp if consecutive aborts exceed a threshold
-          if (tx->consec_aborts > ABORT_THRESHOLD)
-              if (bcasptr(&fcm_timestamp.val, 0ul, 1ul))
+          if (tx->consec_aborts > ABORT_THRESHOLD) {
+              if (bcasptr(&fcm_timestamp.val, 0ul, 1ul)) {
                   tx->strong_HG = true;
+              }
+          }
           // NB: as before, some counting opportunities here
       }
 
@@ -218,10 +226,13 @@ namespace stm
        */
       static void onBegin(TxThread* tx)
       {
-          if (!tx->strong_HG)
-              while (fcm_timestamp.val)
-                  if (TxThread::tmbegin == begin_blocker)
+          if (!tx->strong_HG) {
+              while (fcm_timestamp.val) {
+                  if (TxThread::tmbegin == begin_blocker) {
                       tx->tmabort(tx);
+                  }
+              }
+          }
       }
 
       /**
@@ -237,10 +248,10 @@ namespace stm
 
           // acquire a timestamp if consecutive aborts exceed a threshold
           if (tx->consec_aborts > ABORT_THRESHOLD) {
-              if (bcasptr(&fcm_timestamp.val, 0ul, 1ul))
+              if (bcasptr(&fcm_timestamp.val, 0ul, 1ul)) {
                   tx->strong_HG = true;
-          }
-          else {
+              }
+          } else {
               // randomized exponential backoff
               exp_backoff(tx);
           }

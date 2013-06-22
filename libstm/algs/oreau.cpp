@@ -121,14 +121,16 @@ namespace {
               // read this orec
               uintptr_t ivt = (*i)->v.all;
               // if unlocked and newer than start time, abort
-              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
           }
       }
 
       // release locks
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = tx->end_time;
+      }
 
       // notify CM
       CM::onCommit(tx);
@@ -170,15 +172,17 @@ namespace {
 
           // abort the owner if locked
           if (ivt.fields.lock) {
-              if (CM::mayKill(tx, ivt.fields.id - 1))
+              if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           }
 
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
 
           // scale timestamp if ivt2 is too new
           uintptr_t newts = timestamp.val;
@@ -206,8 +210,9 @@ namespace {
           void* tmp = *addr;
 
           // best case: I locked it already
-          if (ivt.all == tx->my_lock.all)
+          if (ivt.all == tx->my_lock.all) {
               return tmp;
+          }
 
           // re-read orec
           CFENCE;
@@ -221,15 +226,17 @@ namespace {
 
           // abort the owner if locked
           if (ivt.fields.lock) {
-              if (CM::mayKill(tx, ivt.fields.id - 1))
+              if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           }
 
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
 
           // scale timestamp if ivt2 is too new
           uintptr_t newts = timestamp.val;
@@ -255,8 +262,9 @@ namespace {
 
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
-              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // save old, log lock, write, return
               o->p = ivt.all;
@@ -269,15 +277,17 @@ namespace {
 
           // abort the owner if locked
           if (ivt.fields.lock) {
-              if (CM::mayKill(tx, ivt.fields.id - 1))
+              if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           }
 
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
 
           // unlocked but too new... scale forward and try again
           uintptr_t newts = timestamp.val;
@@ -302,8 +312,9 @@ namespace {
 
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
-              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // save old, log lock, write, return
               o->p = ivt.all;
@@ -322,15 +333,17 @@ namespace {
 
           // abort owner if locked
           if (ivt.fields.lock) {
-              if (CM::mayKill(tx, ivt.fields.id - 1))
+              if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           }
 
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
 
           // unlocked but too new... scale forward and try again
           uintptr_t newts = timestamp.val;
@@ -362,8 +375,9 @@ namespace {
       // need to increment the timestamp or else this location could become
       // permanently unreadable
       uintptr_t ts = timestamp.val;
-      if (max > ts)
+      if (max > ts) {
           casptr(&timestamp.val, ts, ts+1);
+      }
 
       // notify CM
       CM::onAbort(tx);
@@ -403,8 +417,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
   }
 

@@ -83,8 +83,9 @@ namespace stm
       // prevent new txns from starting.
       while (true) {
           int i = curr_policy.ALG_ID;
-          if (bcasptr(&tmbegin, stms[i].begin, &begin_blocker))
+          if (bcasptr(&tmbegin, stms[i].begin, &begin_blocker)) {
               break;
+          }
           spin64();
       }
 
@@ -180,7 +181,9 @@ namespace stm
   void TxThread::thread_init()
   {
       // multiple inits from one thread do not cause trouble
-      if (Self) return;
+      if (Self) {
+          return;
+      }
 
       // create a TxThread and save it in thread-local storage
       Self = new TxThread();
@@ -235,8 +238,9 @@ namespace stm
       if (app_profiles) {
           uint32_t divisor =
               (curr_policy.ALG_ID == ProfileAppAvg) ? txn_count : 1;
-          if (divisor == 0)
+          if (divisor == 0) {
               divisor = 0u - 1u; // unsigned infinity :)
+          }
 
           std::cout << "# " << stms[curr_policy.ALG_ID].name << " #" << std::endl;
           std::cout << "# read_ro, read_rw_nonraw, read_rw_raw, write_nonwaw, write_waw, txn_time, "
@@ -267,17 +271,21 @@ namespace stm
       // while doing this
       while (true) {
           int i = curr_policy.ALG_ID;
-          if (i == ProfileTM)
+          if (i == ProfileTM) {
               continue;
-          if (bcasptr(&TxThread::tmbegin, stms[i].begin, &begin_blocker))
+          }
+          if (bcasptr(&TxThread::tmbegin, stms[i].begin, &begin_blocker)) {
               break;
+          }
           spin64();
       }
 
       // wait for everyone to be out of a transaction (scope == NULL)
-      for (unsigned i = 0; i < threadcount.val; ++i)
-          while (threads[i]->scope)
+      for (unsigned i = 0; i < threadcount.val; ++i) {
+          while (threads[i]->scope) {
               spin64();
+          }
+      }
 
       // figure out the algorithm for the STM, and set the adapt policy
 
@@ -286,8 +294,9 @@ namespace stm
       int new_policy = Single;
       if (new_algorithm == -1) {
           int tmp = pol_name_map(phasename);
-          if (tmp == -1)
+          if (tmp == -1) {
               UNRECOVERABLE("Invalid configuration string");
+          }
           new_policy = tmp;
           new_algorithm = pols[tmp].startmode;
       }
@@ -351,10 +360,11 @@ namespace stm
           // guess a default configuration, then check env for a better option
           const char* cfg = "NOrec";
           const char* configstring = getenv("STM_CONFIG");
-          if (configstring)
+          if (configstring) {
               cfg = configstring;
-          else
+          } else {
               printf("STM_CONFIG environment variable not found... using %s\n", cfg);
+          }
           init_lib_name = cfg;
 
           // now initialize the the adaptive policies
@@ -363,15 +373,18 @@ namespace stm
           // this is (for now) how we make sure we have a buffer to hold
           // profiles.  This also specifies how many profiles we do at a time.
           char* spc = getenv("STM_NUMPROFILES");
-          if (spc != NULL)
+          if (spc != NULL) {
               profile_txns = strtol(spc, 0, 10);
+          }
           profiles = (dynprof_t*)malloc(profile_txns * sizeof(dynprof_t));
-          for (unsigned i = 0; i < profile_txns; i++)
+          for (unsigned i = 0; i < profile_txns; i++) {
               profiles[i].clear();
+          }
 
           // Initialize the global abort handler.
-          if (conflict_abort_handler)
+          if (conflict_abort_handler) {
               TxThread::tmabort = conflict_abort_handler;
+          }
 
           // now set the phase
           set_policy(cfg);

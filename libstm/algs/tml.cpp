@@ -79,9 +79,8 @@ namespace {
           ++timestamp.val;
           tx->tmlHasLock = false;
           OnReadWriteCommit(tx);
-      }
-      // reading context: just remember the commit
-      else {
+      } else {
+          // reading context: just remember the commit
           OnReadOnlyCommit(tx);
       }
       Trigger::onCommitLock(tx);
@@ -97,8 +96,9 @@ namespace {
   TML::read(STM_READ_SIG(tx,addr,))
   {
       void* val = *addr;
-      if (tx->tmlHasLock)
+      if (tx->tmlHasLock) {
           return val;
+      }
       // NB:  afterread_tml includes a CFENCE
       afterread_TML(tx);
       return val;
@@ -163,8 +163,9 @@ namespace {
   void
   TML::onSwitchTo()
   {
-      if (timestamp.val & 1)
+      if (timestamp.val & 1) {
           ++timestamp.val;
+      }
   }
 } // (anonymous namespace)
 

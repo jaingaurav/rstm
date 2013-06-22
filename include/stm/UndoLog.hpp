@@ -106,8 +106,9 @@ namespace stm
           }
 
           // simple check for null mask, which might result from a filter call
-          if (mask == 0x0)
+          if (mask == 0x0) {
               return;
+          }
 
           union {
               void**   word;
@@ -129,9 +130,11 @@ namespace stm
           // should be correct, since the locations that we're writing to are
           // supposed to be locked, and if there's a data race we can have any
           // sort of behavior.
-          for (unsigned i = 0; i < sizeof(void*); ++i)
-              if (umask.bytes[i] == 0xFF)
+          for (unsigned i = 0; i < sizeof(void*); ++i) {
+              if (umask.bytes[i] == 0xFF) {
                   uaddr.bytes[i] = uval.bytes[i];
+              }
+          }
       }
 
       inline void undo() const { DoMaskedWrite(addr, val, mask); }

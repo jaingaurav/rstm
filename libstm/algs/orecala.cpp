@@ -113,13 +113,13 @@ namespace {
           // if orec not locked, lock it and save old to orec.p
           if (ivt <= tx->start_time) {
               // abort if cannot acquire
-              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
               // save old version to o->p, remember that we hold the lock
               o->p = ivt;
               tx->locks.insert(o);
-          }
-          else if (ivt != tx->my_lock.all) {
+          } else if (ivt != tx->my_lock.all) {
               tx->tmabort(tx);
           }
       }
@@ -132,8 +132,9 @@ namespace {
           foreach (OrecList, i, tx->r_orecs) {
               // read this orec
               uintptr_t ivt = (*i)->v.all;
-              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+              if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
           }
       }
 
@@ -142,14 +143,16 @@ namespace {
 
       // release locks
       CFENCE;
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = tx->end_time;
+      }
 
       // now ensure that transactions depart from stm_end in the order that
       // they incremend the timestamp.  This avoids the "deferred update"
       // half of the privatization problem.
-      while (last_complete.val != (tx->end_time - 1))
+      while (last_complete.val != (tx->end_time - 1)) {
           spin64();
+      }
       last_complete.val = tx->end_time;
 
       // clean-up
@@ -175,13 +178,15 @@ namespace {
       CFENCE;
 
       // make sure this location isn't locked or too new
-      if (o->v.all > tx->start_time)
+      if (o->v.all > tx->start_time) {
           tx->tmabort(tx);
+      }
 
       // privatization safety: poll the timestamp, maybe validate
       uintptr_t ts = timestamp.val;
-      if (ts != tx->ts_cache)
+      if (ts != tx->ts_cache) {
           privtest(tx, ts);
+      }
       // return the value we read
       return tmp;
   }
@@ -247,8 +252,9 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
       tx->r_orecs.reset();
       tx->writes.reset();
       tx->locks.reset();
@@ -258,8 +264,9 @@ namespace {
       // the deferred update half of the privatization problem.
       // NB:  Note that end_time is always zero for restarts and retrys
       if (tx->end_time != 0) {
-          while (last_complete.val < (tx->end_time - 1))
+          while (last_complete.val < (tx->end_time - 1)) {
               spin64();
+          }
           last_complete.val = tx->end_time;
       }
       return PostRollback(tx, read_ro, write_ro, commit_ro);
@@ -290,8 +297,9 @@ namespace {
       foreach (OrecList, i, tx->r_orecs) {
           // if orec unlocked and newer than start time, it changed, so abort.
           // if locked, it's not locked by me so abort
-          if ((*i)->v.all > tx->start_time)
+          if ((*i)->v.all > tx->start_time) {
               tx->tmabort(tx);
+          }
       }
 
       // remember that we validated at this time

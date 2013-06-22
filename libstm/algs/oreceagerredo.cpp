@@ -97,8 +97,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
 
       // run the redo log
@@ -108,8 +109,9 @@ namespace {
       tx->end_time = 1 + faiptr(&timestamp.val);
 
       // release locks
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = tx->end_time;
+      }
 
       // clean up
       tx->r_orecs.reset();
@@ -144,8 +146,9 @@ namespace {
           }
 
           // abort if locked by other
-          if (ivt.fields.lock)
+          if (ivt.fields.lock) {
               tx->tmabort(tx);
+          }
 
           // scale timestamp if ivt is too new
           uintptr_t newts = timestamp.val;
@@ -189,8 +192,9 @@ namespace {
           }
 
           // abort if locked by other
-          if (ivt.fields.lock)
+          if (ivt.fields.lock) {
               tx->tmabort(tx);
+          }
 
           // scale timestamp if ivt is too new
           uintptr_t newts = timestamp.val;
@@ -221,8 +225,9 @@ namespace {
 
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
-              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // save old, log lock, write, return
               o->p = ivt.all;
@@ -232,8 +237,9 @@ namespace {
           }
 
           // fail if lock held
-          if (ivt.fields.lock)
+          if (ivt.fields.lock) {
               tx->tmabort(tx);
+          }
 
           // unlocked but too new... scale forward and try again
           uintptr_t newts = timestamp.val;
@@ -263,8 +269,9 @@ namespace {
 
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
-              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+              if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                   tx->tmabort(tx);
+              }
 
               // save old, log lock, write, return
               o->p = ivt.all;
@@ -273,12 +280,14 @@ namespace {
           }
 
           // next best: already have the lock
-          if (ivt.all == tx->my_lock.all)
+          if (ivt.all == tx->my_lock.all) {
               return;
+          }
 
           // fail if lock held
-          if (ivt.fields.lock)
+          if (ivt.fields.lock) {
               tx->tmabort(tx);
+          }
 
           // unlocked but too new... scale forward and try again
           uintptr_t newts = timestamp.val;
@@ -303,8 +312,9 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
 
       // undo memory operations, reset lists
       tx->r_orecs.reset();
@@ -335,8 +345,9 @@ namespace {
           // read this orec
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
-          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all))
+          if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
               tx->tmabort(tx);
+          }
       }
   }
 

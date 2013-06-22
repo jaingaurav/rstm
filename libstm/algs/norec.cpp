@@ -57,33 +57,39 @@ namespace {
       while (true) {
           // read the lock until it is even
           uintptr_t s = timestamp.val;
-          if ((s & 1) == 1)
+          if ((s & 1) == 1) {
               continue;
+          }
 
           // check the read set
           CFENCE;
           // don't branch in the loop---consider it backoff if we fail
           // validation early
           bool valid = true;
-          foreach (ValueList, i, tx->vlist)
+          foreach (ValueList, i, tx->vlist) {
               valid &= STM_LOG_VALUE_IS_VALID(i, tx);
+          }
 
-          if (!valid)
+          if (!valid) {
               return VALIDATION_FAILED;
+          }
 
           // restart if timestamp changed during read set iteration
           CFENCE;
-          if (timestamp.val == s)
+          if (timestamp.val == s) {
               return s;
+          }
       }
   }
 
   bool
   irrevoc(TxThread* tx)
   {
-      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               return false;
+          }
+      }
 
       // redo writes
       tx->writes.writeback();
@@ -101,8 +107,9 @@ namespace {
       // We just need to be sure that the timestamp is not odd, or else we will
       // block.  For safety, increment the timestamp to make it even, in the event
       // that it is odd.
-      if (timestamp.val & 1)
+      if (timestamp.val & 1) {
           ++timestamp.val;
+      }
   }
 
 
@@ -160,9 +167,11 @@ namespace {
       }
 
       // get the lock and validate (use RingSTM obstruction-free technique)
-      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               tx->tmabort(tx);
+          }
+      }
 
       tx->writes.writeback();
 
@@ -194,9 +203,11 @@ namespace {
       // writeback and increments the seqlock again
 
       // get the lock and validate (use RingSTM obstruction-free technique)
-      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1))
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+      while (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               tx->tmabort(tx);
+          }
+      }
 
       tx->writes.writeback();
 
@@ -229,8 +240,9 @@ namespace {
       // if the timestamp has changed since the last read, we must validate and
       // restart this read
       while (tx->start_time != timestamp.val) {
-          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED)
+          if ((tx->start_time = validate(tx)) == VALIDATION_FAILED) {
               tx->tmabort(tx);
+          }
           tmp = *addr;
           CFENCE;
       }

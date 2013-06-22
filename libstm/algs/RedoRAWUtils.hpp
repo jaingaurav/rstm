@@ -28,9 +28,10 @@
  *  When we're word logging the RAW check is trivial. If we found the value it
  *  was returned as log.val, so we can simply return it.
  */
-#define REDO_RAW_CHECK(found, log, mask) \
-    if (__builtin_expect(found, false))  \
-        return log.val;
+#define REDO_RAW_CHECK(found, log, mask)  \
+    if (__builtin_expect(found, false)) { \
+        return log.val;                   \
+    }
 
 /**
  *  When we're word logging the RAW check is trivial. If we found the value
@@ -38,9 +39,9 @@
  *  version logs the event.
  */
 #define REDO_RAW_CHECK_PROFILEAPP(found, log, mask) \
-    if (__builtin_expect(found, false)) {     \
-        ++profiles[0].read_rw_raw;              \
-        return log.val;                       \
+    if (__builtin_expect(found, false)) {           \
+        ++profiles[0].read_rw_raw;                  \
+        return log.val;                             \
     }
 
 /**
@@ -63,9 +64,11 @@
  *  during REDO_RAW_CLEANUP.
  */
 #define REDO_RAW_CHECK(found, log, pmask)       \
-    if (__builtin_expect(found, false))         \
-        if ((pmask & log.mask) == pmask)        \
-            return log.val;
+    if (__builtin_expect(found, false)) {       \
+        if ((pmask & log.mask) == pmask) {      \
+            return log.val;                     \
+        }                                       \
+    }
 
 /**
  *  ProfileApp version logs the event.
@@ -73,11 +76,11 @@
  *  NB: Byte logging exposes new possible statistics, should we record them?
  */
 #define REDO_RAW_CHECK_PROFILEAPP(found, log, pmask)  \
-    if (__builtin_expect(found, false)) {       \
-        if ((pmask & log.mask) == pmask) {      \
-            ++profiles[0].read_rw_raw;          \
-            return log.val;                     \
-        }                                       \
+    if (__builtin_expect(found, false)) {             \
+        if ((pmask & log.mask) == pmask) {            \
+            ++profiles[0].read_rw_raw;                \
+            return log.val;                           \
+        }                                             \
     }
 
 /**

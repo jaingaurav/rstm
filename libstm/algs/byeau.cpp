@@ -115,8 +115,9 @@ namespace {
   ByEAU_Generic<CM>::commit_ro(TxThread* tx)
   {
       // read-only... release read locks
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // notify CM
       CM::onCommit(tx);
@@ -137,10 +138,12 @@ namespace {
   ByEAU_Generic<CM>::commit_rw(TxThread* tx)
   {
       // release write locks, then read locks
-      foreach (ByteLockList, i, tx->w_bytelocks)
+      foreach (ByteLockList, i, tx->w_bytelocks) {
           (*i)->owner = 0;
-      foreach (ByteLockList, i, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+      }
 
       // notify CM
       CM::onCommit(tx);
@@ -173,14 +176,16 @@ namespace {
       // abort the owner and wait until it cleans up
       while (uint32_t owner = lock->owner) {
           // only abort owner if CM says it's ok
-          if (CM::mayKill(tx, owner - 1))
+          if (CM::mayKill(tx, owner - 1)) {
               threads[owner-1]->alive = TX_ABORTED;
-          else
+          } else {
               tx->tmabort(tx);
+          }
           // NB: must have liveness check in the spin, since we may have read
           //     locks
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
       }
 
       // do the read
@@ -189,8 +194,9 @@ namespace {
       CFENCE;
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
       return result;
   }
 
@@ -215,13 +221,15 @@ namespace {
 
           // abort the owner and wait until it cleans up
           while (uint32_t owner = lock->owner) {
-              if (CM::mayKill(tx, owner - 1))
+              if (CM::mayKill(tx, owner - 1)) {
                   threads[owner-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
               // NB: again, need liveness check
-              if (tx->alive == TX_ABORTED)
+              if (tx->alive == TX_ABORTED) {
                   tx->tmabort(tx);
+              }
           }
       }
 
@@ -231,8 +239,9 @@ namespace {
       CFENCE;
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
       return result;
   }
 
@@ -248,18 +257,21 @@ namespace {
       // abort current owner, wait for release, then acquire
       while (true) {
           // abort the owner if there is one
-          if (uint32_t owner = lock->owner)
+          if (uint32_t owner = lock->owner) {
               // must get permission from CM, else abort self to prevent deadlock
-              if (CM::mayKill(tx, owner - 1))
+              if (CM::mayKill(tx, owner - 1)) {
                   threads[owner-1]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           // try to get ownership
-          else if (bcas32(&(lock->owner), 0u, tx->id))
+          } else if (bcas32(&(lock->owner), 0u, tx->id)) {
               break;
+          }
           // liveness check
-          if (tx->alive == TX_ABORTED)
+          if (tx->alive == TX_ABORTED) {
               tx->tmabort(tx);
+          }
       }
 
       // log the lock, drop any read locks I have
@@ -267,22 +279,25 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // abort active readers
-      for (int i = 0; i < 60; ++i)
+      for (int i = 0; i < 60; ++i) {
           if (lock->reader[i] != 0) {
               // again, only abort readers with CM permission, else abort self
-              if (CM::mayKill(tx, i))
+              if (CM::mayKill(tx, i)) {
                   threads[i]->alive = TX_ABORTED;
-              else
+              } else {
                   tx->tmabort(tx);
+              }
           }
+      }
 
       // add to undo log, do in-place write
       tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
       STM_DO_MASKED_WRITE(addr, val, mask);
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
 
       OnFirstWrite(tx, read_rw, write_rw, commit_rw);
   }
@@ -301,32 +316,37 @@ namespace {
           // abort current owner, wait for release, then acquire
           while (true) {
               // abort the owner if there is one
-              if (uint32_t owner = lock->owner)
+              if (uint32_t owner = lock->owner) {
                   // need CM permission
-                  if (CM::mayKill(tx, owner-1))
+                  if (CM::mayKill(tx, owner-1)) {
                       threads[owner-1]->alive = TX_ABORTED;
-                  else
+                  } else {
                       tx->tmabort(tx);
+                  }
               // try to get ownership
-              else if (bcas32(&(lock->owner), 0u, tx->id))
+              } else if (bcas32(&(lock->owner), 0u, tx->id)) {
                   break;
+              }
               // liveness check
-              if (tx->alive == TX_ABORTED)
+              if (tx->alive == TX_ABORTED) {
                   tx->tmabort(tx);
+              }
           }
           // log the lock, drop any read locks I have
           tx->w_bytelocks.insert(lock);
           lock->reader[tx->id-1] = 0;
 
           // abort active readers
-          for (int i = 0; i < 60; ++i)
+          for (int i = 0; i < 60; ++i) {
               if (lock->reader[i] != 0) {
                   // get permission to abort reader
-                  if (CM::mayKill(tx, i))
+                  if (CM::mayKill(tx, i)) {
                       threads[i]->alive = TX_ABORTED;
-                  else
+                  } else {
                       tx->tmabort(tx);
+                  }
               }
+          }
       }
 
       // add to undo log, do in-place write
@@ -334,8 +354,9 @@ namespace {
       STM_DO_MASKED_WRITE(addr, val, mask);
 
       // check for remote abort
-      if (tx->alive == TX_ABORTED)
+      if (tx->alive == TX_ABORTED) {
           tx->tmabort(tx);
+      }
   }
 
   /**
@@ -355,10 +376,12 @@ namespace {
       STM_UNDO(tx->undo_log, except, len);
 
       // release write locks, then read locks
-      foreach (ByteLockList, j, tx->w_bytelocks)
+      foreach (ByteLockList, j, tx->w_bytelocks) {
           (*j)->owner = 0;
-      foreach (ByteLockList, j, tx->r_bytelocks)
+      }
+      foreach (ByteLockList, j, tx->r_bytelocks) {
           (*j)->reader[tx->id-1] = 0;
+      }
 
       // reset lists
       tx->r_bytelocks.reset();

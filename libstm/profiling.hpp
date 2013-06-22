@@ -69,11 +69,13 @@ namespace stm
       {
           // if we don't have a function for changing algs, then we should just
           // return
-          if (!pols[curr_policy.POL_ID].decider)
+          if (!pols[curr_policy.POL_ID].decider) {
               return;
+          }
           // return if we didn't wait long enough
-          if (tx->begin_wait <= (unsigned)curr_policy.waitThresh)
+          if (tx->begin_wait <= (unsigned)curr_policy.waitThresh) {
               return;
+          }
           // ok, we're going to adapt.  Call the common adapt code
           trigger_common(tx);
       }
@@ -92,11 +94,13 @@ namespace stm
       {
           // if we don't have a function for changing algs, then we should just
           // return
-          if (!pols[curr_policy.POL_ID].decider)
+          if (!pols[curr_policy.POL_ID].decider) {
               return;
+          }
           // return if we didn't abort enough
-          if (tx->consec_aborts <= (unsigned)curr_policy.abortThresh)
+          if (tx->consec_aborts <= (unsigned)curr_policy.abortThresh) {
               return;
+          }
           // ok, we're going to adapt.  Call the common adapt code
           curr_policy.abort_switch = true;
           trigger_common(tx);
@@ -134,25 +138,30 @@ namespace stm
       {
           // if we don't have a function for changing algs, then we should just
           // return
-          if (!pols[curr_policy.POL_ID].decider)
+          if (!pols[curr_policy.POL_ID].decider) {
               return;
+          }
           // return if this policy doesn't allow commit-time probing
-          if (!pols[curr_policy.POL_ID].isCommitProfile)
+          if (!pols[curr_policy.POL_ID].isCommitProfile) {
               return;
+          }
           // return if not thread#2
-          if (tx->id != 2)
+          if (tx->id != 2) {
               return;
+          }
           // return if not a trigger commit number
           unsigned c = tx->num_ro + tx->num_commits;
-          if (c != next)
+          if (c != next) {
               return;
+          }
           // update the trigger commit number
-          if (next < 65536)
+          if (next < 65536) {
               next = next * 16;
-          else if (next < 524288)
+          } else if (next < 524288) {
               next += 65536;
-          else
+          } else {
               next += 524288;
+          }
 
           // record that this is a non-abort trigger, and call the adapt code
           //

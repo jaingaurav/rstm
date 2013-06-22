@@ -97,13 +97,13 @@ namespace {
           // if unlocked and we can lock it, do so
           if (ivt.all != tx->my_lock.all) {
               if (!ivt.fields.lock) {
-                  if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all))
+                  if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
                       tx->tmabort(tx);
+                  }
                   // save old version to o->p, remember that we hold the lock
                   o->p = ivt.all;
                   tx->locks.insert(o);
-              }
-              else {
+              } else {
                   tx->tmabort(tx);
               }
           }
@@ -114,16 +114,18 @@ namespace {
           uintptr_t ivt = i->o->v.all;
           // if orec does not match val, then it must be locked by me, with its
           // old val equalling my expected val
-          if ((ivt != i->v) && ((ivt != tx->my_lock.all) || (i->v != i->o->p)))
+          if ((ivt != i->v) && ((ivt != tx->my_lock.all) || (i->v != i->o->p))) {
               tx->tmabort(tx);
+          }
       }
 
       // run the redo log
       tx->writes.writeback();
 
       // release locks
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p+1;
+      }
 
       // clean-up
       tx->nanorecs.reset();
@@ -159,15 +161,18 @@ namespace {
               // log the read
               tx->nanorecs.insert(nanorec_t(o, ivt2));
               // validate the whole read set, then return the value we just read
-              foreach (NanorecList, i, tx->nanorecs)
-                  if (i->o->v.all != i->v)
+              foreach (NanorecList, i, tx->nanorecs) {
+                  if (i->o->v.all != i->v) {
                       tx->tmabort(tx);
+                  }
+              }
               return tmp;
           }
 
           // if lock held, spin before retrying
-          if (o->v.fields.lock)
+          if (o->v.fields.lock) {
               spin64();
+          }
       }
   }
 
@@ -226,8 +231,9 @@ namespace {
       STM_ROLLBACK(tx->writes, except, len);
 
       // release the locks and restore version numbers
-      foreach (OrecList, i, tx->locks)
+      foreach (OrecList, i, tx->locks) {
           (*i)->v.all = (*i)->p;
+      }
 
       // undo memory operations, reset lists
       tx->nanorecs.reset();

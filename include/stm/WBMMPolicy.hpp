@@ -93,8 +93,9 @@ namespace stm
           // insert /ptr/ into the prelimbo pool and increment the pool size
           prelimbo->pool[prelimbo->length++] = ptr;
           // if prelimbo is not full, we're done
-          if (prelimbo->length != prelimbo->POOL_SIZE)
+          if (prelimbo->length != prelimbo->POOL_SIZE) {
               return;
+          }
           // if prelimbo is full, we have a lot more work to do
           handle_full_prelimbo();
       }
@@ -129,18 +130,20 @@ namespace stm
       void* txAlloc(size_t const &size)
       {
           void* ptr = malloc(size);
-          if ((*my_ts)&1)
+          if ((*my_ts)&1) {
               allocs.insert(ptr);
+          }
           return ptr;
       }
 
       /*** Wrapper to thread-specific allocator for freeing memory */
       void txFree(void* ptr)
       {
-          if ((*my_ts)&1)
+          if ((*my_ts)&1) {
               frees.insert(ptr);
-          else
+          } else {
               free(ptr);
+          }
       }
 
       /*** On begin, move to an odd epoch and start logging */
@@ -150,8 +153,9 @@ namespace stm
       void onTxAbort()
       {
           AddressList::iterator i, e;
-          for (i = allocs.begin(), e = allocs.end(); i != e; ++i)
+          for (i = allocs.begin(), e = allocs.end(); i != e; ++i) {
               free(*i);
+          }
           frees.reset();
           allocs.reset();
           *my_ts = 1+*my_ts;
@@ -161,8 +165,9 @@ namespace stm
       void onTxCommit()
       {
           AddressList::iterator i, e;
-          for (i = frees.begin(), e = frees.end(); i != e; ++i)
+          for (i = frees.begin(), e = frees.end(); i != e; ++i) {
               schedForReclaim(*i);
+          }
           frees.reset();
           allocs.reset();
           *my_ts = 1+*my_ts;

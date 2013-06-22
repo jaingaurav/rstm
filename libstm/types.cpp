@@ -57,8 +57,9 @@ namespace stm
         version(1), list(NULL), capacity(initial_capacity), lsize(0)
   {
       // Find a good index length for the initial capacity of the list.
-      while (ilength < 3 * initial_capacity)
+      while (ilength < 3 * initial_capacity) {
           doubleIndexLength();
+      }
 
       index = new index_t[ilength];
       list  = typed_malloc<WriteSetEntry>(capacity);
@@ -85,8 +86,9 @@ namespace stm
           size_t h = hash(l.addr);
 
           // search for the next available slot
-          while (index[h].version == version)
+          while (index[h].version == version) {
               h = (h + 1) % ilength;
+          }
 
           index[h].address = l.addr;
           index[h].version = version;
@@ -120,14 +122,16 @@ namespace stm
   void WriteSet::rollback(void** exception, size_t len)
   {
       // early exit if there's no exception
-      if (!len)
+      if (!len) {
           return;
+      }
 
       // for each entry, call rollback with the exception range, which will
       // actually writeback if the entry is in the address range.
       void** upper = (void**)((uint8_t*)exception + len);
-      for (iterator i = begin(), e = end(); i != e; ++i)
+      for (iterator i = begin(), e = end(); i != e; ++i) {
           i->rollback(exception, upper);
+      }
   }
 #else
   // rollback was inlined
@@ -136,8 +140,9 @@ namespace stm
 #if !defined(STM_ABORT_ON_THROW)
   void UndoLog::undo()
   {
-      for (iterator i = end() - 1, e = begin(); i >= e; --i)
+      for (iterator i = end() - 1, e = begin(); i >= e; --i) {
           i->undo();
+      }
   }
 #else
   void UndoLog::undo(void** exception, size_t len)
@@ -148,15 +153,17 @@ namespace stm
       // for byte-logging we need to deal with the mask to see if the write
       // is going to be in the exception range
       if (!exception) {  // common case only adds one branch
-          for (iterator i = end() - 1, e = begin(); i >= e; --i)
+          for (iterator i = end() - 1, e = begin(); i >= e; --i) {
               i->undo();
+          }
           return;
       }
 
       void** upper = (void**)((uint8_t*)exception + len);
       for (iterator i = end() - 1, e = begin(); i >= e; --i) {
-          if (i->filter(exception, upper))
+          if (i->filter(exception, upper)) {
               continue;
+          }
           i->undo();
       }
   }
@@ -171,15 +178,17 @@ namespace stm
   {
       // we have some sort of intersection... we start by assuming that it's
       // total.
-      if (addr >= lower && addr + 1 < upper)
+      if (addr >= lower && addr + 1 < upper) {
           return true;
+      }
 
       // We have a complicated intersection. We'll do a really slow loop
       // through each byte---at this point it doesn't make a difference.
       for (unsigned i = 0; i < sizeof(val); ++i) {
           void** a = (void**)(byte_addr + i);
-          if (a >= lower && a < upper)
+          if (a >= lower && a < upper) {
               byte_mask[i] = 0x0;
+          }
       }
 
       // did we filter every byte?
