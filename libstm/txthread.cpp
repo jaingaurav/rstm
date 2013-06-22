@@ -189,6 +189,12 @@ namespace stm
       Self = new TxThread();
   }
 
+  /*** Thread-local TxThread instance */
+  TxThread* TxThread::getSelf()
+  {
+      return Self;
+  }
+
   /**
    *  Simplified support for self-abort
    */

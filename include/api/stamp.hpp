@@ -109,7 +109,7 @@ inline void tm_start(stm::TxThread** desc, int id)
 {
     stm::thread_init();
     // The desc parameter is an "out" parameter, so return its address
-    *desc = stm::Self;
+    *desc = stm::TxThread::getSelf();
 }
 
 #endif // API_STAMP_HPP__

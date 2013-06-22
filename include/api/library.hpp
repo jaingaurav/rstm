@@ -137,14 +137,14 @@ namespace stm
    *  get a chunk of memory that will be automatically reclaimed if the caller
    *  is a transaction that ultimately aborts
    */
-  inline void* tx_alloc(size_t size) { return Self->allocator.txAlloc(size); }
+  inline void* tx_alloc(size_t size) { return TxThread::getSelf()->allocator.txAlloc(size); }
 
   /**
    *  Free some memory.  If the caller is a transaction that ultimately aborts,
    *  the free will not happen.  If the caller is a transaction that commits,
    *  the free will happen at commit time.
    */
-  inline void tx_free(void* p) { Self->allocator.txFree(p); }
+  inline void tx_free(void* p) { TxThread::getSelf()->allocator.txFree(p); }
 
   /**
    *  Master class for all objects that are used in transactions, to ensure
@@ -247,13 +247,13 @@ namespace stm
 /**
  *  This is the way to start a transaction
  */
-#define TM_BEGIN(TYPE)                                      \
-    {                                                       \
-    stm::TxThread* tx = (stm::TxThread*)stm::Self;          \
-    jmp_buf _jmpbuf;                                        \
-    uint32_t abort_flags = setjmp(_jmpbuf);                 \
-    stm::begin(tx, &_jmpbuf, abort_flags);                  \
-    CFENCE;                                                 \
+#define TM_BEGIN(TYPE)                                            \
+    {                                                             \
+    stm::TxThread* tx = (stm::TxThread*)stm::TxThread::getSelf(); \
+    jmp_buf _jmpbuf;                                              \
+    uint32_t abort_flags = setjmp(_jmpbuf);                       \
+    stm::begin(tx, &_jmpbuf, abort_flags);                        \
+    CFENCE;                                                       \
     {
 
 /**
@@ -268,7 +268,7 @@ namespace stm
 /**
  *  Macro to get STM context.  This currently produces a pointer to a TxThread
  */
-#define TM_GET_THREAD() stm::TxThread* tx = (stm::TxThread*)stm::Self
+#define TM_GET_THREAD() stm::TxThread* tx = (stm::TxThread*)stm::TxThread::getSelf()
 #define TM_ARG_ALONE stm::TxThread* tx
 #define TM_ARG , TM_ARG_ALONE
 #define TM_PARAM , tx

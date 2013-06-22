@@ -156,11 +156,10 @@ namespace stm
     protected:
       TxThread();
       ~TxThread() { }
+
+    public:
+      static TxThread* getSelf();
   }; // class TxThread
-
-  /*** GLOBAL VARIABLES RELATED TO THREAD MANAGEMENT */
-  extern __thread TxThread* Self; // this thread's TxThread
-
 } // namespace stm
 
 #endif // TXTHREAD_HPP__

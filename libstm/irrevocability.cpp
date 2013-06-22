@@ -128,7 +128,7 @@ namespace stm
    */
   void become_irrevoc()
   {
-      TxThread* tx = Self;
+      TxThread* tx = TxThread::getSelf();
       // special code for degenerate STM implementations
       //
       // NB: stm::is_irrevoc relies on how this works, so if it changes then

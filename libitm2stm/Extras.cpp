@@ -31,14 +31,14 @@
 void*
 itm2stm::malloc_wrapper(size_t sz)
 {
-    return stm::Self->allocator.txAlloc(sz);
+    return stm::TxThread::getSelf()->allocator.txAlloc(sz);
 }
 
 /* Wrap: free operator(std::size_t sz)  */
 void
 itm2stm::free_wrapper(void *ptr)
 {
-    stm::Self->allocator.txFree(ptr);
+    stm::TxThread::getSelf()->allocator.txFree(ptr);
 }
 
 
@@ -46,7 +46,7 @@ itm2stm::free_wrapper(void *ptr)
 void*
 itm2stm::new_wrapper(size_t sz)
 {
-    return stm::Self->allocator.txAlloc(sz);
+    return stm::TxThread::getSelf()->allocator.txAlloc(sz);
 }
 
 
@@ -54,5 +54,5 @@ itm2stm::new_wrapper(size_t sz)
 void
 itm2stm::delete_wrapper(void *ptr)
 {
-    stm::Self->allocator.txFree(ptr);
+    stm::TxThread::getSelf()->allocator.txFree(ptr);
 }

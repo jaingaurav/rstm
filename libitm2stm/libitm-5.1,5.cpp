@@ -79,7 +79,7 @@ _ITM_transaction*
 _ITM_getTransaction(void) {
     if (!td) {
         TxThread::thread_init();
-        td = new _ITM_transaction(*stm::Self);
+        td = new _ITM_transaction(*stm::TxThread::getSelf());
     }
     return td;
 }
