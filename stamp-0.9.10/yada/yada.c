@@ -186,7 +186,7 @@ initializeWork (heap_t* workHeapPtr, mesh_t* meshPtr)
  * =============================================================================
  */
 void
-process ()
+process (void*)
 {
     TM_THREAD_ENTER();
 
