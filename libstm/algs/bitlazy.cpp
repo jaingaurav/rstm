@@ -88,7 +88,7 @@ namespace {
 
       // release read locks
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       tx->r_bitlocks.reset();
@@ -164,7 +164,7 @@ namespace {
           (*i)->owner = 0;
       }
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       // remember that this was a commit
@@ -185,7 +185,7 @@ namespace {
   {
       // first test if we've got a read bit
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1)) {
+      if (bl->readers.set_if(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
       }
       // if there's a writer, it can't be me since I'm in-flight
@@ -217,7 +217,7 @@ namespace {
 
       // first test if we've got a read bit
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1)) {
+      if (bl->readers.set_if(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
       } else {
           // if so, we may be a writer (all writes are also reads!)
@@ -249,7 +249,7 @@ namespace {
 
       // if we don't have a read bit, get one
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1)) {
+      if (bl->readers.set_if(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
       }
       if (bl->owner) {
@@ -269,7 +269,7 @@ namespace {
 
       // if we don't have a read bit, get one
       bitlock_t* bl = get_bitlock(addr);
-      if (bl->readers.setif(tx->id-1)) {
+      if (bl->readers.set_if(tx->id-1)) {
           tx->r_bitlocks.insert(bl);
       }
       if (bl->owner) {
@@ -295,7 +295,7 @@ namespace {
           (*i)->owner = 0;
       }
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       tx->r_bitlocks.reset();

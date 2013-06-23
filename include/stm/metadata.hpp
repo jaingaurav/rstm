@@ -133,16 +133,16 @@ namespace stm
       volatile uintptr_t    bits[BUCKETS];
 
       /*** set a bit */
-      void setbit(unsigned slot);
+      void set_bit(unsigned slot);
 
       /*** test a bit */
-      bool getbit(unsigned slot);
+      bool get_bit(unsigned slot);
 
       /*** unset a bit */
-      void unsetbit(unsigned slot);
+      void unset_bit(unsigned slot);
 
       /*** combine test and set */
-      bool setif(unsigned slot);
+      bool set_if(unsigned slot);
 
       /*** bitwise or */
       void operator |= (rrec_t& rhs);

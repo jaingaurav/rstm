@@ -390,7 +390,7 @@ namespace stm
   }
 
   /*** set a bit */
-  inline void rrec_t::setbit(unsigned slot)
+  inline void rrec_t::set_bit(unsigned slot)
   {
       uint32_t bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);
@@ -407,7 +407,7 @@ namespace stm
   }
 
   /*** test a bit */
-  inline bool rrec_t::getbit(unsigned slot)
+  inline bool rrec_t::get_bit(unsigned slot)
   {
       unsigned bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);
@@ -416,7 +416,7 @@ namespace stm
   }
 
   /*** unset a bit */
-  inline void rrec_t::unsetbit(unsigned slot)
+  inline void rrec_t::unset_bit(unsigned slot)
   {
       uint32_t bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);
@@ -439,7 +439,7 @@ namespace stm
   }
 
   /*** combine test and set */
-  inline bool rrec_t::setif(unsigned slot)
+  inline bool rrec_t::set_if(unsigned slot)
   {
       uint32_t bucket = slot / BITS;
       uintptr_t mask = 1lu<<(slot % BITS);

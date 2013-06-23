@@ -78,7 +78,7 @@ namespace {
   {
       // read-only... release read locks
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       tx->r_bitlocks.reset();
@@ -96,7 +96,7 @@ namespace {
           (*i)->owner = 0;
       }
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       // clean-up
@@ -120,7 +120,7 @@ namespace {
       bitlock_t* lock = get_bitlock(addr);
 
       // do I have a read lock?
-      if (lock->readers.getbit(tx->id-1)) {
+      if (lock->readers.get_bit(tx->id-1)) {
           return *addr;
       }
 
@@ -130,7 +130,7 @@ namespace {
       // now try to get a read lock
       while (true) {
           // mark my reader bit
-          lock->readers.setbit(tx->id-1);
+          lock->readers.set_bit(tx->id-1);
 
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
@@ -138,7 +138,7 @@ namespace {
           }
 
           // drop read lock, wait (with timeout) for lock release
-          lock->readers.unsetbit(tx->id-1);
+          lock->readers.unset_bit(tx->id-1);
           while (lock->owner != 0) {
               if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
@@ -165,7 +165,7 @@ namespace {
       }
 
       // do I have a read lock?
-      if (lock->readers.getbit(tx->id-1)) {
+      if (lock->readers.get_bit(tx->id-1)) {
           return *addr;
       }
 
@@ -175,7 +175,7 @@ namespace {
       // now try to get a read lock
       while (true) {
           // mark my reader bit
-          lock->readers.setbit(tx->id-1);
+          lock->readers.set_bit(tx->id-1);
 
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
@@ -183,7 +183,7 @@ namespace {
           }
 
           // drop read lock, wait (with timeout) for lock release
-          lock->readers.unsetbit(tx->id-1);
+          lock->readers.unset_bit(tx->id-1);
           while (lock->owner != 0) {
               if (++tries > READ_TIMEOUT) {
                   tx->tmabort(tx);
@@ -213,7 +213,7 @@ namespace {
 
       // log the lock, drop any read locks I have
       tx->w_bitlocks.insert(lock);
-      lock->readers.unsetbit(tx->id-1);
+      lock->readers.unset_bit(tx->id-1);
 
       // wait (with timeout) for readers to drain out
       // (read one bucket at a time)
@@ -260,7 +260,7 @@ namespace {
 
       // log the lock, drop any read locks I have
       tx->w_bitlocks.insert(lock);
-      lock->readers.unsetbit(tx->id-1);
+      lock->readers.unset_bit(tx->id-1);
 
       // wait (with timeout) for readers to drain out
       // (read one bucket at a time)
@@ -297,7 +297,7 @@ namespace {
           (*i)->owner = 0;
       }
       foreach (BitLockList, i, tx->r_bitlocks) {
-          (*i)->readers.unsetbit(tx->id-1);
+          (*i)->readers.unset_bit(tx->id-1);
       }
 
       // reset lists
