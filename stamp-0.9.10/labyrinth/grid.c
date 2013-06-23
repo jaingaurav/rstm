@@ -79,7 +79,6 @@
 #include "vector.h"
 
 
-const unsigned long CACHE_LINE_SIZE = 32UL;
 
 
 /* =============================================================================
@@ -97,12 +96,13 @@ grid_alloc (long width, long height, long depth)
         gridPtr->height = height;
         gridPtr->depth  = depth;
         long n = width * height * depth;
-        long* points_unaligned = (long*)SEQ_MALLOC(n * sizeof(long) + CACHE_LINE_SIZE);
+        size_t cacheLineSize = getCacheLineSize();
+        long* points_unaligned = (long*)SEQ_MALLOC(n * sizeof(long) + cacheLineSize);
         assert(points_unaligned);
         gridPtr->points_unaligned = points_unaligned;
         gridPtr->points = (long*)((char*)(((unsigned long)points_unaligned
-                                          & ~(CACHE_LINE_SIZE-1)))
-                                  + CACHE_LINE_SIZE);
+                                          & ~(cacheLineSize-1)))
+                                  + cacheLineSize);
         memset(gridPtr->points, GRID_POINT_EMPTY, (n * sizeof(long)));
     }
 
@@ -125,12 +125,13 @@ Pgrid_alloc (long width, long height, long depth)
         gridPtr->height = height;
         gridPtr->depth  = depth;
         long n = width * height * depth;
-        long* points_unaligned = (long*)P_MALLOC(n * sizeof(long) + CACHE_LINE_SIZE);
+        size_t cacheLineSize = getCacheLineSize();
+        long* points_unaligned = (long*)P_MALLOC(n * sizeof(long) + cacheLineSize);
         assert(points_unaligned);
         gridPtr->points_unaligned = points_unaligned;
         gridPtr->points = (long*)((char*)(((unsigned long)points_unaligned
-                                          & ~(CACHE_LINE_SIZE-1)))
-                                  + CACHE_LINE_SIZE);
+                                          & ~(cacheLineSize-1)))
+                                  + cacheLineSize);
         memset(gridPtr->points, GRID_POINT_EMPTY, (n * sizeof(long)));
     }
 
@@ -179,7 +180,8 @@ grid_copy (grid_t* dstGridPtr, grid_t* srcGridPtr)
 #ifdef USE_EARLY_RELEASE
     long* srcPoints = srcGridPtr->points;
     long i;
-    long i_step = (CACHE_LINE_SIZE / sizeof(srcPoints[0]));
+    size_t cacheLineSize = getCacheLineSize();
+    long i_step = (cacheLineSize / sizeof(srcPoints[0]));
     for (i = 0; i < n; i+=i_step) {
         TM_EARLY_RELEASE(srcPoints[i]); /* releases entire line */
     }
