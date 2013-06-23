@@ -392,6 +392,7 @@ inline void sleep_ms(uint32_t ms) { usleep(ms*1000); }
 #include <assert.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 /**
  *  Yield the CPU
@@ -413,6 +414,14 @@ inline uint64_t getElapsedTime()
     return tt;
 }
 
+/**
+ * Get the cache line size form sysconf
+ */
+inline size_t getCacheLineSize()
+{
+    return sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+}
+
 #endif // STM_OS_LINUX
 
 #if defined(STM_OS_SOLARIS)
@@ -431,11 +440,20 @@ inline uint64_t getElapsedTime()
     return gethrtime();
 }
 
+/**
+ * Hard code a value of 64 for now
+ */
+inline size_t getCacheLineSize()
+{
+    return 64;
+}
+
 #endif // STM_OS_SOLARIS
 
 #if defined(STM_OS_MACOS)
 #include <mach/mach_time.h>
 #include <sched.h>
+#include <sys/sysctl.h>
 
 /**
  *  Yield the CPU
@@ -457,6 +475,17 @@ inline uint64_t getElapsedTime()
         (void)mach_timebase_info(&sTimebaseInfo);
     }
     return mach_absolute_time() * sTimebaseInfo.numer / sTimebaseInfo.denom;
+}
+
+/**
+ * Get the cache line size form sysctl
+ */
+inline size_t getCacheLineSize()
+{
+    size_t cacheLineSize = 0;;
+    size_t len = sizeof(size_t);
+    sysctlbyname("hw.cachelinesize", &cacheLineSize, &len, 0, 0);
+    return cacheLineSize;
 }
 
 #endif // STM_OS_MACOS
