@@ -70,7 +70,7 @@ namespace {
   {
       // if the transaction is invalid, abort
       if (__builtin_expect(tx->alive == 2, false)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // ok, all is good
@@ -87,7 +87,7 @@ namespace {
   {
       // if the transaction is invalid, abort
       if (__builtin_expect(tx->alive == 2, false)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // grab the lock to stop the world
@@ -100,7 +100,7 @@ namespace {
       // double check that we're valid
       if (__builtin_expect(tx->alive == 2,false)) {
           timestamp.val = tmp + 2; // release the lock
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // kill conflicting transactions
@@ -152,7 +152,7 @@ namespace {
           }
           // abort if we're killed
           if (tx->alive == 2) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
   }

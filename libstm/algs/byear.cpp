@@ -90,7 +90,7 @@ namespace {
   {
       // atomically mark self committed
       if (!bcas32(&tx->alive, TX_ACTIVE, TX_COMMITTED)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // we committed... replay redo log
@@ -132,11 +132,11 @@ namespace {
           switch (threads[owner-1]->alive) {
             case TX_COMMITTED:
               // abort myself if the owner is writing back
-              tx->tmabort(tx);
+              tx->abort();
             case TX_ACTIVE:
               // abort the owner(it's active)
               if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
               break;
             case TX_ABORTED:
@@ -152,7 +152,7 @@ namespace {
 
       // check for remote abort
       if (tx->alive == TX_ABORTED) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       return result;
   }
@@ -190,11 +190,11 @@ namespace {
           switch (threads[owner-1]->alive) {
             case TX_COMMITTED:
               // abort myself if the owner is writing back
-              tx->tmabort(tx);
+              tx->abort();
             case TX_ACTIVE:
               // abort the owner(it's active)
               if (!bcas32(&threads[owner-1]->alive, TX_ACTIVE, TX_ABORTED)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
               break;
             case TX_ABORTED:
@@ -210,7 +210,7 @@ namespace {
 
       // check for remote abort
       if (tx->alive == TX_ABORTED) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       return result;
@@ -235,7 +235,7 @@ namespace {
           }
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -252,7 +252,7 @@ namespace {
       for (int i = 0; i < 60; ++i) {
           if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
               if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -288,7 +288,7 @@ namespace {
           }
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -300,7 +300,7 @@ namespace {
       for (int i = 0; i < 60; ++i) {
           if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
               if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }

@@ -38,7 +38,7 @@ _ITM_transaction::commit() {
     if (thread_handle_.nesting_depth == 1)
     {
         // dispatch to the appropriate end function
-        thread_handle_.tmcommit(&thread_handle_);
+        thread_handle_.commit();
 
         // // zero scope (to indicate "not in tx")
         CFENCE;

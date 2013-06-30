@@ -122,7 +122,7 @@ namespace {
               uintptr_t ivt = (*i)->v.all;
               // if unlocked and newer than start time, abort
               if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -175,13 +175,13 @@ namespace {
               if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
               } else {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
 
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
 
           // scale timestamp if ivt2 is too new
@@ -229,13 +229,13 @@ namespace {
               if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
               } else {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
 
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
 
           // scale timestamp if ivt2 is too new
@@ -263,7 +263,7 @@ namespace {
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
               if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
 
               // save old, log lock, write, return
@@ -280,13 +280,13 @@ namespace {
               if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
               } else {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
 
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
 
           // unlocked but too new... scale forward and try again
@@ -313,7 +313,7 @@ namespace {
           // common case: uncontended location... lock it
           if (ivt.all <= tx->start_time) {
               if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
 
               // save old, log lock, write, return
@@ -336,13 +336,13 @@ namespace {
               if (CM::mayKill(tx, ivt.fields.id - 1)) {
                   threads[ivt.fields.id-1]->alive = TX_ABORTED;
               } else {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
 
           // liveness check
           if (tx->alive == TX_ABORTED) {
-              tx->tmabort(tx);
+              tx->abort();
           }
 
           // unlocked but too new... scale forward and try again
@@ -418,7 +418,7 @@ namespace {
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
           if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
   }

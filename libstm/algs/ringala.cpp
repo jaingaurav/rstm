@@ -104,7 +104,7 @@ namespace {
               // change from here on out.
               for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--) {
                   if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
-                      tx->tmabort(tx);
+                      tx->abort();
                   }
               }
 
@@ -115,7 +115,7 @@ namespace {
 
               // detect ring rollover: start.ts must not have changed
               if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
 
               // ensure this tx doesn't look at this entry again
@@ -152,7 +152,7 @@ namespace {
   {
       // abort if this read would violate ALA
       if (tx->cf->lookup(addr)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // read the value from memory, log the address, and validate
@@ -179,7 +179,7 @@ namespace {
 
       // abort if this read would violate ALA
       if (tx->cf->lookup(addr)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // read the value from memory, log the address, and validate
@@ -267,12 +267,12 @@ namespace {
       CFENCE;
       // detect ring rollover: start.ts must not have changed
       if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // now intersect my rf with my cf
       if (tx->rf->intersect(tx->cf)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // wait for newest entry to be writeback-complete before returning

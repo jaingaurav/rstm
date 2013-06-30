@@ -36,11 +36,7 @@ namespace
   NORETURN void
   default_abort_handler(TxThread* tx)
   {
-      jmp_buf* scope = (jmp_buf*)TxThread::tmrollback(tx
-#if defined(STM_ABORT_ON_THROW)
-                                                      , NULL, 0
-#endif
-                                               );
+      jmp_buf* scope = (jmp_buf*)tx->rollback(0, 0);
       // need to null out the scope
       longjmp(*scope, 1);
   }
@@ -195,6 +191,36 @@ namespace stm
       return Self;
   }
 
+  bool TxThread::begin()
+  {
+      return tmbegin(this);
+  }
+
+  void TxThread::commit()
+  {
+      return tmcommit(this);
+  }
+
+  void* TxThread::read(THREAD_READ_SIG(addr,mask))
+  {
+      return tmread(this, addr STM_MASK(mask));
+  }
+
+  void TxThread::write(THREAD_WRITE_SIG(addr,val,mask))
+  {
+      tmwrite(this, addr, val STM_MASK(mask));
+  }
+
+  scope_t* TxThread::rollback(THREAD_ROLLBACK_SIG(exception,len))
+  {
+      return tmrollback(this STM_EXCEPTION(exception, len));
+  }
+
+  NORETURN void TxThread::abort()
+  {
+      tmabort(this);
+  }
+
   /**
    *  Simplified support for self-abort
    */
@@ -205,7 +231,7 @@ namespace stm
       // register this restart
       ++tx->num_restarts;
       // call the abort code
-      tx->tmabort(tx);
+      tx->abort();
   }
 
 

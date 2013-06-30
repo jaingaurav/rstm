@@ -104,7 +104,7 @@ namespace {
               // intersect against all new entries
               for (uintptr_t i = commit_time; i >= tx->start_time + 1; i--) {
                   if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
-                      tx->tmabort(tx);
+                      tx->abort();
                   }
               }
 
@@ -115,7 +115,7 @@ namespace {
 
               // detect ring rollover: start.ts must not have changed
               if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
 
               // ensure this tx doesn't look at this entry again
@@ -239,7 +239,7 @@ namespace {
       // intersect against all new entries
       for (uintptr_t i = my_index; i >= tx->start_time + 1; i--) {
           if (ring_wf[i % RING_ELEMENTS].intersect(tx->rf)) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -250,7 +250,7 @@ namespace {
 
       // detect ring rollover: start.ts must not have changed
       if (timestamp.val > (tx->start_time + RING_ELEMENTS)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // ensure this tx doesn't look at this entry again

@@ -141,7 +141,7 @@ namespace {
           lock->readers.unset_bit(tx->id-1);
           while (lock->owner != 0) {
               if (++tries > READ_TIMEOUT) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -186,7 +186,7 @@ namespace {
           lock->readers.unset_bit(tx->id-1);
           while (lock->owner != 0) {
               if (++tries > READ_TIMEOUT) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -207,7 +207,7 @@ namespace {
       // get the write lock, with timeout
       while (!bcasptr(&(lock->owner), 0u, tx->id)) {
           if (++tries > ACQUIRE_TIMEOUT) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -221,7 +221,7 @@ namespace {
           tries = 0;
           while (lock->readers.bits[b]) {
               if (++tries > DRAIN_TIMEOUT) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -254,7 +254,7 @@ namespace {
       // get the write lock, with timeout
       while (!bcasptr(&(lock->owner), 0u, tx->id)) {
           if (++tries > ACQUIRE_TIMEOUT) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -271,7 +271,7 @@ namespace {
           tries = 0;
           while (lock->readers.bits[b]) {
               if (++tries > DRAIN_TIMEOUT) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }

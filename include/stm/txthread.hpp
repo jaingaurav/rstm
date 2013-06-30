@@ -159,6 +159,18 @@ namespace stm
 
     public:
       static TxThread* getSelf();
+
+      TM_FASTCALL bool begin();
+
+      TM_FASTCALL void commit();
+
+      TM_FASTCALL void* read(THREAD_READ_SIG(,));
+
+      TM_FASTCALL void write(THREAD_WRITE_SIG(,,));
+
+      scope_t* rollback(THREAD_ROLLBACK_SIG(,));
+
+      NORETURN void abort();
   }; // class TxThread
 } // namespace stm
 

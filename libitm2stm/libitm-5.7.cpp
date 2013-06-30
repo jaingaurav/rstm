@@ -71,7 +71,7 @@ _ITM_transaction::enter(Node* const scope, const uint32_t flags) {
                                                  thread_handle_.end_txn_time);
 
         // Now call the per-algorithm begin function.
-        irrevocable = TxThread::tmbegin(&thread_handle_);
+        irrevocable = thread_handle_.begin();
     } else {
         irrevocable = libraryIsInevitable();
     }

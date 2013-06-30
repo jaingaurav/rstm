@@ -69,18 +69,18 @@ struct INST<T, N, false> {
 
         // load the first word, masking the high bytes that we're interested in
         uintptr_t mask = make_mask(offset, sizeof(void*));
-        cast.from[0] = tx.tmread(&tx, base, mask);
+        cast.from[0] = tx.read(base, mask);
 
         // reset the mask, and load the middle words---for N=1 I expect this
         // loop to be eliminated
         mask = make_mask(0, sizeof(void*));
         for (size_t i = 1; i < N; ++i) {
-            cast.from[i] = tx.tmread(&tx, base + i, mask);
+            cast.from[i] = tx.read(base + i, mask);
         }
 
         // compute the final mask
         mask = make_mask(0, offset);
-        cast.from[N] = tx.tmread(&tx, base + N, mask);
+        cast.from[N] = tx.read(base + N, mask);
 
         // find the right byte, and return it as a T
         return *reinterpret_cast<T*>(cast.to + offset);
@@ -102,18 +102,18 @@ struct INST<T, N, false> {
 
         // store the first word, masking the high bytes that we care about
         uintptr_t mask = make_mask(offset, sizeof(void*));
-        tx.tmwrite(&tx, base, cast.to[0], mask);
+        tx.write(base, cast.to[0], mask);
 
         // reset the mask, and store the middle words---for N=1 I expect this
         // loop to be eliminated
         mask = make_mask(0, sizeof(void*));
         for (size_t i = 1; i < N; ++i) {
-            tx.tmwrite(&tx, base + i, cast.to[i], mask);
+            tx.write(base + i, cast.to[i], mask);
         }
 
         // compute the final mask, and store the last word
         mask = make_mask(0, offset);
-        tx.tmwrite(&tx, base + N, cast.to[N], mask);
+        tx.write(base + N, cast.to[N], mask);
     }
 
     inline static T Read(TxThread& tx, const T* addr) {
@@ -158,7 +158,7 @@ struct INST<T, N, true> {
         // load the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
         for (size_t i = 0; i < N; ++i) {
-            cast.from[i] = tx.tmread(&tx, address + i, mask);
+            cast.from[i] = tx.read(address + i, mask);
         }
 
         return cast.to;
@@ -182,7 +182,7 @@ struct INST<T, N, true> {
         // store the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
         for (size_t i = 0; i < N; ++i) {
-            tx.tmwrite(&tx, address + i, cast.to[i], mask);
+            tx.write(address + i, cast.to[i], mask);
         }
     }
 };
@@ -234,7 +234,7 @@ struct INST<T, 0u, true> {
         union {
             void* from;
             uint8_t to[sizeof(void*)];
-        } cast = { tx.tmread(&tx, base_of(addr), mask) };
+        } cast = { tx.read(base_of(addr), mask) };
 
         // pick out the right T from the "to" array and return it
         return *reinterpret_cast<T*>(cast.to + offset);
@@ -257,7 +257,7 @@ struct INST<T, 0u, true> {
 
         // perform the store
         const uintptr_t mask = make_mask(offset, offset + sizeof(T));
-        tx.tmwrite(&tx, base, cast.to, mask);
+        tx.write(base, cast.to, mask);
     }
 };
 

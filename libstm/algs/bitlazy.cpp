@@ -82,7 +82,7 @@ namespace {
   {
       // were there remote aborts?
       if (!tx->alive) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       CFENCE;
 
@@ -116,14 +116,14 @@ namespace {
           // abort if cannot acquire and haven't locked yet
           if (bl->owner == 0) {
               if (!bcasptr(&bl->owner, (uintptr_t)0, tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
               // log lock
               tx->w_bitlocks.insert(bl);
               // get readers
               accumulator |= bl->readers;
           } else if (bl->owner != tx->my_lock.all) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -151,7 +151,7 @@ namespace {
       // were there remote aborts?
       CFENCE;
       if (!tx->alive) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       CFENCE;
 
@@ -190,13 +190,13 @@ namespace {
       }
       // if there's a writer, it can't be me since I'm in-flight
       if (bl->owner) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       // order the read before checking for remote aborts
       void* val = *addr;
       CFENCE;
       if (!tx->alive) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       return val;
   }
@@ -225,13 +225,13 @@ namespace {
           REDO_RAW_CHECK(found, log, mask);
       }
       if (bl->owner) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       void* val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       CFENCE;
       if (!tx->alive) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       return val;
   }
@@ -253,7 +253,7 @@ namespace {
           tx->r_bitlocks.insert(bl);
       }
       if (bl->owner) {
-          tx->tmabort(tx);
+          tx->abort();
       }
       OnFirstWrite(tx, read_rw, write_rw, commit_rw);
   }
@@ -273,7 +273,7 @@ namespace {
           tx->r_bitlocks.insert(bl);
       }
       if (bl->owner) {
-          tx->tmabort(tx);
+          tx->abort();
       }
   }
 

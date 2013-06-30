@@ -25,7 +25,7 @@ read_subword(TxThread& tx, void** base, uint8_t* to, size_t i, size_t j) {
     const union {
         void* word;
         uint8_t bytes[sizeof(void*)];
-    } align = { tx.tmread(&tx, base, make_mask(i, j)) };
+    } align = { tx.read(base, make_mask(i, j)) };
 
     // copy the bytes on-by-one, note the offset into the align union
     const size_t length = (j - i);
@@ -56,7 +56,7 @@ write_subword(TxThread& tx, void** base, const uint8_t* from, size_t i,
     }
 
     // perform the write
-    tx.tmwrite(&tx, base, buffer.word, make_mask(i, j));
+    tx.write(base, buffer.word, make_mask(i, j));
 
     // return the number of bytes we wrote
     return length;
@@ -123,7 +123,7 @@ itm2stm::block_read(TxThread& tx, void* target, const void* source,
     void** to = reinterpret_cast<void**>(target);
 
     for (size_t i = 0; i < words; ++i, read += sizeof(void*)) {
-        to[i] = tx.tmread(&tx, base + i, mask);
+        to[i] = tx.read(base + i, mask);
     }
 
     // return the number of bytes we've read
@@ -190,7 +190,7 @@ itm2stm::block_write(TxThread& tx, void* target, const void* source,
     void* const * const from = reinterpret_cast<void* const *>(source);
 
     for (size_t i = 0; i < words; ++i, written += sizeof(void*)) {
-        tx.tmwrite(&tx, base + i, from[i], mask);
+        tx.write(base + i, from[i], mask);
     }
 
     // return the number of bytes we've written
@@ -231,7 +231,7 @@ itm2stm::block_set(TxThread& tx, void* target, uint8_t c, size_t length) {
     const uintptr_t mask = make_mask(0, sizeof(void*));
 
     for (size_t i = 0; i < words; ++i, length -= sizeof(void*)) {
-        tx.tmwrite(&tx, base + i, from.word, mask);
+        tx.write(base + i, from.word, mask);
     }
 
     // deal with any postfix bytes

@@ -94,7 +94,7 @@ namespace stm
       }
 
       // now call the per-algorithm begin function
-      TxThread::tmbegin(tx);
+      tx->begin();
   }
 
   /**
@@ -111,7 +111,7 @@ namespace stm
       }
 
       // dispatch to the appropriate end function
-      tx->tmcommit(tx);
+      tx->commit();
 
       // zero scope (to indicate "not in tx")
       CFENCE;

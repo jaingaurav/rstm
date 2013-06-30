@@ -111,14 +111,14 @@ namespace {
           if (ivt <= tx->start_time) {
               // abort if cannot acquire
               if (!bcasptr(&o->v.all, ivt, tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
               // save old version to o->p, log lock
               o->p = ivt;
               tx->locks.insert(o);
           } else if (ivt != tx->my_lock.all) {
               // else if we don't hold the lock abort
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -131,7 +131,7 @@ namespace {
               // read this orec
               uintptr_t ivt = (*i)->v.all;
               if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -204,7 +204,7 @@ namespace {
           foreach (OrecList, i, tx->r_orecs) {
               // if orec locked or newer than start time, abort
               if ((*i)->v.all > tx->start_time) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
 
@@ -320,7 +320,7 @@ namespace {
       foreach (OrecList, i, tx->r_orecs) {
           // if orec locked or newer than start time, abort
           if ((*i)->v.all > tx->start_time) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
       // careful here: we can't scale the start time past last_complete.val,

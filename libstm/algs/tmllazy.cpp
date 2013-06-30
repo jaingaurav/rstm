@@ -82,7 +82,7 @@ namespace {
   {
       // we have writes... if we can't get the lock, abort
       if (!bcasptr(&timestamp.val, tx->start_time, tx->start_time + 1)) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // we're committed... run the redo log
@@ -110,7 +110,7 @@ namespace {
       if (__builtin_expect(timestamp.val == tx->start_time, true)) {
           return tmp;
       }
-      tx->tmabort(tx);
+      tx->abort();
       // unreachable
       return NULL;
   }

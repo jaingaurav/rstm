@@ -98,13 +98,13 @@ namespace {
           if (ivt.all != tx->my_lock.all) {
               if (!ivt.fields.lock) {
                   if (!bcasptr(&o->v.all, ivt.all, tx->my_lock.all)) {
-                      tx->tmabort(tx);
+                      tx->abort();
                   }
                   // save old version to o->p, remember that we hold the lock
                   o->p = ivt.all;
                   tx->locks.insert(o);
               } else {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
       }
@@ -115,7 +115,7 @@ namespace {
           // if orec does not match val, then it must be locked by me, with its
           // old val equalling my expected val
           if ((ivt != i->v) && ((ivt != tx->my_lock.all) || (i->v != i->o->p))) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -163,7 +163,7 @@ namespace {
               // validate the whole read set, then return the value we just read
               foreach (NanorecList, i, tx->nanorecs) {
                   if (i->o->v.all != i->v) {
-                      tx->tmabort(tx);
+                      tx->abort();
                   }
               }
               return tmp;

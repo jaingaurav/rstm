@@ -66,18 +66,23 @@
 #endif
 
 #if defined(STM_WS_BYTELOG)
-#   define STM_READ_SIG(tx, addr, mask)       TxThread* tx, void** addr, uintptr_t mask
-#   define STM_WRITE_SIG(tx, addr, val, mask) TxThread* tx, void** addr, void* val, uintptr_t mask
+#   define THREAD_READ_SIG(addr, mask)        void** addr, uintptr_t mask
+#   define THREAD_WRITE_SIG(addr, val, mask)  void** addr, void* val, uintptr_t mask
 #else
-#   define STM_READ_SIG(tx, addr, mask)       TxThread* tx, void** addr
-#   define STM_WRITE_SIG(tx, addr, val, mask) TxThread* tx, void** addr, void* val
+#   define THREAD_READ_SIG(addr, mask)        void** addr
+#   define THREAD_WRITE_SIG(addr, val, mask)  void** addr, void* val
 #endif
+#define STM_READ_SIG(tx, addr, mask)          TxThread* tx, THREAD_READ_SIG(addr, mask)
+#define STM_WRITE_SIG(tx, addr, val, mask)    TxThread* tx, THREAD_WRITE_SIG(addr, val, mask)
 
 #if defined(STM_ABORT_ON_THROW)
+#   define STM_EXCEPTION(exception, len)         , exception, len
 #   define STM_ROLLBACK_SIG(tx, exception, len)  \
-    TxThread* tx, void** exception, size_t len
+    TxThread* tx, THREAD_ROLLBACK_SIG(exception, len)
 #else
+#   define STM_EXCEPTION(exception, len)
 #   define STM_ROLLBACK_SIG(tx, exception, len)  TxThread* tx
 #endif
+#define THREAD_ROLLBACK_SIG(exception, len)      void** exception, size_t len
 
 #endif // MACROS_HPP__

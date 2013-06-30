@@ -60,8 +60,7 @@ _ITM_transaction::rollback() {
         // is why we can only call it once we know the depth is supposed to be
         // 0. It's not relevant that we've already set the depth to 0; that
         // behavior is to support RSTM's "library" API.
-        thread_handle_.tmrollback(&thread_handle_, thrown.first,
-                                  thrown.second);
+        thread_handle_.rollback(thrown.first, thrown.second);
         thread_handle_.stack_high = 0x0;
         thread_handle_.stack_low = (void**)~0x0;
     }

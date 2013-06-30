@@ -91,7 +91,7 @@ namespace {
       // writeback
       while (last_complete.val != (uintptr_t)(tx->order - 1)) {
           if (TxThread::tmbegin != begin) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -145,7 +145,7 @@ namespace {
       // NB: this is a pretty serious tradeoff... it admits false aborts for
       //     the sake of preventing a 'check if locked' test
       if (ivt > tx->ts_cache) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // log orec
@@ -244,7 +244,7 @@ namespace {
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
           if (ivt > tx->ts_cache) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
       // now update the finish_cache to remember that at this time, we were

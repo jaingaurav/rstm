@@ -101,7 +101,7 @@ namespace {
       // we need to transition to fast here, but not till our turn
       while (last_complete.val != ((uintptr_t)tx->order - 1)) {
           if (TxThread::tmbegin != begin) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
       // validate
@@ -110,7 +110,7 @@ namespace {
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
           if (ivt > tx->ts_cache) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
       // writeback
@@ -168,7 +168,7 @@ namespace {
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
       if (ivt > tx->ts_cache) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // log orec
@@ -182,7 +182,7 @@ namespace {
               uintptr_t ivt_inner = (*i)->v.all;
               // if it has a timestamp of ts_cache or greater, abort
               if (ivt_inner > tx->ts_cache) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
           }
           // now update the ts_cache to remember that at this time, we were
@@ -212,7 +212,7 @@ namespace {
       uintptr_t ivt = o->v.all;
       // abort if this changed since the last time I saw someone finish
       if (ivt > tx->ts_cache) {
-          tx->tmabort(tx);
+          tx->abort();
       }
 
       // log orec
@@ -327,7 +327,7 @@ namespace {
           uintptr_t ivt = (*i)->v.all;
           // if it has a timestamp of ts_cache or greater, abort
           if (ivt > tx->ts_cache) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
       // now update the finish_cache to remember that at this time, we were

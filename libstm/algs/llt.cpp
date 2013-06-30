@@ -97,14 +97,14 @@ namespace {
           if (ivt <= tx->start_time) {
               // abort if cannot acquire
               if (!bcasptr(&o->v.all, ivt, tx->my_lock.all)) {
-                  tx->tmabort(tx);
+                  tx->abort();
               }
               // save old version to o->p, remember that we hold the lock
               o->p = ivt;
               tx->locks.insert(o);
           // else if we don't hold the lock abort
           } else if (ivt != tx->my_lock.all) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
 
@@ -156,7 +156,7 @@ namespace {
           return tmp;
       }
       // unreachable
-      tx->tmabort(tx);
+      tx->abort();
       return NULL;
   }
 
@@ -189,7 +189,7 @@ namespace {
           tx->r_orecs.insert(o);
           return tmp;
       }
-      tx->tmabort(tx);
+      tx->abort();
       // unreachable
       return NULL;
   }
@@ -260,7 +260,7 @@ namespace {
           uintptr_t ivt = (*i)->v.all;
           // if unlocked and newer than start time, abort
           if ((ivt > tx->start_time) && (ivt != tx->my_lock.all)) {
-              tx->tmabort(tx);
+              tx->abort();
           }
       }
   }
