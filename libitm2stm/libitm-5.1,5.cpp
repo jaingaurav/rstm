@@ -34,7 +34,7 @@ static __thread _ITM_transaction* td = NULL;
 /// Don't need any of the funky user-visible abort handling because the abort is
 /// invisible. Just treat it like a restart of the current scope. This is passed
 /// to sys_init.
-void
+__attribute__((noreturn)) void
 tmabort(stm::TxThread* tx) {
     // Clear the exception object if there is one. This is because tmabort is
     // called due to conflict aborts, and the exception isn't going to reach the
