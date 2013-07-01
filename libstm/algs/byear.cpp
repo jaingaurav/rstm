@@ -36,8 +36,8 @@ namespace {
   struct ByEAR
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -115,7 +115,7 @@ namespace {
   /**
    *  ByEAR read (read-only transaction)
    */
-  void*
+  uintptr_t
   ByEAR::read_ro(STM_READ_SIG(tx,addr,))
   {
       bytelock_t* lock = get_bytelock(addr);
@@ -147,7 +147,7 @@ namespace {
 
       // do the read
       CFENCE;
-      void* result = *addr;
+      uintptr_t result = *addr;
       CFENCE;
 
       // check for remote abort
@@ -160,7 +160,7 @@ namespace {
   /**
    *  ByEAR read (writing transaction)
    */
-  void*
+  uintptr_t
   ByEAR::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       bytelock_t* lock = get_bytelock(addr);
@@ -173,7 +173,7 @@ namespace {
           bool found = tx->writes.find(log);
           REDO_RAW_CHECK(found, log, mask);
 
-          void* val = *addr;
+          uintptr_t val = *addr;
           REDO_RAW_CLEANUP(val, found, log, mask);
           return val;
       }
@@ -205,7 +205,7 @@ namespace {
 
       // do the read
       CFENCE;
-      void* result = *addr;
+      uintptr_t result = *addr;
       CFENCE;
 
       // check for remote abort

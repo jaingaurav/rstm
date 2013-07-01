@@ -45,8 +45,8 @@ namespace {
   struct Nano
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -137,7 +137,7 @@ namespace {
   /**
    *  Nano read (read-only context):
    */
-  void*
+  uintptr_t
   Nano::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
@@ -150,7 +150,7 @@ namespace {
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
 
           // re-read orec
@@ -179,7 +179,7 @@ namespace {
   /**
    *  Nano read (writing context):
    */
-  void*
+  uintptr_t
   Nano::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -188,7 +188,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

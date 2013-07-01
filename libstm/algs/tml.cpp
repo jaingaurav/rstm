@@ -40,7 +40,7 @@ using stm::UNRECOVERABLE;
 namespace {
   struct TML {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read(STM_READ_SIG(,,));
       static TM_FASTCALL void write(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit(TxThread*);
 
@@ -92,10 +92,10 @@ namespace {
    *    If we have the lock, we're irrevocable so just do a read.  Otherwise,
    *    after doing the read, make sure we are still valid.
    */
-  void*
+  uintptr_t
   TML::read(STM_READ_SIG(tx,addr,))
   {
-      void* val = *addr;
+      uintptr_t val = *addr;
       if (tx->tmlHasLock) {
           return val;
       }

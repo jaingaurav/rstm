@@ -72,7 +72,7 @@ namespace {
       static stm::scope_t* rollback(STM_ROLLBACK_SIG(,,));
   };
 
-  TM_FASTCALL void* read(STM_READ_SIG(,,));
+  TM_FASTCALL uintptr_t read(STM_READ_SIG(,,));
   TM_FASTCALL void write(STM_WRITE_SIG(,,,));
   bool irrevoc(TxThread*);
   NOINLINE void validate(TxThread*);
@@ -166,7 +166,7 @@ namespace {
    *
    *    Must check orec twice, and may need to validate
    */
-  void*
+  uintptr_t
   read(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr, then start loop to read a consistent value
@@ -178,7 +178,7 @@ namespace {
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
 
           // best case: I locked it already
           if (ivt.all == tx->my_lock.all) {

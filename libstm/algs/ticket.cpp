@@ -32,7 +32,7 @@ namespace {
   struct Ticket
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read(STM_READ_SIG(,,));
       static TM_FASTCALL void write(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit(TxThread*);
 
@@ -65,7 +65,7 @@ namespace {
   /**
    *  Ticket read
    */
-  void*
+  uintptr_t
   Ticket::read(STM_READ_SIG(,addr,)) {
       return *addr;
   }

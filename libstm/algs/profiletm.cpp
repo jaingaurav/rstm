@@ -32,8 +32,8 @@ namespace
   struct ProfileTM
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -165,7 +165,7 @@ namespace
    *
    *    Simply read the location, and remember that we did a read
    */
-  void*
+  uintptr_t
   ProfileTM::read_ro(STM_READ_SIG(,addr,))
   {
       ++profiles[last_complete.val].read_ro;
@@ -175,7 +175,7 @@ namespace
   /**
    *  ProfileTM read (writing transaction)
    */
-  void*
+  uintptr_t
   ProfileTM::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log

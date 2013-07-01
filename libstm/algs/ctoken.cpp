@@ -43,8 +43,8 @@ using stm::get_orec;
 namespace {
   struct CToken {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread* tx);
@@ -129,12 +129,12 @@ namespace {
   /**
    *  CToken read (read-only transaction)
    */
-  void*
+  uintptr_t
   CToken::read_ro(STM_READ_SIG(tx,addr,))
   {
       // read the location... this is safe since timestamps behave as in Wang's
       // CGO07 paper
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE; // RBR between dereference and orec check
 
       // get the orec addr, read the orec's version#
@@ -161,7 +161,7 @@ namespace {
   /**
    *  CToken read (writing transaction)
    */
-  void*
+  uintptr_t
   CToken::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -170,7 +170,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

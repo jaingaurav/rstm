@@ -29,11 +29,11 @@ offset_of(const void* const address) {
 /// mask as necessary). This drops the word-unaligned least significant bits
 /// from the address, if there are any. We get the least significant bits using
 /// the same technique as offset_of.
-inline void**
+inline uintptr_t*
 base_of(const void* const address) {
     const uintptr_t MASK = ~static_cast<uintptr_t>(sizeof(void*) - 1);
     const uintptr_t base = reinterpret_cast<uintptr_t>(address) & MASK;
-    return reinterpret_cast<void**>(base);
+    return reinterpret_cast<uintptr_t*>(base);
 }
 
 inline void

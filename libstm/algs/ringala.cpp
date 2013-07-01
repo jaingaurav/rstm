@@ -39,8 +39,8 @@ namespace {
   struct RingALA
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -147,7 +147,7 @@ namespace {
    *    RingALA reads are like RingSTM reads, except that we must also verify
    *    that our reads won't result in ALA conflicts
    */
-  void*
+  uintptr_t
   RingALA::read_ro(STM_READ_SIG(tx,addr,))
   {
       // abort if this read would violate ALA
@@ -156,7 +156,7 @@ namespace {
       }
 
       // read the value from memory, log the address, and validate
-      void* val = *addr;
+      uintptr_t val = *addr;
       CFENCE;
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already
@@ -169,7 +169,7 @@ namespace {
   /**
    *  RingALA read (writing transaction)
    */
-  void*
+  uintptr_t
   RingALA::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -183,7 +183,7 @@ namespace {
       }
 
       // read the value from memory, log the address, and validate
-      void* val = *addr;
+      uintptr_t val = *addr;
       CFENCE;
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already

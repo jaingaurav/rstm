@@ -38,8 +38,8 @@ using stm::ValueListEntry;
 namespace {
   struct NOrecPrio {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -151,11 +151,11 @@ namespace {
    *
    *    This is a standard NOrec read
    */
-  void*
+  uintptr_t
   NOrecPrio::read_ro(STM_READ_SIG(tx,addr,mask))
   {
       // read the location to a temp
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE;
 
       while (tx->start_time != timestamp.val) {
@@ -177,7 +177,7 @@ namespace {
    *
    *    Standard NOrec read from writing context
    */
-  void*
+  uintptr_t
   NOrecPrio::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -192,7 +192,7 @@ namespace {
       // bytes that we "actually" need, which is computed as bytes in mask but
       // not in log.mask. This is only correct because we know that a failed
       // find also reset the log.mask to 0 (that's part of the find interface).
-      void* val = read_ro(tx, addr STM_MASK(mask & ~log.mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask & ~log.mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

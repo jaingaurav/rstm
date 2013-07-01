@@ -16,15 +16,15 @@ using namespace itm2stm;
 
 namespace {
 inline size_t
-read_subword(TxThread& tx, void** base, uint8_t* to, size_t i, size_t j) {
+read_subword(TxThread& tx, uintptr_t* base, uint8_t* to, size_t i, size_t j) {
     assert(i < j && j <= sizeof(void*) && "range incorrect");
     assert(offset_of(base) == 0 && "base should be aligned");
 
     // load the subword transactionally using a union so that we can copy only
     // the bytes that we want into the "to" pointer
     const union {
-        void* word;
-        uint8_t bytes[sizeof(void*)];
+        uintptr_t word;
+        uint8_t   bytes[sizeof(void*)];
     } align = { tx.read(base, make_mask(i, j)) };
 
     // copy the bytes on-by-one, note the offset into the align union
@@ -38,7 +38,7 @@ read_subword(TxThread& tx, void** base, uint8_t* to, size_t i, size_t j) {
 }
 
 inline size_t
-write_subword(TxThread& tx, void** base, const uint8_t* from, size_t i,
+write_subword(TxThread& tx, uintptr_t* base, const uint8_t* from, size_t i,
               size_t j)
 {
     assert(i < j && j <= sizeof(void*) && "range incorrect");
@@ -46,8 +46,8 @@ write_subword(TxThread& tx, void** base, const uint8_t* from, size_t i,
 
     // read the bytes into a union with the correct offset
     union {
-        void* word;
-        uint8_t bytes[sizeof(void*)];
+        uintptr_t word;
+        uint8_t   bytes[sizeof(void*)];
     } buffer = {0};
 
     const size_t length = j - i;
@@ -94,7 +94,7 @@ itm2stm::block_read(TxThread& tx, void* target, const void* source,
 
     // get the base for the source address, this is a waste if source is
     // aligned, but it does give us the right type too, so we don't really care
-    void** base = base_of(source);
+    uintptr_t* base = base_of(source);
 
     // if there is an offset, or the whole amount fits into 1 read, read it as a
     // subword
@@ -120,7 +120,7 @@ itm2stm::block_read(TxThread& tx, void* target, const void* source,
 
     // use the target pointers as a pointer to a word---this might not be
     // aligned, but that's ok because the write to "target" is nontransactional
-    void** to = reinterpret_cast<void**>(target);
+    uintptr_t* to = reinterpret_cast<uintptr_t*>(target);
 
     for (size_t i = 0; i < words; ++i, read += sizeof(void*)) {
         to[i] = tx.read(base + i, mask);
@@ -161,7 +161,7 @@ itm2stm::block_write(TxThread& tx, void* target, const void* source,
 
     // Get the base address for the target address, this is a waste if the
     // target address is already aligned, but it gives us the right type too.
-    void** base = base_of(target);
+    uintptr_t* base = base_of(target);
 
     // if there is an offset, or we're going to be able to do the whole
     // operation with one writer, use the write_subword implementation
@@ -187,7 +187,7 @@ itm2stm::block_write(TxThread& tx, void* target, const void* source,
     // use the source address as a pointer to a word---this might not be
     // aligned, but that is ok because the read from the "source" is
     // nontransactional
-    void* const * const from = reinterpret_cast<void* const *>(source);
+    uintptr_t const * const from = reinterpret_cast<uintptr_t const *>(source);
 
     for (size_t i = 0; i < words; ++i, written += sizeof(void*)) {
         tx.write(base + i, from[i], mask);
@@ -206,11 +206,11 @@ itm2stm::block_set(TxThread& tx, void* target, uint8_t c, size_t length) {
 
     // all of the words come from this array
     const union {
-        uint8_t bytes[sizeof(void*)];
-        void* word;
+        uint8_t   bytes[sizeof(void*)];
+        uintptr_t word;
     } from = {{c}};
 
-    void** base = base_of(target);
+    uintptr_t* base = base_of(target);
     size_t offset = offset_of(target);
 
     // deal with any prefix bytes (also handles subword block_set)

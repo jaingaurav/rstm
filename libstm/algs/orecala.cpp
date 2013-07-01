@@ -41,8 +41,8 @@ using stm::UNRECOVERABLE;
 namespace {
   struct OrecALA {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -168,11 +168,11 @@ namespace {
    *    Standard tl2-style read, but then we poll for potential privatization
    *    conflicts
    */
-  void*
+  uintptr_t
   OrecALA::read_ro(STM_READ_SIG(tx,addr,))
   {
       // read the location, log the orec
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       orec_t* o = get_orec(addr);
       tx->r_orecs.insert(o);
       CFENCE;
@@ -196,7 +196,7 @@ namespace {
    *
    *    Same as above, but with a writeset lookup.
    */
-  void*
+  uintptr_t
   OrecALA::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -205,7 +205,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

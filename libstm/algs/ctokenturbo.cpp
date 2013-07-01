@@ -42,9 +42,9 @@ using stm::WriteSetEntry;
 namespace {
   struct CTokenTurbo {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_turbo(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_turbo(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_turbo(STM_WRITE_SIG(,,,));
@@ -157,10 +157,10 @@ namespace {
   /**
    *  CTokenTurbo read (read-only transaction)
    */
-  void*
+  uintptr_t
   CTokenTurbo::read_ro(STM_READ_SIG(tx,addr,))
   {
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE; // RBR between dereference and orec check
 
       // get the orec addr, read the orec's version#
@@ -195,7 +195,7 @@ namespace {
   /**
    *  CTokenTurbo read (writing transaction)
    */
-  void*
+  uintptr_t
   CTokenTurbo::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -203,7 +203,7 @@ namespace {
       bool found = tx->writes.find(log);
       REDO_RAW_CHECK(found, log, mask);
 
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       REDO_RAW_CLEANUP(tmp, found, log, mask);
       CFENCE; // RBR between dereference and orec check
 
@@ -228,7 +228,7 @@ namespace {
   /**
    *  CTokenTurbo read (read-turbo mode)
    */
-  void*
+  uintptr_t
   CTokenTurbo::read_turbo(STM_READ_SIG(,addr,))
   {
       return *addr;

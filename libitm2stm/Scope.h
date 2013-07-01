@@ -87,7 +87,7 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     /// returned value will be the pair (NULL, 0).
     ///
     /// The stack maintains an undo log in support of the _ITM_L* calls.
-    std::pair<void**, size_t>& rollback();
+    std::pair<uintptr_t*, size_t>& rollback();
 
     /// Called to commit a scope. Inlined because we care about commit
     /// performance.
@@ -102,7 +102,7 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     }
 
     /// Self explanatory, precondition thrown_.address == NULL.
-    void setThrownObject(void** addr, size_t length);
+    void setThrownObject(uintptr_t* addr, size_t length);
 
     // Resets the thrown object.
     void clearThrownObject();
@@ -117,7 +117,7 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
 
     /// This version of log is used directly by the _ITM_LB routine, and also
     /// supports the SHIM_LOG_HELPER template.
-    void log(void** addr, void* value, size_t bytes) {
+    void log(uintptr_t* addr, uintptr_t value, size_t bytes) {
         undo_on_rollback_.insert(LoggedWord(addr, value, bytes));
     }
 
@@ -135,9 +135,9 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     /// The ITM interface is designed to register thrown objects to support
     /// abort-on-throw semantics. This pair represent such a thrown-object
     /// address range.
-    struct ThrownObject : public std::pair<void**, size_t> {
-        void** begin() const;
-        void** end() const;
+    struct ThrownObject : public std::pair<uintptr_t*, size_t> {
+        uintptr_t* begin() const;
+        uintptr_t* end() const;
         void reset() {
             first = NULL;
             second = 0;
@@ -182,9 +182,9 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     /// specific alignment.*
     struct LoggedWord {
       private:
-        void** address_;
-        void*    value_;
-        size_t   bytes_;
+        uintptr_t* address_;
+        uintptr_t    value_;
+        size_t       bytes_;
 
         /// The clip routine is used to protect against undoing to thrown
         /// objects. We aren't capable of undoing to a discontinuous range
@@ -193,15 +193,15 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
         /// is some "left-over" space on each side).
         ///
         /// The range is [lower, upper)
-        void clip(void** lower, void** upper);
+        void clip(uintptr_t* lower, uintptr_t* upper);
 
       public:
-        LoggedWord(void** addr, void* val, size_t bytes)
+        LoggedWord(uintptr_t* addr, uintptr_t val, size_t bytes)
             : address_(addr), value_(val), bytes_(bytes) {
         }
 
-        void** begin() const;
-        void** end() const;
+        uintptr_t* begin() const;
+        uintptr_t* end() const;
         void undo(ThrownObject&);
     };
 
@@ -229,9 +229,9 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     template <typename T, size_t W = sizeof(T) / sizeof(void*)>
     struct SHIM_LOG_HELPER {
         static void log(Scope* const scope, const T* addr) {
-            void** address = reinterpret_cast<void**>(const_cast<T*>(addr));
+            uintptr_t* address = reinterpret_cast<uintptr_t*>(const_cast<T*>(addr));
             for (size_t i = 0; i < W; ++i) {
-                scope->log(address + i, *(address + i), sizeof(void*));
+                scope->log(address + i, *(address + i), sizeof(uintptr_t));
             }
         }
     };
@@ -240,10 +240,10 @@ class Scope : public Checkpoint /* asm needs this as first superclass */
     template <typename T>
     struct SHIM_LOG_HELPER<T, 0u> {
         static void log(Scope* const scope, const T* addr) {
-            void** address = reinterpret_cast<void**>(const_cast<T*>(addr));
+            uintptr_t* address = reinterpret_cast<uintptr_t*>(const_cast<T*>(addr));
             union {
                 T val;
-                void* word;
+                uintptr_t word;
             } cast = { *addr };
             scope->log(address, cast.word, sizeof(T));
         }

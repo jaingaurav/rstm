@@ -36,8 +36,8 @@ namespace {
   struct BitEager
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -113,7 +113,7 @@ namespace {
    *    (there must not be a writer, and WBR issues apply), then read directly
    *    from memory.
    */
-  void*
+  uintptr_t
   BitEager::read_ro(STM_READ_SIG(tx,addr,))
   {
       uint32_t tries = 0;
@@ -153,7 +153,7 @@ namespace {
    *    This is almost identical to the RO case, except that if the caller has
    *    the write lock, we can return immediately.
    */
-  void*
+  uintptr_t
   BitEager::read_rw(STM_READ_SIG(tx,addr,))
   {
       uint32_t tries = 0;

@@ -19,7 +19,7 @@ using namespace itm2stm;
 /// passed data into word sized blocks, and logs them all individually.
 void
 _ITM_LB(_ITM_transaction* td, const void* addr, size_t bytes) {
-    void**  address = reinterpret_cast<void**>(const_cast<void*>(addr));
+    uintptr_t*  address = reinterpret_cast<uintptr_t*>(const_cast<void*>(addr));
     Scope* scope = td->inner();
 
     // read and log as many words as we can
@@ -33,15 +33,15 @@ _ITM_LB(_ITM_transaction* td, const void* addr, size_t bytes) {
         address8 += bytes - e; // move cursor to the last word
 
         union {
-            uint8_t bytes[sizeof(void*)];
-            void* word;
+            uint8_t   bytes[sizeof(uintptr_t)];
+            uintptr_t word;
         } buffer = {{0}};
 
         for (size_t i = 0; i < e; ++i) {
             buffer.bytes[i] = address8[i];
         }
 
-        scope->log(reinterpret_cast<void**>(const_cast<uint8_t*>(address8)),
+        scope->log(reinterpret_cast<uintptr_t*>(const_cast<uint8_t*>(address8)),
                    buffer.word, e);
     }
 }

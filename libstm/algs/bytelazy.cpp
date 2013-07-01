@@ -37,8 +37,8 @@ namespace {
   struct ByteLazy
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -162,7 +162,7 @@ namespace {
   /**
    *  ByteLazy read (read-only transaction)
    */
-  void*
+  uintptr_t
   ByteLazy::read_ro(STM_READ_SIG(tx,addr,))
   {
       // first test if we've got a read byte
@@ -181,7 +181,7 @@ namespace {
       }
 
       // order the read before checking for remote aborts
-      void* val = *addr;
+      uintptr_t val = *addr;
       CFENCE;
 
       if (!tx->alive) {
@@ -194,7 +194,7 @@ namespace {
   /**
    *  ByteLazy read (writing transaction)
    */
-  void*
+  uintptr_t
   ByteLazy::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // These are used in REDO_RAW_CLEANUP, so they have to be scoped out
@@ -224,7 +224,7 @@ namespace {
       }
 
       // order the read before checking for remote aborts
-      void* val = *addr;
+      uintptr_t val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       CFENCE;
 

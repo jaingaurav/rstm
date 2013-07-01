@@ -38,10 +38,10 @@ namespace stm
   /***  Word-logging variant of undo log entries */
   struct WordLoggingUndoLogEntry
   {
-      void** addr;
-      void*  val;
+      uintptr_t* addr;
+      uintptr_t  val;
 
-      WordLoggingUndoLogEntry(void** addr, void* val)
+      WordLoggingUndoLogEntry(uintptr_t* addr, uintptr_t val)
           : addr(addr), val(val)
       { }
 
@@ -61,7 +61,7 @@ namespace stm
        *  The bytelog version /can/ be partially filtered, which is just a
        *  masking operation.
        */
-      inline bool filter(void** lower, void** upper)
+      inline bool filter(uintptr_t* lower, uintptr_t* upper)
       {
           return (addr >= lower && addr + 1 < upper);
       }
@@ -73,13 +73,13 @@ namespace stm
       // We use unions here to make our life easier, since we may access
       // these as byte, bytes, or word
       union {
-          void**   addr;
-          uint8_t* byte_addr;
+          uintptr_t* addr;
+          uint8_t*   byte_addr;
       };
 
       union {
-          void*   val;
-          uint8_t byte_val[sizeof(void*)];
+          uintptr_t val;
+          uint8_t   byte_val[sizeof(void*)];
       };
 
       union {
@@ -88,7 +88,7 @@ namespace stm
       };
 
       /***  construction is simple, except for the unions */
-      ByteLoggingUndoLogEntry(void** paddr, void* pval, uintptr_t pmask)
+      ByteLoggingUndoLogEntry(uintptr_t* paddr, uintptr_t pval, uintptr_t pmask)
           : addr(), val(), mask()
       {
           addr = paddr;
@@ -97,7 +97,7 @@ namespace stm
       }
 
       /*** write the masked bytes of an aligned word */
-      inline static void DoMaskedWrite(void** addr, void* val, uintptr_t mask)
+      inline static void DoMaskedWrite(uintptr_t* addr, uintptr_t val, uintptr_t mask)
       {
           // common case is word access
           if (mask == ~(uintptr_t)0x0) {
@@ -111,13 +111,13 @@ namespace stm
           }
 
           union {
-              void**   word;
-              uint8_t* bytes;
+              uintptr_t* word;
+              uint8_t*   bytes;
           } uaddr = { addr };
 
           union {
-              void*   word;
-              uint8_t bytes[sizeof(void*)];
+              uintptr_t word;
+              uint8_t   bytes[sizeof(void*)];
           } uval = { val };
 
           union {
@@ -143,7 +143,7 @@ namespace stm
        *  The bytelog implementation of the filter operation support any sort
        *  of intersection possible.
        */
-      inline bool filter(void** lower, void** upper)
+      inline bool filter(uintptr_t* lower, uintptr_t* upper)
       {
           // fastpath when there's no intersection
           return (addr + 1 < lower || addr >= upper)
@@ -158,7 +158,7 @@ namespace stm
        *  such a corner case that it just doesn't matter. Plus this is an
        *  abort path anyway.
        */
-      bool filterSlow(void**, void**);
+      bool filterSlow(uintptr_t*, uintptr_t*);
   };
 
   /**
@@ -193,7 +193,7 @@ namespace stm
       void undo();
 #   define STM_UNDO(log, except, len) log.undo()
 #else
-      void undo(void** except, size_t len);
+      void undo(uintptr_t* except, size_t len);
 #   define STM_UNDO(log, except, len) log.undo(except, len)
 #endif
   };

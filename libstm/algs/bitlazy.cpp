@@ -51,8 +51,8 @@ namespace {
   struct BitLazy
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -180,7 +180,7 @@ namespace {
    *    Must preserve write-before-read ordering between marking self as a reader
    *    and checking for conflicting writers.
    */
-  void*
+  uintptr_t
   BitLazy::read_ro(STM_READ_SIG(tx,addr,))
   {
       // first test if we've got a read bit
@@ -193,7 +193,7 @@ namespace {
           tx->abort();
       }
       // order the read before checking for remote aborts
-      void* val = *addr;
+      uintptr_t val = *addr;
       CFENCE;
       if (!tx->alive) {
           tx->abort();
@@ -206,7 +206,7 @@ namespace {
    *
    *    Same as above, but with a test if this tx has a pending write
    */
-  void*
+  uintptr_t
   BitLazy::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // Used by REDO_RAW_CLEANUP so they have to be scoped out here. We assume
@@ -227,7 +227,7 @@ namespace {
       if (bl->owner) {
           tx->abort();
       }
-      void* val = *addr;
+      uintptr_t val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       CFENCE;
       if (!tx->alive) {

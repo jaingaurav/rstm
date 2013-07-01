@@ -35,7 +35,7 @@ _ITM_transaction::rollback() {
     // Our scope's rollback tells us the exception object range, so that the
     // rstm library can either a) avoid undo-ing to that region, or b) actually
     // redo to that region.
-    pair<void**, size_t>& thrown = inner()->rollback();
+    pair<uintptr_t*, size_t>& thrown = inner()->rollback();
 
     // NB: In the current version of libstm We have a mismatch between the
     //     fact that the shim is using closed nesting, and the library is
@@ -62,7 +62,7 @@ _ITM_transaction::rollback() {
         // behavior is to support RSTM's "library" API.
         thread_handle_.rollback(thrown.first, thrown.second);
         thread_handle_.stack_high = 0x0;
-        thread_handle_.stack_low = (void**)~0x0;
+        thread_handle_.stack_low = (uintptr_t*)~0x0;
     }
 }
 

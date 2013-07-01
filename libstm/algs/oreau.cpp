@@ -44,8 +44,8 @@ namespace {
   {
       static void Initialize(int id, const char* name);
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -146,7 +146,7 @@ namespace {
    *  OrEAU read (read-only transaction)
    */
   template <class CM>
-  void*
+  uintptr_t
   OrEAU_Generic<CM>::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
@@ -158,7 +158,7 @@ namespace {
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
 
           // re-read orec
           CFENCE;
@@ -195,7 +195,7 @@ namespace {
    *  OrEAU read (writing transaction)
    */
   template <class CM>
-  void*
+  uintptr_t
   OrEAU_Generic<CM>::read_rw(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
@@ -207,7 +207,7 @@ namespace {
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
 
           // best case: I locked it already
           if (ivt.all == tx->my_lock.all) {

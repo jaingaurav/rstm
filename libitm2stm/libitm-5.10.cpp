@@ -16,5 +16,5 @@
 void
 _ITM_registerThrownObject(_ITM_transaction* td, const void* addr, size_t len) {
     assert(!td->inner()->isExceptionBlock());
-    td->inner()->setThrownObject((void**)addr, len);
+    td->inner()->setThrownObject((uintptr_t*)addr, len);
 }

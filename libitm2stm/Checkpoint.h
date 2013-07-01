@@ -26,8 +26,8 @@ class Checkpoint {
     // of the caller.
     //
     // NB: *frame address must be first word!*
-    void** stackHigh() const {
-        return (void**)checkpoint_[0];
+    uintptr_t* stackHigh() const {
+        return (uintptr_t*)checkpoint_[0];
     }
 
   protected:

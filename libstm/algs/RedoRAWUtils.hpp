@@ -91,13 +91,10 @@
  *  read bytes that correspond to the valid bytes from the log, and then merge
  *  in the logged bytes.
  */
-#define REDO_RAW_CLEANUP(value, found, log, mask)               \
-    if (__builtin_expect(found, false)) {                       \
-        /* can't do masking on a void* */                       \
-        uintptr_t v = reinterpret_cast<uintptr_t>(value);       \
-        v &= ~log.mask;                                         \
-        v |= reinterpret_cast<uintptr_t>(log.val) & log.mask;   \
-        value = reinterpret_cast<void*>(v);                     \
+#define REDO_RAW_CLEANUP(value, found, log, mask)    \
+    if (__builtin_expect(found, false)) {            \
+        value &= ~log.mask;                          \
+        value |= log.val & log.mask;                 \
     }
 
 #else

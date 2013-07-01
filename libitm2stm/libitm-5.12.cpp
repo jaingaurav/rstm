@@ -61,11 +61,11 @@ struct INST<T, N, false> {
     inline static T
     ReadUnaligned(TxThread& tx, const T* addr, uintptr_t offset) {
         union {
-            void* from[N + 1];
-            uint8_t to[sizeof(void*[N+1])];
+            uintptr_t from[N + 1];
+            uint8_t   to[sizeof(void*[N+1])];
         } cast;
 
-        void** const base = base_of(addr);
+        uintptr_t* const base = base_of(addr);
 
         // load the first word, masking the high bytes that we're interested in
         uintptr_t mask = make_mask(offset, sizeof(void*));
@@ -92,13 +92,13 @@ struct INST<T, N, false> {
     inline static void
     WriteUnaligned(TxThread& tx, T* addr, const T value, uintptr_t offset) {
         union {
-            void* to[N + 1];
-            uint8_t from[sizeof(void* [N + 1])];
+            uintptr_t to[N + 1];
+            uint8_t   from[sizeof(void* [N + 1])];
         } cast = {{0}}; // initialization suppresses uninitialized warning
         *reinterpret_cast<T*>(cast.from + offset) = value;
 
         // masks out the unaligned low order bits of the address
-        void** const base = base_of(addr);
+        uintptr_t* const base = base_of(addr);
 
         // store the first word, masking the high bytes that we care about
         uintptr_t mask = make_mask(offset, sizeof(void*));
@@ -148,12 +148,12 @@ struct INST<T, N, true> {
         // the T* is aligned on a word boundary, so we can just use a "T"
         // directly as the second half of this union.
         union {
-            void* from[N];
-            T to;
+            uintptr_t from[N];
+            T         to;
         } cast;
 
         // treat the address as a pointer to an array of words
-        void** const address = reinterpret_cast<void**>(const_cast<T*>(addr));
+        uintptr_t* const address = reinterpret_cast<uintptr_t*>(const_cast<T*>(addr));
 
         // load the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
@@ -172,12 +172,12 @@ struct INST<T, N, true> {
         // The T* is aligned on a word boundary, so we can just use a T as the
         // first half of this union, and then store it as void* chunks.
         union {
-            T from;
-            void* to[N];
+            T         from;
+            uintptr_t to[N];
         } cast = { value };
 
         // treat the address as a pointer to an array of words
-        void** const address = reinterpret_cast<void**>(const_cast<T*>(addr));
+        uintptr_t* const address = reinterpret_cast<uintptr_t*>(const_cast<T*>(addr));
 
         // store the words
         const uintptr_t mask = make_mask(0, sizeof(void*));
@@ -232,8 +232,8 @@ struct INST<T, 0u, true> {
         // we use a uint8_t union "to" type which allows us to deal with
         // unaligned, but non-overflowing, accesses without extra code.
         union {
-            void* from;
-            uint8_t to[sizeof(void*)];
+            uintptr_t from;
+            uint8_t   to[sizeof(uintptr_t)];
         } cast = { tx.read(base_of(addr), mask) };
 
         // pick out the right T from the "to" array and return it
@@ -247,13 +247,13 @@ struct INST<T, 0u, true> {
         // we use a uint8_t "to" array which allows us to deal with unaligned,
         // but non-overflowing, accesses without extra code.
         union {
-            void* to;
-            uint8_t from[sizeof(void*)];
+            uintptr_t to;
+            uint8_t   from[sizeof(uintptr_t)];
         } cast = {0};
         *reinterpret_cast<T*>(cast.from + offset) = value;
 
         // get the base address
-        void** const base = base_of(addr);
+        uintptr_t* const base = base_of(addr);
 
         // perform the store
         const uintptr_t mask = make_mask(offset, offset + sizeof(T));

@@ -54,8 +54,8 @@ namespace stm
       uint32_t       num_ro;        // stats counter: read-only commits
       scope_t* volatile scope;      // used to roll back; also flag for isTxnl
 #ifdef STM_PROTECT_STACK
-      void**         stack_high;    // the stack pointer at begin_tx time
-      void**         stack_low;     // norec stack low-water mark
+      uintptr_t*     stack_high;    // the stack pointer at begin_tx time
+      uintptr_t*     stack_low;     // norec stack low-water mark
 #endif
       uintptr_t      start_time;    // start time of transaction
       uintptr_t      end_time;      // end time of transaction
@@ -118,7 +118,7 @@ namespace stm
 
       /*** Per-thread commit, read, and write pointers */
       TM_FASTCALL void(*tmcommit)(TxThread*);
-      TM_FASTCALL void*(*tmread)(STM_READ_SIG(,,));
+      TM_FASTCALL uintptr_t(*tmread)(STM_READ_SIG(,,));
       TM_FASTCALL void(*tmwrite)(STM_WRITE_SIG(,,,));
 
       /**
@@ -164,7 +164,7 @@ namespace stm
 
       TM_FASTCALL void commit();
 
-      TM_FASTCALL void* read(THREAD_READ_SIG(,));
+      TM_FASTCALL uintptr_t read(THREAD_READ_SIG(,));
 
       TM_FASTCALL void write(THREAD_WRITE_SIG(,,));
 

@@ -77,13 +77,13 @@ namespace stm
       TM_INLINE
       static T read(T* addr, TxThread* thread)
       {
-          return (T)(uintptr_t)thread->read((void**)addr STM_MASK(~0x0));
+          return (T)thread->read((uintptr_t*)addr STM_MASK(~0x0));
       }
 
       TM_INLINE
       static void write(T* addr, T val, TxThread* thread)
       {
-          thread->write((void**)addr, (void*)(uintptr_t)val STM_MASK(~0x0));
+          thread->write((uintptr_t*)addr, (uintptr_t)val STM_MASK(~0x0));
       }
   };
 
@@ -95,7 +95,7 @@ namespace stm
       static float read(float* addr, TxThread* thread)
       {
           union { float f;  void* v;  } v;
-          v.v = thread->read((void**)addr STM_MASK(~0x0));
+          v.v = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           return v.f;
       }
 
@@ -104,7 +104,7 @@ namespace stm
       {
           union { float f;  void* v;  } v;
           v.f = val;
-          thread->write((void**)addr, v.v STM_MASK(~0x0));
+          thread->write((uintptr_t*)addr, v.v STM_MASK(~0x0));
       }
   };
 
@@ -116,7 +116,7 @@ namespace stm
       static float read(const float* addr, TxThread* thread)
       {
           union { float f;  void* v;  } v;
-          v.v = thread->read((void**)addr STM_MASK(~0x0));
+          v.v = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           return v.f;
       }
 
@@ -135,13 +135,13 @@ namespace stm
       static T read(T* addr, TxThread* thread)
       {
           // get second word's address
-          void** addr2 = (void**)((long)addr + 4);
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           union {
               long long l;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           // read the two words
-          v.v.v1 = thread->read((void**)addr STM_MASK(~0x0));
+          v.v.v1 = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           v.v.v2 = thread->read(addr2 STM_MASK(~0x0));
           return (T)v.l;
       }
@@ -150,12 +150,12 @@ namespace stm
       static void write(T* addr, T val, TxThread* thread)
       {
           // compute the two addresses
-          void** addr1 = (void**)addr;
-          void** addr2 = (void**)((long)addr + 4);
+          uintptr_t* addr1 = (uintptr_t*)addr;
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           // turn the value into two words
           union {
               T t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           v.t = val;
           // write the two words
@@ -175,13 +175,13 @@ namespace stm
       static double read(double* addr, TxThread* thread)
       {
           // get second word's address
-          void** addr2 = (void**)((long)addr + 4);
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           union {
               double t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           // read the two words
-          v.v.v1 = thread->read((void**)addr STM_MASK(~0x0));
+          v.v.v1 = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           v.v.v2 = thread->read(addr2 STM_MASK(~0x0));
           return v.t;
       }
@@ -190,12 +190,12 @@ namespace stm
       static void write(double* addr, double val, TxThread* thread)
       {
           // compute the two addresses
-          void** addr1 = (void**) addr;
-          void** addr2 = (void**) ((long)addr + 4);
+          uintptr_t* addr1 = (uintptr_t*)addr;
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           // turn the value into two words
           union {
               double t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           v.t = val;
           // write the two words
@@ -212,13 +212,13 @@ namespace stm
       static double read(const double* addr, TxThread* thread)
       {
           // get the second word's address
-          void** addr2 = (void**)((long)addr + 4);
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           union {
               double t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           // read the two words
-          v.v.v1 = thread->read((void**)addr STM_MASK(~0x0));
+          v.v.v1 = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           v.v.v2 = thread->read(addr2 STM_MASK(~0x0));
           return v.t;
       }
@@ -247,8 +247,8 @@ namespace stm
           // address addr, then treat that as an array of T's from which we
           // pull out a specific element (based on masking the last two
           // bits)
-          union { char v[4]; void* v2; } v;
-          void** a = (void**)(((long)addr) & ~3);
+          union { char v[4]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((long)addr) & ~3);
           long offset = ((long)addr) & 3;
           v.v2 = thread->read(a STM_MASK(0xFF << (8 * offset)));
           return (T)v.v[offset];
@@ -259,8 +259,8 @@ namespace stm
       {
           // to protect granularity, we need to read the whole word and
           // then write a byte of it
-          union { T v[4]; void* v2; } v;
-          void** a = (void**)(((long)addr) & ~3);
+          union { T v[4]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((long)addr) & ~3);
           long offset = ((long)addr) & 3;
           // read the enclosing word
           v.v2 = thread->read(a STM_MASK(0xFF << (8 * offset)));
@@ -277,13 +277,13 @@ namespace stm
       TM_INLINE
       static T read(T* addr, TxThread* thread)
       {
-          return (T)(uintptr_t)thread->read((void**)addr STM_MASK(~0x0));
+          return (T)thread->read((uintptr_t*)addr STM_MASK(~0x0));
       }
 
       TM_INLINE
       static void write(T* addr, T val, TxThread* thread)
       {
-          thread->write((void**)addr, (void*)(uintptr_t)val STM_MASK(~0x0));
+          thread->write((uintptr_t*)addr, (uintptr_t)val STM_MASK(~0x0));
       }
   };
 
@@ -294,17 +294,17 @@ namespace stm
       TM_INLINE
       static double read(double* addr, TxThread* thread)
       {
-          union { double d;  void*  v; } v;
-          v.v = thread->read((void**)addr STM_MASK(~0x0));
+          union { double d; uintptr_t v; } v;
+          v.v = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           return v.d;
       }
 
       TM_INLINE
       static void write(double* addr, double val, TxThread* thread)
       {
-          union { double d;  void*  v; } v;
+          union { double d; uintptr_t v; } v;
           v.d = val;
-          thread->write((void**)addr, v.v STM_MASK(~0x0));
+          thread->write((uintptr_t*)addr, v.v STM_MASK(~0x0));
       }
   };
 
@@ -315,8 +315,8 @@ namespace stm
       TM_INLINE
       static double read(const double* addr, TxThread* thread)
       {
-          union { double d;  void*  v; } v;
-          v.v = thread->read((void**)addr STM_MASK(~0x0));
+          union { double d; uintptr_t v; } v;
+          v.v = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           return v.d;
       }
 
@@ -335,13 +335,13 @@ namespace stm
       static double read(double* addr, TxThread* thread)
       {
           // get second word's address
-          void** addr2 = (void**)((long)addr + 4);
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           union {
               double t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           // read the two words
-          v.v.v1 = thread->read((void**)addr STM_MASK(~0x0));
+          v.v.v1 = thread->read((uintptr_t*)addr STM_MASK(~0x0));
           v.v.v2 = thread->read(addr2 STM_MASK(~0x0));
           return v.t;
       }
@@ -350,12 +350,12 @@ namespace stm
       static void write(double* addr, double val, TxThread* thread)
       {
           // compute the two addresses
-          void** addr1 = (void**) addr;
-          void** addr2 = (void**) ((long)addr + 4);
+          uintptr_t* addr1 = (uintptr_t*)addr;
+          uintptr_t* addr2 = (uintptr_t*)((long)addr + 4);
           // turn the value into two words
           union {
               double t;
-              struct { void* v1; void* v2; } v;
+              struct { uintptr_t v1; uintptr_t v2; } v;
           } v;
           v.t = val;
           // write the two words
@@ -386,8 +386,8 @@ namespace stm
           // we must read the word (as a void*) that contains the 4byte at
           // address addr, then treat that as an array of T's from which we
           // pull out a specific element (based on the 3-lsb)
-          union { int v[2]; void* v2; } v;
-          void** a = (void**)(((intptr_t)addr) & ~7ul);
+          union { int v[2]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((intptr_t)addr) & ~7ul);
           long offset = (((intptr_t)addr)>>2)&1;
           v.v2 = thread->read(a STM_MASK(0xffffffff << (32 * offset)));
           return (T)v.v[offset];
@@ -398,8 +398,8 @@ namespace stm
       {
           // to protect granularity, we need to read the whole word and
           // then write a byte of it
-          union { T v[2]; void* v2; } v;
-          void** a = (void**)(((intptr_t)addr) & ~7ul);
+          union { T v[2]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((intptr_t)addr) & ~7ul);
           int offset = (((intptr_t)addr)>>2) & 1;
           // read the enclosing word
           v.v2 = thread->read(a STM_MASK(0xffffffff << (32 * offset)));
@@ -416,8 +416,8 @@ namespace stm
       static float read(float* addr, TxThread* thread)
       {
           // read the word as a void*, pull out the right portion of it
-          union { float v[2]; void* v2; } v;
-          void** a = (void**)(((intptr_t)addr)&~7ul);
+          union { float v[2]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((intptr_t)addr)&~7ul);
           long offset = (((intptr_t)addr)>>2)&1;
           v.v2 = thread->read(a STM_MASK(0xffffffff << (32 * offset)));
           return v.v[offset];
@@ -427,8 +427,8 @@ namespace stm
       static void write(float* addr, float val, TxThread* thread)
       {
           // read the whole word, then write a word of it
-          union { float v[2]; void* v2; } v;
-          void**a = (void**)(((intptr_t)addr) & ~7ul);
+          union { float v[2]; uintptr_t v2; } v;
+          uintptr_t*a = (uintptr_t*)(((intptr_t)addr) & ~7ul);
           int offset = (((intptr_t)addr)>>2) & 1;
           // read enclosing word
           v.v2 = thread->read(a STM_MASK(0xffffffff << (32 * offset)));
@@ -445,8 +445,8 @@ namespace stm
       static float read(const float* addr, TxThread* thread)
       {
           // read the word as a void*, pull out the right portion of it
-          union { float v[2]; void* v2; } v;
-          void** a = (void**)(((intptr_t)addr)&~7ul);
+          union { float v[2]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((intptr_t)addr)&~7ul);
           long offset = (((intptr_t)addr)>>2)&1;
           v.v2 = thread->read(a STM_MASK(0xffffffff << (32 * offset)));
           return v.v[offset];
@@ -469,8 +469,8 @@ namespace stm
           // address addr, then treat that as an array of T's from which we
           // pull out a specific element (based on masking the last three
           // bits)
-          union { char v[8]; void* v2; } v;
-          void** a = (void**)(((long)addr) & ~7);
+          union { char v[8]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((long)addr) & ~7);
           long offset = ((long)addr) & 7;
           v.v2 = thread->read(a STM_MASK(0xffffffff << (8 * offset)));
           return (T)v.v[offset];
@@ -481,8 +481,8 @@ namespace stm
       {
           // to protect granularity, we need to read the whole word and
           // then write a byte of it
-          union { T v[8]; void* v2; } v;
-          void** a = (void**)(((long)addr) & ~7);
+          union { T v[8]; uintptr_t v2; } v;
+          uintptr_t* a = (uintptr_t*)(((long)addr) & ~7);
           long offset = ((long)addr) & 7;
           // read the enclosing word
           v.v2 = thread->read(a STM_MASK(0xffffffff << (8 * offset)));

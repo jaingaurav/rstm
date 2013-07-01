@@ -54,8 +54,8 @@ namespace
 {
   struct OrecFair {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -239,7 +239,7 @@ namespace
    *    NB: We could poll the 'set' bit first, which might afford some
    *        optimizations for priority transactions
    */
-  void*
+  uintptr_t
   OrecFair::read_ro(STM_READ_SIG(tx,addr,))
   {
       // CM instrumentation
@@ -259,7 +259,7 @@ namespace
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
 
           // re-read the orec
@@ -294,7 +294,7 @@ namespace
    *    NB: As above, we could poll the 'set' bit if we had a priority-only
    *        version of this function
    */
-  void*
+  uintptr_t
   OrecFair::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -319,7 +319,7 @@ namespace
           CFENCE;
 
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
 
           // re-read the orec

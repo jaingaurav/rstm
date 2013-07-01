@@ -69,7 +69,7 @@ namespace
   struct Swiss
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read(STM_READ_SIG(,,));
       static TM_FASTCALL void write(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit(TxThread*);
 
@@ -98,7 +98,7 @@ namespace
   }
 
   // word based transactional read
-  void* Swiss::read(STM_READ_SIG(tx,addr,mask))
+  uintptr_t Swiss::read(STM_READ_SIG(tx,addr,mask))
   {
       // get orec address
       orec_t* o = get_orec(addr);
@@ -112,7 +112,7 @@ namespace
           bool found = tx->writes.find(log);
           REDO_RAW_CHECK(found, log, mask);
 
-          void* val = *addr;
+          uintptr_t val = *addr;
           REDO_RAW_CLEANUP(val, found, log, mask);
           return val;
       }
@@ -122,7 +122,7 @@ namespace
           // read version is unchanging and not locked
           uintptr_t rver1 = o->p;
           CFENCE;
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
           uintptr_t rver2 = o->p;
           // deal with inconsistent reads

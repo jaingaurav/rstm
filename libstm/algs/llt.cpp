@@ -42,8 +42,8 @@ namespace {
   struct LLT
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -137,7 +137,7 @@ namespace {
    *
    *    We use "check twice" timestamps in LLT
    */
-  void*
+  uintptr_t
   LLT::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
@@ -146,7 +146,7 @@ namespace {
       // read orec, then val, then orec
       uintptr_t ivt = o->v.all;
       CFENCE;
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE;
       uintptr_t ivt2 = o->v.all;
       // if orec never changed, and isn't too new, the read is valid
@@ -157,17 +157,17 @@ namespace {
       }
       // unreachable
       tx->abort();
-      return NULL;
+      return 0;
   }
 
   /**
    *  LLT read (writing transaction)
    */
-  void*
+  uintptr_t
   LLT::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
-      WriteSetEntry log(STM_WRITE_SET_ENTRY(addr, NULL, mask));
+      WriteSetEntry log(STM_WRITE_SET_ENTRY(addr, 0, mask));
       bool found = tx->writes.find(log);
       REDO_RAW_CHECK(found, log, mask);
 
@@ -177,7 +177,7 @@ namespace {
       // read orec, then val, then orec
       uintptr_t ivt = o->v.all;
       CFENCE;
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE;
       uintptr_t ivt2 = o->v.all;
 
@@ -191,7 +191,7 @@ namespace {
       }
       tx->abort();
       // unreachable
-      return NULL;
+      return 0;
   }
 
   /**

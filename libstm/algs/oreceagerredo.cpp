@@ -41,8 +41,8 @@ namespace {
   struct OrecEagerRedo
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -127,14 +127,14 @@ namespace {
    *    simple: read the location, check the orec, and scale the timestamp if
    *    necessary.
    */
-  void*
+  uintptr_t
   OrecEagerRedo::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
       orec_t* o = get_orec(addr);
       while (true) {
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
           // read orec
           id_version_t ivt; ivt.all = o->v.all;
@@ -163,14 +163,14 @@ namespace {
    *    The RW read code is slightly more complicated.  We only check the read
    *    log if we hold the lock, but we must be prepared for that possibility.
    */
-  void*
+  uintptr_t
   OrecEagerRedo::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // get the orec addr
       orec_t* o = get_orec(addr);
       while (true) {
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
           // read orec
           id_version_t ivt; ivt.all = o->v.all;

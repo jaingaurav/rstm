@@ -39,8 +39,8 @@ namespace {
   struct OrecLazy_Generic
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -169,14 +169,14 @@ namespace {
    *    orec and return
    */
   template <class CM>
-  void*
+  uintptr_t
   OrecLazy_Generic<CM>::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr
       orec_t* o = get_orec(addr);
       while (true) {
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
           //  check the orec.
           //  NB: with this variant of timestamp, we don't need prevalidation
@@ -208,7 +208,7 @@ namespace {
    *    Just like read-only context, but must check the write set first
    */
   template <class CM>
-  void*
+  uintptr_t
   OrecLazy_Generic<CM>::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -217,7 +217,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

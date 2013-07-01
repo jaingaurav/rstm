@@ -47,11 +47,11 @@ namespace stm {
    *  ValueList.
    */
   class WordLoggingValueListEntry {
-      void** addr;
-      void* val;
+      uintptr_t* addr;
+      uintptr_t  val;
 
     public:
-      WordLoggingValueListEntry(void** a, void* v) : addr(a), val(v) {
+      WordLoggingValueListEntry(uintptr_t* a, uintptr_t v) : addr(a), val(v) {
       }
 
       /**
@@ -59,7 +59,7 @@ namespace stm {
        *  wasn't inside the protected stack region. We assume that the stack is
        *  at least word-aligned.
        */
-      bool isValidFiltered(void** stack_low, void** stack_high) const {
+      bool isValidFiltered(uintptr_t* stack_low, uintptr_t* stack_high) const {
           // can't be invalid on a transaction-local stack location.
           if (addr >= stack_low && addr < stack_high) {
               return true;
@@ -79,12 +79,12 @@ namespace stm {
    *  masking during validation.
    */
   class ByteLoggingValueListEntry {
-      void** addr;
-      void* val;
-      uintptr_t mask;
+      uintptr_t* addr;
+      uintptr_t  val;
+      uintptr_t  mask;
 
     public:
-      ByteLoggingValueListEntry(void** a, void* v, uintptr_t m)
+      ByteLoggingValueListEntry(uintptr_t* a, uintptr_t v, uintptr_t m)
           : addr(a), val(v), mask(m) {
       }
 
@@ -120,7 +120,7 @@ namespace stm {
        *  want to validate the value in case we performed an in-place write to
        *  it.
        */
-      bool isValidFiltered(void** stack_low, void** stack_high) const {
+      bool isValidFiltered(uintptr_t* stack_low, uintptr_t* stack_high) const {
           // can't be invalid on a transaction-local stack location.
           if (addr >= stack_low && addr < stack_high) {
               return true;
@@ -169,10 +169,10 @@ namespace stm {
        *  range check here and avoid actually inserting values that are in the
        *  current local stack.
        */
-      TM_INLINE void insert(ValueListEntry data, void**& low) {
+      TM_INLINE void insert(ValueListEntry data, uintptr_t*& low) {
           // we're inside the TM right now, so __builtin_frame_address is fine.
           low = (__builtin_frame_address(0) > low) ?
-                    low : (void**)__builtin_frame_address(0);
+                    low : (uintptr_t*)__builtin_frame_address(0);
           MiniVector<ValueListEntry>::insert(data);
       }
 #define STM_LOG_VALUE(tx, addr, val, mask)                      \

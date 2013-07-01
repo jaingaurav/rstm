@@ -42,10 +42,10 @@ namespace stm
    */
   struct WordLoggingWriteSetEntry
   {
-      void** addr;
-      void*  val;
+      uintptr_t* addr;
+      uintptr_t  val;
 
-      WordLoggingWriteSetEntry(void** paddr, void* pval)
+      WordLoggingWriteSetEntry(uintptr_t* paddr, uintptr_t pval)
           : addr(paddr), val(pval)
       { }
 
@@ -64,7 +64,7 @@ namespace stm
        * include asserts because we don't want to pay for them in the common
        * case writeback loop.
        */
-      bool filter(void** lower, void** upper)
+      bool filter(uintptr_t* lower, uintptr_t* upper)
       {
           return !(addr + 1 < lower || addr >= upper);
       }
@@ -86,7 +86,7 @@ namespace stm
        *     size and alignment here, because the word-based writeset can only
        *     handle word-sized data.
        */
-      void rollback(void** lower, void** upper)
+      void rollback(uintptr_t* lower, uintptr_t* upper)
       {
           assert((uint8_t*)upper - (uint8_t*)lower >= (int)sizeof(void*));
           assert((uintptr_t)upper % sizeof(void*) == 0);
@@ -112,13 +112,13 @@ namespace stm
   struct ByteLoggingWriteSetEntry
   {
       union {
-          void**   addr;
-          uint8_t* byte_addr;
+          uintptr_t* addr;
+          uint8_t*   byte_addr;
       };
 
       union {
-          void*   val;
-          uint8_t byte_val[sizeof(void*)];
+          uintptr_t val;
+          uint8_t   byte_val[sizeof(void*)];
       };
 
       union {
@@ -126,7 +126,7 @@ namespace stm
           uint8_t   byte_mask[sizeof(void*)];
       };
 
-      ByteLoggingWriteSetEntry(void** paddr, void* pval, uintptr_t pmask)
+      ByteLoggingWriteSetEntry(uintptr_t* paddr, uintptr_t pval, uintptr_t pmask)
       {
           addr = paddr;
           val  = pval;
@@ -152,10 +152,10 @@ namespace stm
           }
 
           // bit twiddling for awkward intersection, avoids looping
-          uintptr_t new_val = (uintptr_t)rhs.val;
+          uintptr_t new_val = rhs.val;
           new_val &= rhs.mask;
-          new_val |= (uintptr_t)val & ~rhs.mask;
-          val = (void*)new_val;
+          new_val |= val & ~rhs.mask;
+          val = new_val;
 
           // the new mask is the union of the old mask and the new mask
           mask |= rhs.mask;
@@ -173,7 +173,7 @@ namespace stm
        *  intersections here using the mask, but we're not going to worry about
        *  that given the expected size/alignment of the range.
        */
-      bool filter(void** lower, void** upper)
+      bool filter(uintptr_t* lower, uintptr_t* upper)
       {
           return !(addr + 1 < lower || addr >= upper);
       }
@@ -212,7 +212,7 @@ namespace stm
        *  to an exception object (represented by the address range). We don't
        *  assume anything about the alignment or size of the exception object.
        */
-      void rollback(void** lower, void** upper)
+      void rollback(uintptr_t* lower, uintptr_t* upper)
       {
           // two simple cases first, no intersection or complete intersection.
           if (addr + 1 < lower || addr >= upper) {
@@ -257,11 +257,11 @@ namespace stm
       /***  data type for the index */
       struct index_t
       {
-          size_t version;
-          void*  address;
-          size_t index;
+          size_t     version;
+          uintptr_t* address;
+          size_t     index;
 
-          index_t() : version(0), address(NULL), index(0) { }
+          index_t() : version(0), address(0), index(0) { }
       };
 
       index_t* index;                             // hash entries
@@ -278,7 +278,7 @@ namespace stm
        *  hash function is straight from CLRS (that's where the magic
        *  constant comes from).
        */
-      size_t hash(void* const key) const
+      size_t hash(uintptr_t* const key) const
       {
           static const unsigned long long s = 2654435769ull;
           const unsigned long long r = ((unsigned long long)key) * s;
@@ -367,7 +367,7 @@ namespace stm
       void rollback() { }
 #   define STM_ROLLBACK(log, exception, len) log.rollback()
 #else
-      void rollback(void**, size_t);
+      void rollback(uintptr_t*, size_t);
 #   define STM_ROLLBACK(log, exception, len) log.rollback(exception, len)
 #endif
 

@@ -59,7 +59,7 @@ namespace stm
         num_ro(0), scope(NULL),
 #ifdef STM_PROTECT_STACK
         stack_high(NULL),
-        stack_low((void**)~0x0),
+        stack_low((uintptr_t*)~0x0),
 #endif
         start_time(0), tmlHasLock(false), undo_log(64), vlist(64), writes(64),
         r_orecs(64), locks(64),
@@ -201,7 +201,7 @@ namespace stm
       return tmcommit(this);
   }
 
-  void* TxThread::read(THREAD_READ_SIG(addr,mask))
+  uintptr_t TxThread::read(THREAD_READ_SIG(addr,mask))
   {
       return tmread(this, addr STM_MASK(mask));
   }

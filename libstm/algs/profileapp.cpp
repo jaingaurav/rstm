@@ -55,8 +55,8 @@ namespace {
   {
       static void Initialize(int id, const char* name);
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -182,7 +182,7 @@ namespace {
    *  ProfileApp read (read-only transaction)
    */
   template <int COUNTMODE>
-  void*
+  uintptr_t
   ProfileApp<COUNTMODE>::read_ro(STM_READ_SIG(,addr,))
   {
       // count the read
@@ -195,7 +195,7 @@ namespace {
    *  ProfileApp read (writing transaction)
    */
   template <int COUNTMODE>
-  void*
+  uintptr_t
   ProfileApp<COUNTMODE>::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -208,7 +208,7 @@ namespace {
       // NB: There are other interesting stats when byte logging, should we
       //     record them?
       ++profiles[0].read_rw_nonraw;
-      void* val = *addr;
+      uintptr_t val = *addr;
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

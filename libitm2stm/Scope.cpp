@@ -15,32 +15,32 @@
 using namespace itm2stm;
 using std::pair;
 
-inline void**
+inline uintptr_t*
 Scope::ThrownObject::begin() const {
     return first;
 }
 
-inline void**
+inline uintptr_t*
 Scope::ThrownObject::end() const {
     uint8_t* bytes = reinterpret_cast<uint8_t*>(first);
     bytes += second;
-    return reinterpret_cast<void**>(bytes);
+    return reinterpret_cast<uintptr_t*>(bytes);
 }
 
-inline void**
+inline uintptr_t*
 Scope::LoggedWord::begin() const {
-    return reinterpret_cast<void**>(address_);
+    return reinterpret_cast<uintptr_t*>(address_);
 }
 
-inline void**
+inline uintptr_t*
 Scope::LoggedWord::end() const {
     uint8_t* bytes = reinterpret_cast<uint8_t*>(address_);
     bytes += bytes_;
-    return reinterpret_cast<void**>(bytes);
+    return reinterpret_cast<uintptr_t*>(bytes);
 }
 
 inline void
-Scope::LoggedWord::clip(void** lower, void** upper) {
+Scope::LoggedWord::clip(uintptr_t* lower, uintptr_t* upper) {
     // no intersection
     if (end() <= lower || begin() >= upper)
         return;
@@ -59,14 +59,14 @@ Scope::LoggedWord::clip(void** lower, void** upper) {
     // clip begin()
     if (begin() > lower && end () > upper) {
         // shift value, since we always start writing at it.
-        value_ = (void**)(((uintptr_t)value_) >> (((uint8_t*)upper -
+        value_ = (uintptr_t)(((uintptr_t)value_) >> (((uint8_t*)upper -
                                                    (uint8_t*)begin()) * 8));
         bytes_ = (uint8_t*)end() - (uint8_t*)upper;
         address_ = upper;
     }
 
     // uh-oh, unhandle-able case
-    if ((begin() > lower && end() < (void**)((uint8_t*)upper - 1)))
+    if ((begin() > lower && end() < (uintptr_t*)((uint8_t*)upper - 1)))
         assert(false && "Logged value has incompatible range intersection");
 
     // uh-oh, unreachable
@@ -100,7 +100,7 @@ Scope::Scope(_ITM_transaction& owner)
 #endif
 }
 
-std::pair<void**, size_t>&
+std::pair<uintptr_t*, size_t>&
 Scope::rollback() {
     // 1) Undo all of the logged words.
     for (UndoList::iterator i = undo_on_rollback_.end() - 1,
@@ -126,7 +126,7 @@ Scope::rollback() {
 }
 
 void
-Scope::setThrownObject(void** addr, size_t length) {
+Scope::setThrownObject(uintptr_t* addr, size_t length) {
     assert(thrown_.first == NULL && "Only one thrown object expected "
                                     "per-scope");
     thrown_.first = addr;

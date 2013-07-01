@@ -58,8 +58,8 @@ namespace {
       static void Initialize(int id, const char* name);
 
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -160,7 +160,7 @@ namespace {
    *  ByEAU_Generic read (read-only transaction)
    */
   template <class CM>
-  void*
+  uintptr_t
   ByEAU_Generic<CM>::read_ro(STM_READ_SIG(tx,addr,))
   {
       bytelock_t* lock = get_bytelock(addr);
@@ -190,7 +190,7 @@ namespace {
 
       // do the read
       CFENCE;
-      void* result = *addr;
+      uintptr_t result = *addr;
       CFENCE;
 
       // check for remote abort
@@ -204,7 +204,7 @@ namespace {
    *  ByEAU_Generic read (writing transaction)
    */
   template <class CM>
-  void*
+  uintptr_t
   ByEAU_Generic<CM>::read_rw(STM_READ_SIG(tx,addr,))
   {
       bytelock_t* lock = get_bytelock(addr);
@@ -235,7 +235,7 @@ namespace {
 
       // do the read
       CFENCE;
-      void* result = *addr;
+      uintptr_t result = *addr;
       CFENCE;
 
       // check for remote abort

@@ -107,7 +107,7 @@ namespace stm
        */
       bool  (*TM_FASTCALL begin) (TxThread*);
       void  (*TM_FASTCALL commit)(TxThread*);
-      void* (*TM_FASTCALL read)  (STM_READ_SIG(,,));
+      uintptr_t (*TM_FASTCALL read)  (STM_READ_SIG(,,));
       void  (*TM_FASTCALL write) (STM_WRITE_SIG(,,,));
 
       /**
@@ -143,7 +143,7 @@ namespace stm
    *  Map addresses to orec table entries
    */
   TM_INLINE
-  inline orec_t* get_orec(void* addr)
+  inline orec_t* get_orec(uintptr_t* addr)
   {
       uintptr_t index = reinterpret_cast<uintptr_t>(addr);
       return &orecs[(index>>3) % NUM_STRIPES];
@@ -153,7 +153,7 @@ namespace stm
    *  Map addresses to nanorec table entries
    */
   TM_INLINE
-  inline orec_t* get_nanorec(void* addr)
+  inline orec_t* get_nanorec(uintptr_t* addr)
   {
       uintptr_t index = reinterpret_cast<uintptr_t>(addr);
       return &nanorecs[(index>>3) % RING_ELEMENTS];
@@ -163,7 +163,7 @@ namespace stm
    *  Map addresses to rrec table entries
    */
   TM_INLINE
-  inline rrec_t* get_rrec(void* addr)
+  inline rrec_t* get_rrec(uintptr_t* addr)
   {
       uintptr_t index = reinterpret_cast<uintptr_t>(addr);
       return &rrecs[(index>>3)%RREC_COUNT];
@@ -173,7 +173,7 @@ namespace stm
    *  Map addresses to bytelock table entries
    */
   TM_INLINE
-  inline bytelock_t* get_bytelock(void* addr)
+  inline bytelock_t* get_bytelock(uintptr_t* addr)
   {
       uintptr_t index = reinterpret_cast<uintptr_t>(addr);
       return &bytelocks[(index>>3) % NUM_STRIPES];
@@ -183,7 +183,7 @@ namespace stm
    *  Map addresses to bitlock table entries
    */
   TM_INLINE
-  inline bitlock_t* get_bitlock(void* addr)
+  inline bitlock_t* get_bitlock(uintptr_t* addr)
   {
       uintptr_t index = reinterpret_cast<uintptr_t>(addr);
       return &bitlocks[(index>>3) % NUM_STRIPES];
@@ -234,7 +234,7 @@ namespace stm
   // This is used as a default in txthread.cpp... just forwards to CGL::begin.
   TM_FASTCALL bool begin_CGL(TxThread*);
 
-  typedef TM_FASTCALL void* (*ReadBarrier)(STM_READ_SIG(,,));
+  typedef TM_FASTCALL uintptr_t (*ReadBarrier)(STM_READ_SIG(,,));
   typedef TM_FASTCALL void (*WriteBarrier)(STM_WRITE_SIG(,,,));
   typedef TM_FASTCALL void (*CommitBarrier)(TxThread*);
 

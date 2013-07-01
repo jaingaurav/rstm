@@ -42,8 +42,8 @@ using stm::id_version_t;
 namespace {
   struct OrecELA {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -166,14 +166,14 @@ namespace {
    *    However, we also poll the timestamp counter and validate any time a new
    *    transaction has committed, in order to catch doomed transactions.
    */
-  void*
+  uintptr_t
   OrecELA::read_ro(STM_READ_SIG(tx,addr,))
   {
       // get the orec addr, read the orec's version#
       orec_t* o = get_orec(addr);
       while (true) {
           // read the location
-          void* tmp = *addr;
+          uintptr_t tmp = *addr;
           CFENCE;
           // check the orec.  Note: we don't need prevalidation because we
           // have a global clean state via the last_complete.val field.
@@ -219,7 +219,7 @@ namespace {
    *
    *    Identical to RO case, but with write-set lookup first
    */
-  void*
+  uintptr_t
   OrecELA::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -228,7 +228,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

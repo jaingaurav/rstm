@@ -46,7 +46,7 @@ _ITM_transaction::commit() {
 
         // clear the high/low stack marks.
         thread_handle_.stack_high = 0x0;
-        thread_handle_.stack_low = (void**)~0x0;
+        thread_handle_.stack_low = (uintptr_t*)~0x0;
 
         // record start of nontransactional time, this misses the itm2stm commit
         // and leave time for the outermost scope, but I think we're ok.

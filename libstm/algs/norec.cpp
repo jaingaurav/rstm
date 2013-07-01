@@ -43,8 +43,8 @@ namespace {
       static TM_FASTCALL void commit(TxThread*);
       static TM_FASTCALL void commit_ro(TxThread*);
       static TM_FASTCALL void commit_rw(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static stm::scope_t* rollback(STM_ROLLBACK_SIG(,,));
@@ -226,7 +226,7 @@ namespace {
   }
 
   template <class CM>
-  void*
+  uintptr_t
   NOrec_Generic<CM>::read_ro(STM_READ_SIG(tx,addr,mask))
   {
       // A read is valid iff it occurs during a period where the seqlock does
@@ -234,7 +234,7 @@ namespace {
       // might necessitate a validation.
 
       // read the location to a temp
-      void* tmp = *addr;
+      uintptr_t tmp = *addr;
       CFENCE;
 
       // if the timestamp has changed since the last read, we must validate and
@@ -254,7 +254,7 @@ namespace {
   }
 
   template <class CM>
-  void*
+  uintptr_t
   NOrec_Generic<CM>::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -269,7 +269,7 @@ namespace {
       // bytes that we "actually" need, which is computed as bytes in mask but
       // not in log.mask. This is only correct because we know that a failed
       // find also reset the log.mask to 0 (that's part of the find interface).
-      void* val = read_ro(tx, addr STM_MASK(mask & ~log.mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask & ~log.mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

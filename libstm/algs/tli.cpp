@@ -37,8 +37,8 @@ namespace {
   struct TLI
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -130,7 +130,7 @@ namespace {
    *    a period when the world is not stopped for writeback.  Lastly, we must
    *    ensure that we are still valid
    */
-  void*
+  uintptr_t
   TLI::read_ro(STM_READ_SIG(tx,addr,))
   {
       // push address into read filter, ensure ordering w.r.t. the subsequent
@@ -141,7 +141,7 @@ namespace {
       while (true) {
           uintptr_t x1 = timestamp.val;
           CFENCE;
-          void* val = *addr;
+          uintptr_t val = *addr;
           CFENCE;
           // if the ts was even and unchanged, then the read is valid
           bool ts_ok = !(x1&1) && (timestamp.val == x1);
@@ -160,7 +160,7 @@ namespace {
   /**
    *  TLI read (writing transaction)
    */
-  void*
+  uintptr_t
   TLI::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -169,7 +169,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

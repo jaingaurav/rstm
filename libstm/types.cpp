@@ -119,7 +119,7 @@ namespace stm
    * we're doing.
    */
 #if defined(STM_ABORT_ON_THROW)
-  void WriteSet::rollback(void** exception, size_t len)
+  void WriteSet::rollback(uintptr_t* exception, size_t len)
   {
       // early exit if there's no exception
       if (!len) {
@@ -128,7 +128,7 @@ namespace stm
 
       // for each entry, call rollback with the exception range, which will
       // actually writeback if the entry is in the address range.
-      void** upper = (void**)((uint8_t*)exception + len);
+      uintptr_t* upper = (uintptr_t*)((uint8_t*)exception + len);
       for (iterator i = begin(), e = end(); i != e; ++i) {
           i->rollback(exception, upper);
       }
@@ -145,7 +145,7 @@ namespace stm
       }
   }
 #else
-  void UndoLog::undo(void** exception, size_t len)
+  void UndoLog::undo(uintptr_t* exception, size_t len)
   {
       // don't undo the exception object, if it happens to be logged, also
       // don't branch on the inner loop if there isn't an exception
@@ -159,7 +159,7 @@ namespace stm
           return;
       }
 
-      void** upper = (void**)((uint8_t*)exception + len);
+      uintptr_t* upper = (uintptr_t*)((uint8_t*)exception + len);
       for (iterator i = end() - 1, e = begin(); i >= e; --i) {
           if (i->filter(exception, upper)) {
               continue;
@@ -174,7 +174,7 @@ namespace stm
    * corner case that it just doesn't matter. Plus this is an abort path
    * anyway... consider it a contention management technique.
    */
-  bool ByteLoggingUndoLogEntry::filterSlow(void** lower, void** upper)
+  bool ByteLoggingUndoLogEntry::filterSlow(uintptr_t* lower, uintptr_t* upper)
   {
       // we have some sort of intersection... we start by assuming that it's
       // total.
@@ -185,7 +185,7 @@ namespace stm
       // We have a complicated intersection. We'll do a really slow loop
       // through each byte---at this point it doesn't make a difference.
       for (unsigned i = 0; i < sizeof(val); ++i) {
-          void** a = (void**)(byte_addr + i);
+          uintptr_t* a = (uintptr_t*)(byte_addr + i);
           if (a >= lower && a < upper) {
               byte_mask[i] = 0x0;
           }

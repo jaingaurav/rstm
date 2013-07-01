@@ -37,8 +37,8 @@ using stm::WriteSetEntry;
 namespace {
   struct RingSW {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -143,11 +143,11 @@ namespace {
   /**
    *  RingSW read (read-only transaction)
    */
-  void*
+  uintptr_t
   RingSW::read_ro(STM_READ_SIG(tx,addr,))
   {
       // read the value from memory, log the address, and validate
-      void* val = *addr;
+      uintptr_t val = *addr;
       CFENCE;
       tx->rf->add(addr);
       // get the latest initialized ring entry, return if we've seen it already
@@ -161,7 +161,7 @@ namespace {
   /**
    *  RingSW read (writing transaction)
    */
-  void*
+  uintptr_t
   RingSW::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       // check the log for a RAW hazard, we expect to miss
@@ -170,7 +170,7 @@ namespace {
       REDO_RAW_CHECK(found, log, mask);
 
       // reuse the ReadRO barrier, which is adequate here---reduces LOC
-      void* val = read_ro(tx, addr STM_MASK(mask));
+      uintptr_t val = read_ro(tx, addr STM_MASK(mask));
       REDO_RAW_CLEANUP(val, found, log, mask);
       return val;
   }

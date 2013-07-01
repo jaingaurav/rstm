@@ -36,8 +36,8 @@ namespace {
   struct BitEagerRedo
   {
       static TM_FASTCALL bool begin(TxThread*);
-      static TM_FASTCALL void* read_ro(STM_READ_SIG(,,));
-      static TM_FASTCALL void* read_rw(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_ro(STM_READ_SIG(,,));
+      static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void commit_ro(TxThread*);
@@ -116,7 +116,7 @@ namespace {
    *
    *    As in BitEager, we use timeout for conflict resolution
    */
-  void*
+  uintptr_t
   BitEagerRedo::read_ro(STM_READ_SIG(tx,addr,))
   {
       uint32_t tries = 0;
@@ -155,7 +155,7 @@ namespace {
    *
    *    Same as RO case, but if we have the write lock, we can take a fast path
    */
-  void*
+  uintptr_t
   BitEagerRedo::read_rw(STM_READ_SIG(tx,addr,mask))
   {
       uint32_t tries = 0;
@@ -168,7 +168,7 @@ namespace {
           bool found = tx->writes.find(log);
           REDO_RAW_CHECK(found, log, mask);
 
-          void* val = *addr;
+          uintptr_t val = *addr;
           REDO_RAW_CLEANUP(val, found, log, mask);
           return val;
       }
