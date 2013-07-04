@@ -203,7 +203,13 @@ namespace stm
 
   uintptr_t TxThread::read(THREAD_READ_SIG(addr,mask))
   {
+#ifdef AUTORELEASE_READ
+      uintptr_t retVal = tmread(this, addr STM_MASK(mask));
+      tmrelease(this, addr STM_MASK(mask));
+      return retVal;
+#else
       return tmread(this, addr STM_MASK(mask));
+#endif
   }
 
   void TxThread::write(THREAD_WRITE_SIG(addr,val,mask))
