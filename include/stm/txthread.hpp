@@ -120,6 +120,8 @@ namespace stm
       TM_FASTCALL void(*tmcommit)(TxThread*);
       TM_FASTCALL uintptr_t(*tmread)(STM_READ_SIG(,,));
       TM_FASTCALL void(*tmwrite)(STM_WRITE_SIG(,,,));
+      TM_FASTCALL void(*tmreadreserve)(STM_READ_RESERVE_SIG(,,));
+      TM_FASTCALL void(*tmwritereserve)(STM_WRITE_RESERVE_SIG(,,));
       TM_FASTCALL void(*tmrelease)(STM_RELEASE_SIG(,,));
 
       /**
@@ -168,6 +170,10 @@ namespace stm
       TM_FASTCALL uintptr_t read(THREAD_READ_SIG(,));
 
       TM_FASTCALL void write(THREAD_WRITE_SIG(,,));
+
+      TM_FASTCALL void read_reserve(THREAD_READ_RESERVE_SIG(,));
+
+      TM_FASTCALL void write_reserve(THREAD_WRITE_RESERVE_SIG(,));
 
       TM_FASTCALL void release(THREAD_RELEASE_SIG(,));
 

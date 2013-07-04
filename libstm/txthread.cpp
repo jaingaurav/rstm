@@ -217,6 +217,16 @@ namespace stm
       tmwrite(this, addr, val STM_MASK(mask));
   }
 
+  void TxThread::read_reserve(THREAD_READ_RESERVE_SIG(addr,mask))
+  {
+      tmreadreserve(this, addr STM_MASK(mask));
+  }
+
+  void TxThread::write_reserve(THREAD_WRITE_RESERVE_SIG(addr,mask))
+  {
+      tmwritereserve(this, addr STM_MASK(mask));
+  }
+
   void TxThread::release(THREAD_RELEASE_SIG(addr,mask))
   {
       tmrelease(this, addr STM_MASK(mask));

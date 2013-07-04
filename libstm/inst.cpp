@@ -23,10 +23,12 @@ namespace stm
   void install_algorithm_local(int new_alg, TxThread* tx)
   {
       // set my read/write/commit pointers
-      tx->tmread     = stms[new_alg].read;
-      tx->tmwrite    = stms[new_alg].write;
-      tx->tmrelease  = stms[new_alg].release;
-      tx->tmcommit   = stms[new_alg].commit;
+      tx->tmread         = stms[new_alg].read;
+      tx->tmwrite        = stms[new_alg].write;
+      tx->tmreadreserve  = stms[new_alg].read_reserve;
+      tx->tmwritereserve = stms[new_alg].write_reserve;
+      tx->tmrelease      = stms[new_alg].release;
+      tx->tmcommit       = stms[new_alg].commit;
   }
 
   /**
@@ -67,10 +69,12 @@ namespace stm
 
       // set per-thread pointers
       for (unsigned i = 0; i < threadcount.val; ++i) {
-          threads[i]->tmread     = stms[new_alg].read;
-          threads[i]->tmwrite    = stms[new_alg].write;
-          threads[i]->tmrelease  = stms[new_alg].release;
-          threads[i]->tmcommit   = stms[new_alg].commit;
+          threads[i]->tmread         = stms[new_alg].read;
+          threads[i]->tmwrite        = stms[new_alg].write;
+          threads[i]->tmreadreserve  = stms[new_alg].read_reserve;
+          threads[i]->tmwritereserve = stms[new_alg].write_reserve;
+          threads[i]->tmrelease      = stms[new_alg].release;
+          threads[i]->tmcommit       = stms[new_alg].commit;
           threads[i]->consec_aborts  = 0;
       }
 
