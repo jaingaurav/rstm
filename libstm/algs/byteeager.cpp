@@ -26,6 +26,7 @@ using stm::bytelock_t;
 using stm::get_bytelock;
 using stm::UndoLogEntry;
 
+#define BYTEEAGER_VERSIONING
 
 /**
  *  Declare the functions that we're going to implement, so that we can avoid
@@ -80,7 +81,9 @@ namespace {
       // read-only... release read locks
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+#ifdef BYTEEAGER_VERSIONING
           (*i)->reader_version[tx->id-1] = 0;
+#endif
       }
 
       tx->r_bytelocks.reset();
@@ -99,7 +102,9 @@ namespace {
       }
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+#ifdef BYTEEAGER_VERSIONING
           (*i)->reader_version[tx->id-1] = 0;
+#endif
       }
 
       // clean-up
@@ -124,9 +129,13 @@ namespace {
       }
 
       // log this location if new
+#ifdef BYTEEAGER_VERSIONING
       if (lock->reader_version[tx->id-1] == 0) {
+#endif
           tx->r_bytelocks.insert(lock);
+#ifdef BYTEEAGER_VERSIONING
       }
+#endif
 
       // now try to get a read lock
       while (true) {
@@ -135,6 +144,7 @@ namespace {
 
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
+#ifdef BYTEEAGER_VERSIONING
               // If this is the first read, log the version.
               // Else abort if version changed
               if (lock->reader_version[tx->id-1] == 0) {
@@ -142,6 +152,7 @@ namespace {
               } else if (lock->reader_version[tx->id-1] != lock->version) {
                   tx->abort();
               }
+#endif
               return *addr;
           }
 
@@ -175,9 +186,13 @@ namespace {
       }
 
       // log this location if new
+#ifdef BYTEEAGER_VERSIONING
       if (lock->reader_version[tx->id-1] == 0) {
+#endif
           tx->r_bytelocks.insert(lock);
+#ifdef BYTEEAGER_VERSIONING
       }
+#endif
 
       // now try to get a read lock
       while (true) {
@@ -185,6 +200,7 @@ namespace {
           lock->set_read_byte(tx->id-1);
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
+#ifdef BYTEEAGER_VERSIONING
               // If this is the first read, log the version.
               // Else abort if version changed
               if (lock->reader_version[tx->id-1] == 0) {
@@ -192,6 +208,7 @@ namespace {
               } else if (lock->reader_version[tx->id-1] != lock->version) {
                   tx->abort();
               }
+#endif
               return *addr;
           }
 
@@ -225,11 +242,13 @@ namespace {
       tx->w_bytelocks.insert(lock);
       lock->reader[tx->id-1] = 0;
 
+#ifdef BYTEEAGER_VERSIONING
       // If lock was previously read, check that the version has not changed
       if (lock->reader_version[tx->id-1]
           && (lock->reader_version[tx->id-1] != lock->version)) {
               tx->abort();
       }
+#endif
 
       // wait (with timeout) for readers to drain out
       // (read 4 bytelocks at a time)
@@ -243,8 +262,10 @@ namespace {
           }
       }
 
+#ifdef BYTEEAGER_VERSIONING
       // Increment the version on each successful ownership
       ++lock->version;
+#endif
 
       // add to undo log, do in-place write
       tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
@@ -280,11 +301,13 @@ namespace {
       tx->w_bytelocks.insert(lock);
       lock->reader[tx->id-1] = 0;
 
+#ifdef BYTEEAGER_VERSIONING
       // If lock was previously read, check that the version has not changed
       if (lock->reader_version[tx->id-1]
           && (lock->reader_version[tx->id-1] != lock->version)) {
               tx->abort();
       }
+#endif
 
       // wait (with timeout) for readers to drain out
       // (read 4 bytelocks at a time)
@@ -298,8 +321,10 @@ namespace {
           }
       }
 
+#ifdef BYTEEAGER_VERSIONING
       // Increment the version on each successful ownership
       ++lock->version;
+#endif
 
       // add to undo log, do in-place write
       tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
@@ -312,11 +337,13 @@ namespace {
   void
   ByteEager::release(STM_RELEASE_SIG(tx,addr,))
   {
+#ifdef BYTEEAGER_VERSIONING
       bytelock_t* lock = get_bytelock(addr);
 
       if (lock->owner != tx->id) {
           lock->reader[tx->id-1] = 0;
       }
+#endif
   }
 
   /**
@@ -337,7 +364,9 @@ namespace {
       }
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+#ifdef BYTEEAGER_VERSIONING
           (*i)->reader_version[tx->id-1] = 0;
+#endif
       }
 
       // reset lists
