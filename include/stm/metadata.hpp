@@ -98,12 +98,17 @@ namespace stm
   {
       union
       {
-          volatile uint32_t      owner;      // no need for more than 32 bits
+          struct
+          {
+              volatile uint32_t owner;      // no need for more than 32 bits
+              volatile uint32_t version;
+          };
           volatile unsigned char padding[CACHELINE_BYTES];
       };
       volatile unsigned char reader[CACHELINE_BYTES];
+      volatile uint32_t      reader_version[CACHELINE_BYTES];
 
-      bytelock_t() : owner(0), reader() { }
+      bytelock_t() : owner(0), version(1), reader(), reader_version() { }
 
       /**
        *  Setting the read byte is platform-specific, so we make it a method

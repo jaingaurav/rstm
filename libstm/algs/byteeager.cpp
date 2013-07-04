@@ -39,6 +39,7 @@ namespace {
       static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
+      static TM_FASTCALL void release(STM_RELEASE_SIG(,,));
       static TM_FASTCALL void commit_ro(TxThread*);
       static TM_FASTCALL void commit_rw(TxThread*);
 
@@ -79,6 +80,7 @@ namespace {
       // read-only... release read locks
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+          (*i)->reader_version[tx->id-1] = 0;
       }
 
       tx->r_bytelocks.reset();
@@ -97,6 +99,7 @@ namespace {
       }
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+          (*i)->reader_version[tx->id-1] = 0;
       }
 
       // clean-up
@@ -120,8 +123,10 @@ namespace {
           return *addr;
       }
 
-      // log this location
-      tx->r_bytelocks.insert(lock);
+      // log this location if new
+      if (lock->reader_version[tx->id-1] == 0) {
+          tx->r_bytelocks.insert(lock);
+      }
 
       // now try to get a read lock
       while (true) {
@@ -130,6 +135,13 @@ namespace {
 
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
+              // If this is the first read, log the version.
+              // Else abort if version changed
+              if (lock->reader_version[tx->id-1] == 0) {
+                  lock->reader_version[tx->id-1] = lock->version;
+              } else if (lock->reader_version[tx->id-1] != lock->version) {
+                  tx->abort();
+              }
               return *addr;
           }
 
@@ -162,8 +174,10 @@ namespace {
           return *addr;
       }
 
-      // log this location
-      tx->r_bytelocks.insert(lock);
+      // log this location if new
+      if (lock->reader_version[tx->id-1] == 0) {
+          tx->r_bytelocks.insert(lock);
+      }
 
       // now try to get a read lock
       while (true) {
@@ -171,6 +185,13 @@ namespace {
           lock->set_read_byte(tx->id-1);
           // if nobody has the write lock, we're done
           if (__builtin_expect(lock->owner == 0, true)) {
+              // If this is the first read, log the version.
+              // Else abort if version changed
+              if (lock->reader_version[tx->id-1] == 0) {
+                  lock->reader_version[tx->id-1] = lock->version;
+              } else if (lock->reader_version[tx->id-1] != lock->version) {
+                  tx->abort();
+              }
               return *addr;
           }
 
@@ -204,10 +225,16 @@ namespace {
       tx->w_bytelocks.insert(lock);
       lock->reader[tx->id-1] = 0;
 
+      // If lock was previously read, check that the version has not changed
+      if (lock->reader_version[tx->id-1]
+          && (lock->reader_version[tx->id-1] != lock->version)) {
+              tx->abort();
+      }
+
       // wait (with timeout) for readers to drain out
-      // (read 8 bytelocks at a time)
-      volatile uint64_t* lock_alias = (volatile uint64_t*)&lock->reader[0];
-      for (int i = 0; i < (sizeof(lock->reader)/sizeof(uint64_t)); ++i) {
+      // (read 4 bytelocks at a time)
+      volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
+      for (int i = 0; i < 16; ++i) {
           tries = 0;
           while (lock_alias[i] != 0) {
               if (++tries > DRAIN_TIMEOUT) {
@@ -215,6 +242,9 @@ namespace {
               }
           }
       }
+
+      // Increment the version on each successful ownership
+      ++lock->version;
 
       // add to undo log, do in-place write
       tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
@@ -250,10 +280,16 @@ namespace {
       tx->w_bytelocks.insert(lock);
       lock->reader[tx->id-1] = 0;
 
+      // If lock was previously read, check that the version has not changed
+      if (lock->reader_version[tx->id-1]
+          && (lock->reader_version[tx->id-1] != lock->version)) {
+              tx->abort();
+      }
+
       // wait (with timeout) for readers to drain out
-      // (read 8 bytelocks at a time)
-      volatile uint64_t* lock_alias = (volatile uint64_t*)&lock->reader[0];
-      for (int i = 0; i < (sizeof(lock->reader)/sizeof(uint64_t)); ++i) {
+      // (read 4 bytelocks at a time)
+      volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
+      for (int i = 0; i < 16; ++i) {
           tries = 0;
           while (lock_alias[i] != 0) {
               if (++tries > DRAIN_TIMEOUT) {
@@ -262,9 +298,25 @@ namespace {
           }
       }
 
+      // Increment the version on each successful ownership
+      ++lock->version;
+
       // add to undo log, do in-place write
       tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
       STM_DO_MASKED_WRITE(addr, val, mask);
+  }
+
+  /**
+   *  ByteEager release
+   */
+  void
+  ByteEager::release(STM_RELEASE_SIG(tx,addr,))
+  {
+      bytelock_t* lock = get_bytelock(addr);
+
+      if (lock->owner != tx->id) {
+          lock->reader[tx->id-1] = 0;
+      }
   }
 
   /**
@@ -285,6 +337,7 @@ namespace {
       }
       foreach (ByteLockList, i, tx->r_bytelocks) {
           (*i)->reader[tx->id-1] = 0;
+          (*i)->reader_version[tx->id-1] = 0;
       }
 
       // reset lists
@@ -328,6 +381,7 @@ namespace stm {
       stms[ByteEager].commit    = ::ByteEager::commit_ro;
       stms[ByteEager].read      = ::ByteEager::read_ro;
       stms[ByteEager].write     = ::ByteEager::write_ro;
+      stms[ByteEager].release   = ::ByteEager::release;
       stms[ByteEager].rollback  = ::ByteEager::rollback;
       stms[ByteEager].irrevoc   = ::ByteEager::irrevoc;
       stms[ByteEager].switcher  = ::ByteEager::onSwitchTo;
