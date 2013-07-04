@@ -47,7 +47,7 @@ namespace stm
   rrec_t     rrecs[RREC_COUNT] = {{{0}}};
 
   /*** the table of bytelocks */
-  bytelock_t bytelocks[NUM_STRIPES] = {{0}};
+  bytelock_t bytelocks[NUM_STRIPES];
 
   /*** the table of bitlocks */
   bitlock_t bitlocks[NUM_STRIPES] = {{0}};

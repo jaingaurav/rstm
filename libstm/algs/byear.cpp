@@ -249,7 +249,7 @@ namespace {
       //       risk setting the state of a committing transaction to aborted,
       //       which can give readers inconsistent results when they trying to
       //       read while the committer is writing back.
-      for (int i = 0; i < 60; ++i) {
+      for (int i = 0; i < sizeof(lock->reader); ++i) {
           if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
               if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->abort();
@@ -297,7 +297,7 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // abort active readers
-      for (int i = 0; i < 60; ++i) {
+      for (int i = 0; i < sizeof(lock->reader); ++i) {
           if (lock->reader[i] != 0 && threads[i]->alive == TX_ACTIVE) {
               if (!bcas32(&threads[i]->alive, TX_ACTIVE, TX_ABORTED)) {
                   tx->abort();

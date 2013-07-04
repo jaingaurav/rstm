@@ -279,7 +279,7 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // abort active readers
-      for (int i = 0; i < 60; ++i) {
+      for (int i = 0; i < sizeof(lock->reader); ++i) {
           if (lock->reader[i] != 0) {
               // again, only abort readers with CM permission, else abort self
               if (CM::mayKill(tx, i)) {
@@ -337,7 +337,7 @@ namespace {
           lock->reader[tx->id-1] = 0;
 
           // abort active readers
-          for (int i = 0; i < 60; ++i) {
+          for (int i = 0; i < sizeof(lock->reader); ++i) {
               if (lock->reader[i] != 0) {
                   // get permission to abort reader
                   if (CM::mayKill(tx, i)) {

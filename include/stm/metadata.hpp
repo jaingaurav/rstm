@@ -88,16 +88,22 @@ namespace stm
   /**
    *  TLRW-style algorithms don't use orecs, but instead use "byte locks".
    *  This is the type of a byte lock.  We have 32 bits for the lock, and
-   *  then 60 bytes corresponding to 60 named threads.
+   *  then 64 bytes corresponding to 64 named threads.
    *
-   *  NB: We don't support more than 60 threads in ByteLock-based algorithms.
+   *  NB: We don't support more than 64 threads in ByteLock-based algorithms.
    *      If you have more than that many threads, you should use adaptivity
    *      to switch to a different algorithm.
    */
   struct bytelock_t
   {
-      volatile uint32_t      owner;      // no need for more than 32 bits
-      volatile unsigned char reader[CACHELINE_BYTES - sizeof(uint32_t)];
+      union
+      {
+          volatile uint32_t      owner;      // no need for more than 32 bits
+          volatile unsigned char padding[CACHELINE_BYTES];
+      };
+      volatile unsigned char reader[CACHELINE_BYTES];
+
+      bytelock_t() : owner(0), reader() { }
 
       /**
        *  Setting the read byte is platform-specific, so we make it a method

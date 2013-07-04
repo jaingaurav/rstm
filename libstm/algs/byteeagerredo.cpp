@@ -215,9 +215,9 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // wait (with timeout) for readers to drain out
-      // (read 4 bytelocks at a time)
-      volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
-      for (int i = 0; i < 15; ++i) {
+      // (read 8 bytelocks at a time)
+      volatile uint64_t* lock_alias = (volatile uint64_t*)&lock->reader[0];
+      for (int i = 0; i < (sizeof(lock->reader)/sizeof(uint64_t)); ++i) {
           tries = 0;
           while (lock_alias[i] != 0) {
               if (++tries > DRAIN_TIMEOUT) {
@@ -259,9 +259,9 @@ namespace {
       lock->reader[tx->id-1] = 0;
 
       // wait (with timeout) for readers to drain out
-      // (read 4 bytelocks at a time)
-      volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
-      for (int i = 0; i < 15; ++i) {
+      // (read 8 bytelocks at a time)
+      volatile uint64_t* lock_alias = (volatile uint64_t*)&lock->reader[0];
+      for (int i = 0; i < (sizeof(lock->reader)/sizeof(uint64_t)); ++i) {
           tries = 0;
           while (lock_alias[i] != 0) {
               if (++tries > DRAIN_TIMEOUT) {

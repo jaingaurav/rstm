@@ -96,7 +96,7 @@ namespace {
   ByteLazy::commit_rw(TxThread* tx)
   {
       // try to lock every location in the write set
-      unsigned char accumulator[60] = {0};
+      unsigned char accumulator[CACHELINE_BYTES] = {0};
       // acquire locks, accumulate victim readers
       foreach (WriteSet, i, tx->writes) {
           // get bytelock, read its version#
@@ -112,10 +112,10 @@ namespace {
               tx->w_bytelocks.insert(bl);
 
               // get readers
-              // (read 4 bytelocks at a time)
-              volatile uint32_t* p1 = (volatile uint32_t*)&accumulator[0];
-              volatile uint32_t* p2 = (volatile uint32_t*)&bl->reader[0];
-              for (int j = 0; j < 15; ++j) {
+              // (read 8 bytelocks at a time)
+              volatile uint64_t* p1 = (volatile uint64_t*)&accumulator[0];
+              volatile uint64_t* p2 = (volatile uint64_t*)&bl->reader[0];
+              for (int j = 0; j < (sizeof(bl->reader)/sizeof(uint64_t)); ++j) {
                   p1[j] |= p2[j];
               }
           } else if (bl->owner != tx->my_lock.all) {
@@ -127,7 +127,7 @@ namespace {
       accumulator[tx->id-1] = 0;
 
       // kill the readers
-      for (unsigned char c = 0; c < 60; ++c) {
+      for (unsigned char c = 0; c < sizeof(accumulator); ++c) {
           if (accumulator[c] == 1) {
               cas32(&threads[c]->alive, 1u, 0u);
           }
