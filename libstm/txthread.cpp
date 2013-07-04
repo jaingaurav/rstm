@@ -211,6 +211,11 @@ namespace stm
       tmwrite(this, addr, val STM_MASK(mask));
   }
 
+  void TxThread::release(THREAD_RELEASE_SIG(addr,mask))
+  {
+      tmrelease(this, addr STM_MASK(mask));
+  }
+
   scope_t* TxThread::rollback(THREAD_ROLLBACK_SIG(exception,len))
   {
       return tmrollback(this STM_EXCEPTION(exception, len));

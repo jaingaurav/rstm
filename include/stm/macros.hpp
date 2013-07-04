@@ -68,12 +68,15 @@
 #if defined(STM_WS_BYTELOG)
 #   define THREAD_READ_SIG(addr, mask)        uintptr_t* addr, uintptr_t mask
 #   define THREAD_WRITE_SIG(addr, val, mask)  uintptr_t* addr, uintptr_t val, uintptr_t mask
+#   define THREAD_RELEASE_SIG(addr, mask)     uintptr_t* addr, uintptr_t mask
 #else
 #   define THREAD_READ_SIG(addr, mask)        uintptr_t* addr
 #   define THREAD_WRITE_SIG(addr, val, mask)  uintptr_t* addr, uintptr_t val
+#   define THREAD_RELEASE_SIG(addr, mask)     uintptr_t* addr
 #endif
 #define STM_READ_SIG(tx, addr, mask)          TxThread* tx, THREAD_READ_SIG(addr, mask)
 #define STM_WRITE_SIG(tx, addr, val, mask)    TxThread* tx, THREAD_WRITE_SIG(addr, val, mask)
+#define STM_RELEASE_SIG(tx, addr, mask)       TxThread* tx, THREAD_RELEASE_SIG(addr, mask)
 
 #if defined(STM_ABORT_ON_THROW)
 #   define STM_EXCEPTION(exception, len)         , exception, len

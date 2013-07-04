@@ -25,6 +25,7 @@ namespace stm
       // set my read/write/commit pointers
       tx->tmread     = stms[new_alg].read;
       tx->tmwrite    = stms[new_alg].write;
+      tx->tmrelease  = stms[new_alg].release;
       tx->tmcommit   = stms[new_alg].commit;
   }
 
@@ -68,6 +69,7 @@ namespace stm
       for (unsigned i = 0; i < threadcount.val; ++i) {
           threads[i]->tmread     = stms[new_alg].read;
           threads[i]->tmwrite    = stms[new_alg].write;
+          threads[i]->tmrelease  = stms[new_alg].release;
           threads[i]->tmcommit   = stms[new_alg].commit;
           threads[i]->consec_aborts  = 0;
       }

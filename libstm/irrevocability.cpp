@@ -65,6 +65,7 @@ namespace {
   {
       tx.tmread           = stms[curr_policy.ALG_ID].read;
       tx.tmwrite          = stms[curr_policy.ALG_ID].write;
+      tx.tmrelease        = stms[curr_policy.ALG_ID].release;
       tx.tmcommit         = stms[curr_policy.ALG_ID].commit;
       tx.tmrollback       = stms[curr_policy.ALG_ID].rollback;
       TxThread::tmirrevoc = stms[curr_policy.ALG_ID].irrevoc;
@@ -100,6 +101,7 @@ namespace {
   {
       tx.tmread           = stms[CGL].read;
       tx.tmwrite          = stms[CGL].write;
+      tx.tmrelease        = stms[CGL].release;
       tx.tmcommit         = commit_irrevocable;
       tx.tmrollback       = rollback_irrevocable;
       TxThread::tmirrevoc = stms[CGL].irrevoc;

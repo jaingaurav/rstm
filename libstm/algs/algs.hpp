@@ -109,6 +109,7 @@ namespace stm
       void  (*TM_FASTCALL commit)(TxThread*);
       uintptr_t (*TM_FASTCALL read)  (STM_READ_SIG(,,));
       void  (*TM_FASTCALL write) (STM_WRITE_SIG(,,,));
+      void  (*TM_FASTCALL release)  (STM_RELEASE_SIG(,,));
 
       /**
        * rolls the transaction back without unwinding, returns the scope (which

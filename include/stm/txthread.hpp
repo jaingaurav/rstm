@@ -120,6 +120,7 @@ namespace stm
       TM_FASTCALL void(*tmcommit)(TxThread*);
       TM_FASTCALL uintptr_t(*tmread)(STM_READ_SIG(,,));
       TM_FASTCALL void(*tmwrite)(STM_WRITE_SIG(,,,));
+      TM_FASTCALL void(*tmrelease)(STM_RELEASE_SIG(,,));
 
       /**
        * Some APIs, in particular the itm API at the moment, want to be able
@@ -167,6 +168,8 @@ namespace stm
       TM_FASTCALL uintptr_t read(THREAD_READ_SIG(,));
 
       TM_FASTCALL void write(THREAD_WRITE_SIG(,,));
+
+      TM_FASTCALL void release(THREAD_RELEASE_SIG(,));
 
       scope_t* rollback(THREAD_ROLLBACK_SIG(,));
 
