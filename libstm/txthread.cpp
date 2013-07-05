@@ -193,6 +193,7 @@ namespace stm
 
   bool TxThread::begin()
   {
+      txn_reserves = 0;
       return tmbegin(this);
   }
 
@@ -203,6 +204,7 @@ namespace stm
 
   uintptr_t TxThread::read(THREAD_READ_SIG(addr,mask))
   {
+      ++txn_reserves;
 #ifdef AUTORELEASE_READ
       uintptr_t retVal = tmread(this, addr STM_MASK(mask));
       tmrelease(this, addr STM_MASK(mask));
@@ -214,16 +216,19 @@ namespace stm
 
   void TxThread::write(THREAD_WRITE_SIG(addr,val,mask))
   {
+      ++txn_reserves;
       tmwrite(this, addr, val STM_MASK(mask));
   }
 
   void TxThread::read_reserve(THREAD_READ_RESERVE_SIG(addr,mask))
   {
+      ++txn_reserves;
       tmreadreserve(this, addr STM_MASK(mask));
   }
 
   void TxThread::write_reserve(THREAD_WRITE_RESERVE_SIG(addr,mask))
   {
+      ++txn_reserves;
       tmwritereserve(this, addr STM_MASK(mask));
   }
 
