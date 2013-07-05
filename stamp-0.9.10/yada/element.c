@@ -91,10 +91,10 @@ struct element {
     coordinate_t midpoints[3]; /* midpoint of each edge */
     double radii[3];           /* half of edge length */
     edge_t* encroachedEdgePtr; /* opposite obtuse angle */
-    bool isSkinny;
+    long isSkinny;
     list_t* neighborListPtr;
-    bool isGarbage;
-    bool isReferenced;
+    long isGarbage;
+    long isReferenced;
 };
 
 
@@ -804,7 +804,7 @@ element_setIsReferenced (element_t* elementPtr, bool status)
 void
 TMelement_setIsReferenced (TM_ARGDECL  element_t* elementPtr, bool status)
 {
-    TM_SHARED_WRITE_L(elementPtr->isReferenced, status);
+    TM_SHARED_WRITE_L(elementPtr->isReferenced, (long)status);
 }
 
 
@@ -828,7 +828,7 @@ element_isGarbage (element_t* elementPtr)
 bool
 TMelement_isGarbage (TM_ARGDECL  element_t* elementPtr)
 {
-    return (bool)TM_SHARED_READ_L(elementPtr->isGarbage);
+    return TM_SHARED_READ_L(elementPtr->isGarbage);
 }
 
 
@@ -850,7 +850,7 @@ element_setIsGarbage (element_t* elementPtr, bool status)
 void
 TMelement_setIsGarbage (TM_ARGDECL  element_t* elementPtr, bool status)
 {
-    TM_SHARED_WRITE_L(elementPtr->isGarbage, status);
+    TM_SHARED_WRITE_L(elementPtr->isGarbage, (long)status);
 }
 
 
