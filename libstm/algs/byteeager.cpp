@@ -40,6 +40,8 @@ namespace {
       static TM_FASTCALL uintptr_t read_rw(STM_READ_SIG(,,));
       static TM_FASTCALL void write_ro(STM_WRITE_SIG(,,,));
       static TM_FASTCALL void write_rw(STM_WRITE_SIG(,,,));
+      static TM_FASTCALL void read_reserve(STM_READ_RESERVE_SIG(,,));
+      static TM_FASTCALL void write_reserve(STM_WRITE_RESERVE_SIG(,,));
       static TM_FASTCALL void release(STM_RELEASE_SIG(,,));
       static TM_FASTCALL void commit_ro(TxThread*);
       static TM_FASTCALL void commit_rw(TxThread*);
@@ -332,6 +334,120 @@ namespace {
   }
 
   /**
+   *  ByteEager read reserve
+   */
+  void
+  ByteEager::read_reserve(STM_READ_RESERVE_SIG(tx,addr,))
+  {
+      uint32_t tries = 0;
+      bytelock_t* lock = get_bytelock(addr);
+
+      // do I have the write lock?
+      if (lock->owner == tx->id) {
+          return;
+      }
+
+      // do I have a read lock?
+      if (lock->reader[tx->id-1] == 1) {
+          return;
+      }
+
+      // log this location if new
+#ifdef BYTEEAGER_VERSIONING
+      if (lock->reader_version[tx->id-1] == 0) {
+#endif
+          tx->r_bytelocks.insert(lock);
+#ifdef BYTEEAGER_VERSIONING
+      }
+#endif
+
+      // now try to get a read lock
+      while (true) {
+          // mark my reader byte
+          lock->set_read_byte(tx->id-1);
+          // if nobody has the write lock, we're done
+          if (__builtin_expect(lock->owner == 0, true)) {
+#ifdef BYTEEAGER_VERSIONING
+              // If this is the first read, log the version.
+              // Else abort if version changed
+              if (lock->reader_version[tx->id-1] == 0) {
+                  lock->reader_version[tx->id-1] = lock->version;
+              } else if (lock->reader_version[tx->id-1] != lock->version) {
+                  tx->abort();
+              }
+#endif
+              return;
+          }
+
+          // drop read lock, wait (with timeout) for lock release
+          lock->reader[tx->id-1] = 0;
+          while (lock->owner != 0) {
+              if (++tries > READ_TIMEOUT) {
+                  tx->abort();
+              }
+          }
+      }
+  }
+
+  /**
+   *  ByteEager write reserve
+   */
+  void
+  ByteEager::write_reserve(STM_WRITE_RESERVE_SIG(tx,addr,))
+  {
+      uint32_t tries = 0;
+      bytelock_t* lock = get_bytelock(addr);
+
+      // If I have the write lock, add to undo log, do write, return
+      if (lock->owner == tx->id) {
+          tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
+          return;
+      }
+
+      // get the write lock, with timeout
+      while (!bcas32(&(lock->owner), 0u, tx->id)) {
+          if (++tries > ACQUIRE_TIMEOUT) {
+              tx->abort();
+          }
+      }
+
+      // log the lock, drop any read locks I have
+      tx->w_bytelocks.insert(lock);
+      lock->reader[tx->id-1] = 0;
+
+#ifdef BYTEEAGER_VERSIONING
+      // If lock was previously read, check that the version has not changed
+      if (lock->reader_version[tx->id-1]
+          && (lock->reader_version[tx->id-1] != lock->version)) {
+              tx->abort();
+      }
+#endif
+
+      // wait (with timeout) for readers to drain out
+      // (read 4 bytelocks at a time)
+      volatile uint32_t* lock_alias = (volatile uint32_t*)&lock->reader[0];
+      for (int i = 0; i < 16; ++i) {
+          tries = 0;
+          while (lock_alias[i] != 0) {
+              if (++tries > DRAIN_TIMEOUT) {
+                  tx->abort();
+              }
+          }
+      }
+
+#ifdef BYTEEAGER_VERSIONING
+      // Increment the version on each successful ownership
+      ++lock->version;
+#endif
+
+      // add to undo log, do in-place write
+      tx->undo_log.insert(UndoLogEntry(STM_UNDO_LOG_ENTRY(addr, *addr, mask)));
+      if (tx->w_bytelocks.size() == 1) {
+      OnFirstWrite(tx, read_rw, write_rw, commit_rw);
+}
+  }
+
+  /**
    *  ByteEager release
    */
   void
@@ -410,6 +526,8 @@ namespace stm {
       stms[ByteEager].commit    = ::ByteEager::commit_ro;
       stms[ByteEager].read      = ::ByteEager::read_ro;
       stms[ByteEager].write     = ::ByteEager::write_ro;
+      stms[ByteEager].read_reserve  = ::ByteEager::read_reserve;
+      stms[ByteEager].write_reserve = ::ByteEager::write_reserve;
       stms[ByteEager].release   = ::ByteEager::release;
       stms[ByteEager].rollback  = ::ByteEager::rollback;
       stms[ByteEager].irrevoc   = ::ByteEager::irrevoc;
