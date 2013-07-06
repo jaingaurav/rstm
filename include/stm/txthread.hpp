@@ -90,6 +90,7 @@ namespace stm
       uint32_t       begin_wait;    // how long did last tx block at begin
       bool           strong_HG;     // for strong hourglass
       bool           irrevocable;   // tells begin_blocker that I'm THE ONE
+      uintptr_t      cookie;        // debugging cookie
 
       /*** PER-THREAD FIELDS FOR ENABLING ADAPTIVITY POLICIES */
       uint64_t      end_txn_time;      // end of non-transactional work
@@ -177,6 +178,8 @@ namespace stm
       TM_FASTCALL void write_reserve(THREAD_WRITE_RESERVE_SIG(,));
 
       TM_FASTCALL void release(THREAD_RELEASE_SIG(,));
+
+      TM_FASTCALL void set_cookie(uintptr_t cookie);
 
       scope_t* rollback(THREAD_ROLLBACK_SIG(,));
 

@@ -237,6 +237,11 @@ namespace stm
       tmrelease(this, addr STM_MASK(mask));
   }
 
+  void TxThread::set_cookie(uintptr_t c)
+  {
+      cookie = c;
+  }
+
   scope_t* TxThread::rollback(THREAD_ROLLBACK_SIG(exception,len))
   {
       return tmrollback(this STM_EXCEPTION(exception, len));
