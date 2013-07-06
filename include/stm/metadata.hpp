@@ -100,7 +100,7 @@ namespace stm
       {
           struct
           {
-              volatile uint32_t owner;      // no need for more than 32 bits
+              volatile uintptr_t owner;
               volatile uint32_t version;
           };
           volatile unsigned char padding[CACHELINE_BYTES];
